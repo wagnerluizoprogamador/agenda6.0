@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comissões - Serviços</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="pagina-comissoes">
+    <header>
+        <nav>
+            <a href="agenda.html">Agenda</a>
+            <a href="index.html">Cadastros</a>
+            <a href="clientes.html">Clientes</a>
+            <a href="servicos.html">Serviços</a>
+            <a href="funcionarios.html">Funcionários</a>
+            <a href="financeiro.html">Financeiro</a>
+            <a href="comissoes.html" class="ativo">Comissões</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="comissoes-container">
+            <h1>Gestão de Comissões</h1>
+
+            <div class="comissao-selecao">
+                <label for="selecionar-funcionario">Selecionar Funcionário:</label>
+                <select id="selecionar-funcionario">
+                    <option value="">Selecione um funcionário</option>
+                </select>
+            </div>
+            
+            <div id="comissao-detalhes" style="display:none;">
+                <div class="resumo-comissoes">
+                    <div class="card-resumo">
+                        <h3>Comissão a Pagar</h3>
+                        <p id="comissao-pendente">R$ 0,00</p>
+                    </div>
+                    <div class="card-resumo">
+                        <h3>Vales (Adiantamentos)</h3>
+                        <p id="total-vales">R$ 0,00</p>
+                    </div>
+                    <div class="card-resumo destaque">
+                        <h3>Saldo Líquido</h3>
+                        <p id="saldo-liquido">R$ 0,00</p>
+                    </div>
+                </div>
+
+                <div class="acoes-comissoes">
+                    <form id="form-registrar-vale">
+                        <h3>Registrar Vale</h3>
+                        <div class="form-group">
+                            <label for="valor-vale">Valor do Vale:</label>
+                            <input type="number" id="valor-vale" step="0.01" min="0" required>
+                        </div>
+                        <button type="submit">Registrar Vale</button>
+                    </form>
+
+                    <button id="botao-pagar-comissao" class="btn-pagar">Pagar Comissão</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
