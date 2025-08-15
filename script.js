@@ -100,6 +100,30 @@ botaoReverter.addEventListener('click', () => {
     }
 });
 
+// Evento de envio do formulário de Alterar Dados (novo)
+formAlterarDados.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('agendamento-id').value;
+    const dataHora = document.getElementById('data-hora-edicao').value;
+    const cliente = document.getElementById('cliente-edicao').value;
+    const servico = document.getElementById('servico-edicao').value;
+    const funcionariosSelecionados = Array.from(document.getElementById('funcionario-edicao').selectedOptions).map(option => option.value);
+
+    // Encontra o agendamento na lista e o atualiza
+    const agendamento = agendamentos.find(a => a.id === id);
+    if (agendamento) {
+        agendamento.cliente = cliente;
+        agendamento.servico = servico;
+        agendamento.funcionarios = funcionariosSelecionados;
+        // Adicione aqui a lógica para atualizar data e hora, se necessário
+    }
+
+    criarAgendaDiaria();
+    alert('Agendamento alterado com sucesso!');
+    modalEditar.classList.remove('ativo');
+});
+
+
 // Função para preencher os selects do formulário de edição
 function preencherSelectsEdicao() {
     const clienteSelect = document.getElementById('cliente-edicao');
@@ -140,6 +164,7 @@ function preencherSelectsEdicao() {
 function abrirModalComDetalhes(agendamento) {
     agendamentoSelecionadoId = agendamento.id;
 
+    // Reseta o estado do modal
     formAlterarDados.style.display = 'none';
     detalhesAgendamento.style.display = 'block';
     botoesEdicao.style.display = 'flex';
@@ -188,7 +213,7 @@ function abrirModalComDetalhes(agendamento) {
     }
 
     document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
-    document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
+    document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/4{encodeURIComponent(agendamento.endereco)}`;
 
     modalEditar.classList.add('ativo');
 }
