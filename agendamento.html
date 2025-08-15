@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editando Atendimento</title>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-<script type="module" src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
     
     <style>
         body {
@@ -154,29 +152,6 @@
             margin-top: 15px;
         }
     </style>
-    <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyBW54cVtXEjXcbF_ADxS-HXz3b4xvZBM9o",
-    authDomain: "agenda6-7ba82.firebaseapp.com",
-    projectId: "agenda6-7ba82",
-    storageBucket: "agenda6-7ba82.firebasestorage.app",
-    messagingSenderId: "247288925241",
-    appId: "1:247288925241:web:bf8ff055b46410327251e8",
-    measurementId: "G-Y92QYKMYRT"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 </head>
 <body>
 
@@ -267,8 +242,8 @@
             
             <a href="#" class="aplicar-desconto">Aplicar desconto</a>
             <div class="botoes-edicao">
-    <button type="button" id="botao-salvar">Salvar Agendamento</button>
-</div>
+                <button type="button" id="botao-salvar">Salvar Agendamento</button>
+            </div>
         </form>
     </div>
 
@@ -282,62 +257,60 @@
             }
         }
     </script>
-<script type="module">
-    // Importe o Firebase e o Firestore
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
-    // Suas configurações do Firebase
-   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBW54cVtXEjXcbF_ADxS-HXz3b4xvZBM9o",
-  authDomain: "agenda6-7ba82.firebaseapp.com",
-  projectId: "agenda6-7ba82",
-  storageBucket: "agenda6-7ba82.firebasestorage.app",
-  messagingSenderId: "247288925241",
-  appId: "1:247288925241:web:bf8ff055b46410327251e8",
-  measurementId: "G-Y92QYKMYRT"
-};
-    };
+    <script type="module">
+        // Importe as funções do Firebase que você precisa
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-    // Inicialize o Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+        // Suas configurações do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBW54cVtXEjXcbF_ADxS-HXz3b4xvZBM9o",
+            authDomain: "agenda6-7ba82.firebaseapp.com",
+            projectId: "agenda6-7ba82",
+            storageBucket: "agenda6-7ba82.firebasestorage.app",
+            messagingSenderId: "247288925241",
+            appId: "1:247288925241:web:bf8ff055b46410327251e8",
+            measurementId: "G-Y92QYKMYRT"
+        };
 
-    // Função para salvar o agendamento
-    async function salvarAgendamento() {
-        // Obtenha os valores dos campos do formulário
-        const data = document.querySelector('input[value="Segunda, 11/08/2025"]').value;
-        const horario = document.querySelector('input[value="07:30"]').value;
-        const profissional = document.querySelector('input[value="Aylon"]').value;
-        const cliente = document.querySelector('input[value="Chaiane De Carvalho Traços"]').value;
-        const servicos = Array.from(document.querySelectorAll('.servico-item input:first-child')).map(input => input.value);
-        const total = document.querySelector('.total-valor').textContent.replace('Total: ', '');
-        const duracao = document.querySelector('input[value="1 h 30 min"]').value;
-        const observacao = document.querySelector('input[value="Bel rio Sul"]').value;
+        // Inicialize o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        try {
-            // Crie uma nova coleção "agendamentos" e adicione os dados
-            const docRef = await addDoc(collection(db, "agendamentos"), {
-                data,
-                horario,
-                profissional,
-                cliente,
-                servicos,
-                total,
-                duracao,
-                observacao
-            });
-            console.log("Documento escrito com o ID: ", docRef.id);
-            alert("Agendamento salvo com sucesso!");
-        } catch (e) {
-            console.error("Erro ao adicionar documento: ", e);
-            alert("Erro ao salvar agendamento.");
+        // Função para salvar o agendamento
+        async function salvarAgendamento() {
+            const data = document.querySelector('input[value="Segunda, 11/08/2025"]').value;
+            const horario = document.querySelector('input[value="07:30"]').value;
+            const profissional = document.querySelector('input[value="Aylon"]').value;
+            const cliente = document.querySelector('input[value="Chaiane De Carvalho Traços"]').value;
+            const servicos = Array.from(document.querySelectorAll('.servico-item input:first-child')).map(input => input.value);
+            const total = document.querySelector('.total-valor').textContent.replace('Total: ', '');
+            const duracao = document.querySelector('input[value="1 h 30 min"]').value;
+            const observacao = document.querySelector('input[value="Bel rio Sul"]').value;
+
+            try {
+                // Crie uma nova coleção "agendamentos" e adicione os dados
+                const docRef = await addDoc(collection(db, "agendamentos"), {
+                    data,
+                    horario,
+                    profissional,
+                    cliente,
+                    servicos,
+                    total,
+                    duracao,
+                    observacao
+                });
+                console.log("Documento escrito com o ID: ", docRef.id);
+                alert("Agendamento salvo com sucesso!");
+            } catch (e) {
+                console.error("Erro ao adicionar documento: ", e);
+                alert("Erro ao salvar agendamento.");
+            }
         }
-    }
 
-    // Adicione um "ouvinte" ao botão para chamar a função de salvar
-    document.getElementById('botao-salvar').addEventListener('click', salvarAgendamento);
-</script>
+        // Adicione um "ouvinte" ao botão para chamar a função de salvar
+        document.getElementById('botao-salvar').addEventListener('click', salvarAgendamento);
+    </script>
 </body>
 </html>
