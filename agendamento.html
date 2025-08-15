@@ -1,260 +1,85 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editando Atendimento</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f2f5;
-        }
-
-        /* Estilo do menu lateral e botão (copiado da nossa conversa anterior) */
-        .menu-botao {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            cursor: pointer;
-            z-index: 1001;
-            font-size: 30px;
-            color: #333;
-        }
-        .menu-lateral {
-            height: 100%;
-            width: 250px;
-            position: fixed;
-            z-index: 1000;
-            top: 0;
-            left: -250px;
-            background-color: white;
-            overflow-x: hidden;
-            transition: 0.3s;
-            padding-top: 60px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
-        }
-        .menu-lateral.aberto {
-            left: 0;
-        }
-        .menu-lateral a {
-            padding: 15px 25px;
-            text-decoration: none;
-            font-size: 18px;
-            color: #818181;
-            display: block;
-            transition: 0.3s;
-        }
-        .menu-lateral a:hover {
-            background-color: #f1f1f1;
-        }
-
-        /* Estilos do formulário de agendamento, baseado na sua imagem */
-        .header-form {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            color: #333;
-        }
-        .header-form h2 {
-            margin: 0;
-            font-size: 18px;
-            flex-grow: 1;
-            text-align: center;
-        }
-        .fechar-btn {
-            font-size: 16px;
-            color: #007BFF;
-            text-decoration: none;
-            padding-right: 15px;
-        }
-        .container {
-            padding: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        .form-row {
-            display: flex;
-            gap: 10px;
-        }
-        .form-row .form-group {
-            flex: 1;
-        }
-        .form-group input[type="text"], 
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        .form-group button {
-            background-color: #ffc107;
-            color: #333;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .servicos-list {
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .servico-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .servico-item input {
-            flex-grow: 1;
-            margin-right: 10px;
-        }
-        .servico-item .remover-btn {
-            background: none;
-            border: none;
-            color: #dc3545;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        .adicionar-item {
-            color: #28a745;
-            font-weight: bold;
-            text-decoration: none;
-            display: block;
-            margin-top: 10px;
-        }
-        .total-valor {
-            text-align: right;
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        .aplicar-desconto {
-            color: #007BFF;
-            text-align: right;
-            display: block;
-            text-decoration: none;
-            font-weight: bold;
-            margin-top: 15px;
-        }
-    </style>
-</head>
-<body>
-
-    <span class="menu-botao" onclick="toggleMenu()">&#9776;</span>
-
-    <div id="meuMenuLateral" class="menu-lateral">
-        <a href="agenda.html">Agenda</a>
-        <a href="clientes.html">Clientes & Anamnese</a>
-        <a href="servicos.html">Serviços & Pacotes</a>
-        <a href="financeiro.html">Financeiro</a>
-        <a href="funcionarios.html">Funcionários</a>
-        <a href="comissoes.html">Comissões</a>
-    </div>
-
-    <div class="header-form">
-        <a href="#" class="fechar-btn">Fechar</a>
-        <h2>Editando Atendimento</h2>
-    </div>
-
-    <div class="container">
-        <form>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Data</label>
+<div class="form-row">
+<div class="form-group">
+<label>Data</label>
                     <input type="text" value="Segunda, 11/08/2025">
                     <input type="text" id="input-data" value="Segunda, 11/08/2025">
-                </div>
-                <div class="form-group">
-                    <label>Horário</label>
+</div>
+<div class="form-group">
+<label>Horário</label>
                     <input type="text" value="07:30">
                     <input type="text" id="input-horario" value="07:30">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Profissional</label>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Profissional</label>
                     <input type="text" value="Aylon">
                     <input type="text" id="input-profissional" value="Aylon">
-                </div>
-                <div class="form-group">
-                    <label>Sala</label>
+</div>
+<div class="form-group">
+<label>Sala</label>
                     <input type="text" value="selecionar...">
                     <input type="text" id="input-sala" value="selecionar...">
-                </div>
-            </div>
+</div>
+</div>
 
-            <div class="form-group">
-                <label>Cliente</label>
-                <div style="display: flex; align-items: center;">
+<div class="form-group">
+<label>Cliente</label>
+<div style="display: flex; align-items: center;">
                     <input type="text" value="Chaiane De Carvalho Traços" style="flex-grow: 1;">
                     <input type="text" id="input-cliente" value="Chaiane De Carvalho Traços" style="flex-grow: 1;">
-                    <button>Nova Comanda</button>
-                </div>
-            </div>
+<button>Nova Comanda</button>
+</div>
+</div>
 
-            <div class="form-group">
-                <label>Serviços</label>
+<div class="form-group">
+<label>Serviços</label>
                 <div class="servicos-list">
                 <div class="servicos-list" id="servicos-list">
-                    <div class="servico-item">
-                        <input type="text" value="Posicionamentos">
-                        <input type="text" value="R$100,00" style="width: 100px;">
-@@ -227,17 +227,17 @@
+<div class="servico-item">
+<input type="text" value="Posicionamentos">
+<input type="text" value="R$100,00" style="width: 100px;">
+@@ -227,17 +227,17 @@ <h2>Editando Atendimento</h2>
 
-            <div class="form-group">
-                <label>Duração</label>
+<div class="form-group">
+<label>Duração</label>
                 <input type="text" value="1 h 30 min">
                 <input type="text" id="input-duracao" value="1 h 30 min">
-            </div>
+</div>
 
-            <div class="form-group">
-                <label>Observação</label>
+<div class="form-group">
+<label>Observação</label>
                 <input type="text" value="Bel rio Sul">
                 <input type="text" id="input-observacao" value="Bel rio Sul">
-            </div>
+</div>
 
-            <div class="form-group">
-                <label>Custos de Serviço</label>
+<div class="form-group">
+<label>Custos de Serviço</label>
                 <input type="text">
                 <input type="text" id="input-custos">
-            </div>
+</div>
 
-            <a href="#" class="aplicar-desconto">Aplicar desconto</a>
-@@ -259,11 +259,9 @@
-    </script>
+<a href="#" class="aplicar-desconto">Aplicar desconto</a>
+@@ -259,11 +259,9 @@ <h2>Editando Atendimento</h2>
+</script>
 
-    <script type="module">
+<script type="module">
         // Importe as funções do Firebase que você precisa
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getFirestore, collection, addDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
         // Suas configurações do Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBW54cVtXEjXcbF_ADxS-HXz3b4xvZBM9o",
-            authDomain: "agenda6-7ba82.firebaseapp.com",
-@@ -274,43 +272,84 @@
-            measurementId: "G-Y92QYKMYRT"
-        };
+const firebaseConfig = {
+apiKey: "AIzaSyBW54cVtXEjXcbF_ADxS-HXz3b4xvZBM9o",
+authDomain: "agenda6-7ba82.firebaseapp.com",
+@@ -274,43 +272,84 @@ <h2>Editando Atendimento</h2>
+measurementId: "G-Y92QYKMYRT"
+};
 
         // Inicialize o Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
         // Função para salvar o agendamento
         async function salvarAgendamento() {
@@ -303,8 +128,8 @@
             const horario = document.getElementById('input-horario').value;
             const profissional = document.getElementById('input-profissional').value;
             const cliente = document.getElementById('input-cliente').value;
-            const servicos = Array.from(document.querySelectorAll('.servico-item input:first-child')).map(input => input.value);
-            const total = document.querySelector('.total-valor').textContent.replace('Total: ', '');
+const servicos = Array.from(document.querySelectorAll('.servico-item input:first-child')).map(input => input.value);
+const total = document.querySelector('.total-valor').textContent.replace('Total: ', '');
             const duracao = document.querySelector('input[value="1 h 30 min"]').value;
             const observacao = document.querySelector('input[value="Bel rio Sul"]').value;
             const duracao = document.getElementById('input-duracao').value;
@@ -312,7 +137,7 @@
             
             const agendamentoData = { data, horario, profissional, cliente, servicos, total, duracao, observacao };
 
-            try {
+try {
                 // Crie uma nova coleção "agendamentos" e adicione os dados
                 const docRef = await addDoc(collection(db, "agendamentos"), {
                     data,
@@ -334,13 +159,13 @@
                     const docRef = await addDoc(collection(db, "agendamentos"), agendamentoData);
                     alert("Novo agendamento salvo com sucesso!");
                 }
-            } catch (e) {
+} catch (e) {
                 console.error("Erro ao adicionar documento: ", e);
                 alert("Erro ao salvar agendamento.");
                 console.error("Erro ao salvar/atualizar agendamento: ", e);
                 alert("Erro ao salvar/atualizar agendamento.");
-            }
-        }
+}
+}
 
         // Adicione um "ouvinte" ao botão para chamar a função de salvar
         document.getElementById('botao-salvar').addEventListener('click', salvarAgendamento);
@@ -356,6 +181,6 @@
         }
 
         document.getElementById('botao-salvar').addEventListener('click', () => salvarAgendamento(agendamentoId));
-    </script>
+</script>
 </body>
 </html>
