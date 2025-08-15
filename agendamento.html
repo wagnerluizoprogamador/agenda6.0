@@ -176,35 +176,35 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Data</label>
-                    <input type="text" value="Segunda, 11/08/2025">
+                    <input type="text" id="input-data" value="Segunda, 11/08/2025">
                 </div>
                 <div class="form-group">
                     <label>Horário</label>
-                    <input type="text" value="07:30">
+                    <input type="text" id="input-horario" value="07:30">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>Profissional</label>
-                    <input type="text" value="Aylon">
+                    <input type="text" id="input-profissional" value="Aylon">
                 </div>
                 <div class="form-group">
                     <label>Sala</label>
-                    <input type="text" value="selecionar...">
+                    <input type="text" id="input-sala" value="selecionar...">
                 </div>
             </div>
             
             <div class="form-group">
                 <label>Cliente</label>
                 <div style="display: flex; align-items: center;">
-                    <input type="text" value="Chaiane De Carvalho Traços" style="flex-grow: 1;">
+                    <input type="text" id="input-cliente" value="Chaiane De Carvalho Traços" style="flex-grow: 1;">
                     <button>Nova Comanda</button>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Serviços</label>
-                <div class="servicos-list">
+                <div class="servicos-list" id="servicos-list">
                     <div class="servico-item">
                         <input type="text" value="Posicionamentos">
                         <input type="text" value="R$100,00" style="width: 100px;">
@@ -227,17 +227,17 @@
 
             <div class="form-group">
                 <label>Duração</label>
-                <input type="text" value="1 h 30 min">
+                <input type="text" id="input-duracao" value="1 h 30 min">
             </div>
 
             <div class="form-group">
                 <label>Observação</label>
-                <input type="text" value="Bel rio Sul">
+                <input type="text" id="input-observacao" value="Bel rio Sul">
             </div>
 
             <div class="form-group">
                 <label>Custos de Serviço</label>
-                <input type="text">
+                <input type="text" id="input-custos">
             </div>
             
             <a href="#" class="aplicar-desconto">Aplicar desconto</a>
@@ -259,11 +259,9 @@
     </script>
 
     <script type="module">
-        // Importe as funções do Firebase que você precisa
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-        // Suas configurações do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBW54cVtXEjXcbF_ADxS-HXz3b4xvZBM9o",
             authDomain: "agenda6-7ba82.firebaseapp.com",
@@ -274,43 +272,84 @@
             measurementId: "G-Y92QYKMYRT"
         };
 
-        // Inicialize o Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Função para salvar o agendamento
-        async function salvarAgendamento() {
-            const data = document.querySelector('input[value="Segunda, 11/08/2025"]').value;
-            const horario = document.querySelector('input[value="07:30"]').value;
-            const profissional = document.querySelector('input[value="Aylon"]').value;
-            const cliente = document.querySelector('input[value="Chaiane De Carvalho Traços"]').value;
-            const servicos = Array.from(document.querySelectorAll('.servico-item input:first-child')).map(input => input.value);
-            const total = document.querySelector('.total-valor').textContent.replace('Total: ', '');
-            const duracao = document.querySelector('input[value="1 h 30 min"]').value;
-            const observacao = document.querySelector('input[value="Bel rio Sul"]').value;
+        // Função para preencher o formulário com dados existentes
+        async function preencherFormulario(agendamentoId) {
+            const agendamentoRef = doc(db, "agendamentos", agendamentoId);
+            const agendamentoSnap = await getDoc(agendamentoRef);
 
-            try {
-                // Crie uma nova coleção "agendamentos" e adicione os dados
-                const docRef = await addDoc(collection(db, "agendamentos"), {
-                    data,
-                    horario,
-                    profissional,
-                    cliente,
-                    servicos,
-                    total,
-                    duracao,
-                    observacao
+            if (agendamentoSnap.exists()) {
+                const dados = agendamentoSnap.data();
+                document.getElementById('input-data').value = dados.data;
+                document.getElementById('input-horario').value = dados.horario;
+                document.getElementById('input-profissional').value = dados.profissional;
+                document.getElementById('input-cliente').value = dados.cliente;
+                document.getElementById('input-duracao').value = dados.duracao;
+                document.getElementById('input-observacao').value = dados.observacao;
+                
+                // Limpa a lista de serviços e adiciona os itens do banco de dados
+                const servicosList = document.getElementById('servicos-list');
+                servicosList.innerHTML = '';
+                dados.servicos.forEach(servico => {
+                    const servicoItem = document.createElement('div');
+                    servicoItem.classList.add('servico-item');
+                    servicoItem.innerHTML = `
+                        <input type="text" value="${servico}">
+                        <input type="text" value="R$XX,XX" style="width: 100px;">
+                        <button class="remover-btn">&times;</button>
+                    `;
+                    servicosList.prepend(servicoItem);
                 });
-                console.log("Documento escrito com o ID: ", docRef.id);
-                alert("Agendamento salvo com sucesso!");
-            } catch (e) {
-                console.error("Erro ao adicionar documento: ", e);
-                alert("Erro ao salvar agendamento.");
+
+                document.querySelector('.total-valor').textContent = `Total: ${dados.total}`;
+                
+            } else {
+                console.log("Nenhum agendamento encontrado com este ID.");
             }
         }
 
-        // Adicione um "ouvinte" ao botão para chamar a função de salvar
-        document.getElementById('botao-salvar').addEventListener('click', salvarAgendamento);
+        // Função para salvar ou atualizar o agendamento
+        async function salvarAgendamento(agendamentoId) {
+            const data = document.getElementById('input-data').value;
+            const horario = document.getElementById('input-horario').value;
+            const profissional = document.getElementById('input-profissional').value;
+            const cliente = document.getElementById('input-cliente').value;
+            const servicos = Array.from(document.querySelectorAll('.servico-item input:first-child')).map(input => input.value);
+            const total = document.querySelector('.total-valor').textContent.replace('Total: ', '');
+            const duracao = document.getElementById('input-duracao').value;
+            const observacao = document.getElementById('input-observacao').value;
+            
+            const agendamentoData = { data, horario, profissional, cliente, servicos, total, duracao, observacao };
+
+            try {
+                if (agendamentoId) {
+                    const agendamentoRef = doc(db, "agendamentos", agendamentoId);
+                    await updateDoc(agendamentoRef, agendamentoData);
+                    alert("Agendamento atualizado com sucesso!");
+                } else {
+                    const docRef = await addDoc(collection(db, "agendamentos"), agendamentoData);
+                    alert("Novo agendamento salvo com sucesso!");
+                }
+            } catch (e) {
+                console.error("Erro ao salvar/atualizar agendamento: ", e);
+                alert("Erro ao salvar/atualizar agendamento.");
+            }
+        }
+
+        // Lógica principal
+        const params = new URLSearchParams(window.location.search);
+        const agendamentoId = params.get('id');
+
+        if (agendamentoId) {
+            preencherFormulario(agendamentoId);
+            document.querySelector('h2').textContent = 'Editando Agendamento';
+        } else {
+            document.querySelector('h2').textContent = 'Novo Agendamento';
+        }
+
+        document.getElementById('botao-salvar').addEventListener('click', () => salvarAgendamento(agendamentoId));
     </script>
 </body>
 </html>
