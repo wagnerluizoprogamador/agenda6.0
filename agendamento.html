@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editando Atendimento</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+
+        /* Estilo do menu lateral e botão (copiado da nossa conversa anterior) */
+        .menu-botao {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            z-index: 1001;
+            font-size: 30px;
+            color: #333;
+        }
+        .menu-lateral {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: -250px;
+            background-color: white;
+            overflow-x: hidden;
+            transition: 0.3s;
+            padding-top: 60px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+        }
+        .menu-lateral.aberto {
+            left: 0;
+        }
+        .menu-lateral a {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+        .menu-lateral a:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Estilos do formulário de agendamento, baseado na sua imagem */
+        .header-form {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #333;
+        }
+        .header-form h2 {
+            margin: 0;
+            font-size: 18px;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .fechar-btn {
+            font-size: 16px;
+            color: #007BFF;
+            text-decoration: none;
+            padding-right: 15px;
+        }
+        .container {
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .form-group input[type="text"], 
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .form-group button {
+            background-color: #ffc107;
+            color: #333;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .servicos-list {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .servico-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .servico-item input {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .servico-item .remover-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .adicionar-item {
+            color: #28a745;
+            font-weight: bold;
+            text-decoration: none;
+            display: block;
+            margin-top: 10px;
+        }
+        .total-valor {
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .aplicar-desconto {
+            color: #007BFF;
+            text-align: right;
+            display: block;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <span class="menu-botao" onclick="toggleMenu()">&#9776;</span>
+
+    <div id="meuMenuLateral" class="menu-lateral">
+        <a href="agenda.html">Agenda</a>
+        <a href="clientes.html">Clientes & Anamnese</a>
+        <a href="servicos.html">Serviços & Pacotes</a>
+        <a href="financeiro.html">Financeiro</a>
+        <a href="funcionarios.html">Funcionários</a>
+        <a href="comissoes.html">Comissões</a>
+    </div>
+
+    <div class="header-form">
+        <a href="#" class="fechar-btn">Fechar</a>
+        <h2>Editando Atendimento</h2>
+    </div>
+
+    <div class="container">
+        <form>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Data</label>
+                    <input type="text" value="Segunda, 11/08/2025">
+                </div>
+                <div class="form-group">
+                    <label>Horário</label>
+                    <input type="text" value="07:30">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Profissional</label>
+                    <input type="text" value="Aylon">
+                </div>
+                <div class="form-group">
+                    <label>Sala</label>
+                    <input type="text" value="selecionar...">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Cliente</label>
+                <div style="display: flex; align-items: center;">
+                    <input type="text" value="Chaiane De Carvalho Traços" style="flex-grow: 1;">
+                    <button>Nova Comanda</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Serviços</label>
+                <div class="servicos-list">
+                    <div class="servico-item">
+                        <input type="text" value="Posicionamentos">
+                        <input type="text" value="R$100,00" style="width: 100px;">
+                        <button class="remover-btn">&times;</button>
+                    </div>
+                    <div class="servico-item">
+                        <input type="text" value="Posicionamentos">
+                        <input type="text" value="R$150,00" style="width: 100px;">
+                        <button class="remover-btn">&times;</button>
+                    </div>
+                    <div class="servico-item">
+                        <input type="text" value="Posicionamentos">
+                        <input type="text" value="R$300,00" style="width: 100px;">
+                        <button class="remover-btn">&times;</button>
+                    </div>
+                    <a href="#" class="adicionar-item">+ Adicionar Item</a>
+                    <div class="total-valor">Total: R$ 550,00</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Duração</label>
+                <input type="text" value="1 h 30 min">
+            </div>
+
+            <div class="form-group">
+                <label>Observação</label>
+                <input type="text" value="Bel rio Sul">
+            </div>
+
+            <div class="form-group">
+                <label>Custos de Serviço</label>
+                <input type="text">
+            </div>
+            
+            <a href="#" class="aplicar-desconto">Aplicar desconto</a>
+            <div class="botoes-edicao">
+                <button type="button" id="botao-salvar">Salvar Agendamento</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            var menu = document.getElementById("meuMenuLateral");
+            if (menu.classList.contains("aberto")) {
+                menu.classList.remove("aberto");
+            } else {
+                menu.classList.add("aberto");
+            }
+        }
+    </script>
+
+    <script type="module">
+        // Importe as funções do Firebase que você precisa
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+        // Suas configurações do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBW54cVtXEjXcbF_ADxS-HXz3b4xvZBM9o",
+            authDomain: "agenda6-7ba82.firebaseapp.com",
+            projectId: "agenda6-7ba82",
+            storageBucket: "agenda6-7ba82.firebasestorage.app",
+            messagingSenderId: "247288925241",
+            appId: "1:247288925241:web:bf8ff055b46410327251e8",
+            measurementId: "G-Y92QYKMYRT"
+        };
+
+        // Inicialize o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Função para salvar o agendamento
+        async function salvarAgendamento() {
+            const data = document.querySelector('input[value="Segunda, 11/08/2025"]').value;
+            const horario = document.querySelector('input[value="07:30"]').value;
+            const profissional = document.querySelector('input[value="Aylon"]').value;
+            const cliente = document.querySelector('input[value="Chaiane De Carvalho Traços"]').value;
+            const servicos = Array.from(document.querySelectorAll('.servico-item input:first-child')).map(input => input.value);
+            const total = document.querySelector('.total-valor').textContent.replace('Total: ', '');
+            const duracao = document.querySelector('input[value="1 h 30 min"]').value;
+            const observacao = document.querySelector('input[value="Bel rio Sul"]').value;
+
+            try {
+                // Crie uma nova coleção "agendamentos" e adicione os dados
+                const docRef = await addDoc(collection(db, "agendamentos"), {
+                    data,
+                    horario,
+                    profissional,
+                    cliente,
+                    servicos,
+                    total,
+                    duracao,
+                    observacao
+                });
+                console.log("Documento escrito com o ID: ", docRef.id);
+                alert("Agendamento salvo com sucesso!");
+            } catch (e) {
+                console.error("Erro ao adicionar documento: ", e);
+                alert("Erro ao salvar agendamento.");
+            }
+        }
+
+        // Adicione um "ouvinte" ao botão para chamar a função de salvar
+        document.getElementById('botao-salvar').addEventListener('click', salvarAgendamento);
+    </script>
+</body>
+</html>
