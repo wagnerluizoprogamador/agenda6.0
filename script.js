@@ -1,4 +1,4 @@
-// Lista de agendamentos como uma "fonte da verdade"
+// Dados de exemplo (simulando um "banco de dados" local)
 let agendamentos = [
     {
         id: 'agendamento-0800',
@@ -23,6 +23,11 @@ let agendamentos = [
     }
 ];
 
+// Listas de dados para os selects
+const clientes = ['Wagner', 'João', 'Maria', 'Pedro'];
+const servicos = ['Montagem de 50', 'Manutenção de 100', 'Formatação', 'Instalação'];
+const funcionarios = ['Arthur', 'Beatriz', 'Carlos', 'Diana'];
+
 // Obtém os elementos do modal de Novo Agendamento
 const modalAgendamento = document.getElementById('modal-agendamento');
 const fecharNovoAgendamentoBtn = document.getElementById('fechar-modal');
@@ -39,7 +44,7 @@ const formFluxo = document.getElementById('form-fluxo');
 const tituloModalEdicao = document.getElementById('titulo-modal-edicao');
 const detalhesDuracao = document.getElementById('detalhes-duracao');
 const botaoCancelar = document.getElementById('botao-cancelar');
-const botaoReverter = document.getElementById('botao-reverter'); // Novo botão
+const botaoReverter = document.getElementById('botao-reverter');
 
 let agendamentoSelecionadoId = null;
 
@@ -75,9 +80,7 @@ botaoVoltar.addEventListener('click', () => {
 botaoCancelar.addEventListener('click', () => {
     if (agendamentoSelecionadoId && confirm('Tem certeza que deseja cancelar este agendamento?')) {
         agendamentos = agendamentos.filter(agendamento => agendamento.id !== agendamentoSelecionadoId);
-        
         criarAgendaDiaria();
-        
         alert('Agendamento cancelado com sucesso!');
         modalEditar.classList.remove('ativo');
     }
@@ -89,21 +92,54 @@ botaoReverter.addEventListener('click', () => {
         const agendamento = agendamentos.find(a => a.id === agendamentoSelecionadoId);
         if (agendamento) {
             agendamento.status = 'agendado';
-            agendamento.duracao = ''; // Limpa a duração
-            
+            agendamento.duracao = '';
             criarAgendaDiaria();
-            
             alert('Agendamento revertido com sucesso!');
             modalEditar.classList.remove('ativo');
         }
     }
 });
 
+// Função para preencher os selects do formulário de edição
+function preencherSelectsEdicao() {
+    const clienteSelect = document.getElementById('cliente-edicao');
+    const servicoSelect = document.getElementById('servico-edicao');
+    const funcionarioSelect = document.getElementById('funcionario-edicao');
+
+    // Limpa os selects antes de preencher
+    clienteSelect.innerHTML = '';
+    servicoSelect.innerHTML = '';
+    funcionarioSelect.innerHTML = '';
+
+    // Preenche clientes
+    clientes.forEach(cliente => {
+        const option = document.createElement('option');
+        option.value = cliente;
+        option.textContent = cliente;
+        clienteSelect.appendChild(option);
+    });
+
+    // Preenche serviços
+    servicos.forEach(servico => {
+        const option = document.createElement('option');
+        option.value = servico;
+        option.textContent = servico;
+        servicoSelect.appendChild(option);
+    });
+
+    // Preenche funcionários
+    funcionarios.forEach(funcionario => {
+        const option = document.createElement('option');
+        option.value = funcionario;
+        option.textContent = funcionario;
+        funcionarioSelect.appendChild(option);
+    });
+}
+
 // Função para abrir o modal de Edição/Detalhes com dados de agendamento
 function abrirModalComDetalhes(agendamento) {
     agendamentoSelecionadoId = agendamento.id;
 
-    // Reseta o estado do modal
     formAlterarDados.style.display = 'none';
     detalhesAgendamento.style.display = 'block';
     botoesEdicao.style.display = 'flex';
@@ -115,17 +151,32 @@ function abrirModalComDetalhes(agendamento) {
     document.getElementById('detalhes-funcionarios').textContent = agendamento.funcionarios.join(', ');
     document.getElementById('detalhes-status').textContent = agendamento.status;
 
+    // Preenche o formulário de edição com os dados do agendamento
+    preencherSelectsEdicao();
+    document.getElementById('agendamento-id').value = agendamento.id;
+    document.getElementById('cliente-edicao').value = agendamento.cliente;
+    document.getElementById('servico-edicao').value = agendamento.servico;
+
+    // Seleciona os funcionários
+    const funcionariosSelecionados = Array.from(document.getElementById('funcionario-edicao').options);
+    funcionariosSelecionados.forEach(option => {
+        if (agendamento.funcionarios.includes(option.value)) {
+            option.selected = true;
+        } else {
+            option.selected = false;
+        }
+    });
+
     const blocoFinalizar = document.getElementById('bloco-finalizar');
     const botaoIniciar = document.getElementById('botao-iniciar');
 
-    // Lógica para exibir/ocultar botões com base no status
     if (agendamento.status === 'agendado') {
         tituloModalEdicao.textContent = 'Detalhes do Agendamento';
         botaoIniciar.style.display = 'block';
         blocoFinalizar.style.display = 'none';
         detalhesDuracao.style.display = 'none';
         formFluxo.style.display = 'block';
-        botaoReverter.style.display = 'none'; // Esconde o botão de reverter
+        botaoReverter.style.display = 'none';
     } else if (agendamento.status === 'finalizado') {
         tituloModalEdicao.textContent = 'Serviço Finalizado';
         botaoIniciar.style.display = 'none';
@@ -133,11 +184,11 @@ function abrirModalComDetalhes(agendamento) {
         detalhesDuracao.style.display = 'block';
         document.getElementById('valor-duracao').textContent = agendamento.duracao;
         formFluxo.style.display = 'none';
-        botaoReverter.style.display = 'block'; // Mostra o botão de reverter
+        botaoReverter.style.display = 'block';
     }
 
     document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
-    document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/9{encodeURIComponent(agendamento.endereco)}`;
+    document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
 
     modalEditar.classList.add('ativo');
 }
@@ -155,7 +206,6 @@ function criarAgendaDiaria() {
     const horarios = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'];
 
     calendarioDiario.innerHTML = '';
-
     const hoje = new Date().toISOString().split('T')[0];
 
     horarios.forEach(horario => {
