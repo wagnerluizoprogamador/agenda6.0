@@ -6,7 +6,7 @@
     <title>Agenda de Serviços</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="pagina-agenda">
     <header>
         <nav>
             <a href="agenda.html">Agenda</a>
@@ -14,8 +14,8 @@
             <a href="clientes.html">Clientes</a>
             <a href="servicos.html">Serviços</a>
             <a href="funcionarios.html">Funcionários</a>
-            <a href="financeiro.html"class="ativo">Financeiro</a>
-             <a href="comissoes.html"class="ativo">Comissões</a>
+            <a href="financeiro.html" class="ativo">Financeiro</a>
+            <a href="comissoes.html" class="ativo">Comissões</a>
         </nav>
     </header>
 
@@ -24,14 +24,14 @@
             <div class="navegacao-semanal">
                 <h2 id="data-selecionada"></h2>
                 <div id="dias-da-semana">
-                    </div>
+                </div>
             </div>
             <div id="calendario-diario"></div>
         </section>
 
         <div id="modal-agendamento" class="modal">
             <section class="form-container">
-                <button id="fechar-modal" class="fechar-modal-btn">&times;</button>
+                <button id="fechar-modal" class="fechar-modal-btn">×</button>
                 <h2>Novo Agendamento</h2>
                 <form id="form-novo-agendamento">
                     <div class="form-group">
@@ -67,7 +67,7 @@
         
         <div id="modal-editar-agendamento" class="modal">
             <section class="form-container">
-                <button id="fechar-modal-edicao" class="fechar-modal-btn">&times;</button>
+                <button id="fechar-modal-edicao" class="fechar-modal-btn">×</button>
                 <h2 id="titulo-modal-edicao">Detalhes do Agendamento</h2>
 
                 <div id="detalhes-agendamento">
@@ -100,6 +100,7 @@
 
                 <div class="botoes-edicao" id="botoes-edicao">
                     <button type="button" id="botao-alterar-dados">Alterar Dados</button>
+                    <button type="button" id="botao-reverter" style="display: none;">Reverter para Agendado</button>
                     <button type="button" id="botao-cancelar">Cancelar Agendamento</button>
                 </div>
 
@@ -132,5 +133,4 @@
 
     <script src="script.js"></script>
 </body>
-<body class="pagina-agenda"></body>
 </html>
