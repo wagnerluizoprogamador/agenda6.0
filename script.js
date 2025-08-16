@@ -112,6 +112,8 @@ if (document.body.classList.contains('pagina-agenda')) {
         const data = document.getElementById('data-agendamento').value;
         const horario = document.getElementById('hora-agendamento').value;
         const cliente = document.getElementById('cliente-agendamento').value;
+        const telefone = document.getElementById('telefone-agendamento').value;
+        const endereco = document.getElementById('endereco-agendamento').value;
         const servico = document.getElementById('servico-agendamento').value;
         const funcionariosSelecionados = Array.from(document.getElementById('funcionario-agendamento').selectedOptions).map(option => option.value);
 
@@ -120,6 +122,8 @@ if (document.body.classList.contains('pagina-agenda')) {
             data: data,
             horario: horario,
             cliente: cliente,
+            telefone: telefone,
+            endereco: endereco,
             servico: servico,
             funcionarios: funcionariosSelecionados,
             status: 'agendado'
@@ -255,14 +259,15 @@ if (document.body.classList.contains('pagina-agenda')) {
 
     function abrirModalComDetalhes(agendamento) {
         agendamentoSelecionadoId = agendamento.id;
+        console.log("Status do agendamento:", agendamento.status);
 
         formAlterarDados.style.display = 'none';
         detalhesAgendamento.style.display = 'block';
         botoesEdicao.style.display = 'flex';
 
         document.getElementById('detalhes-cliente').textContent = agendamento.cliente;
-        document.getElementById('detalhes-telefone').textContent = agendamento.telefone;
-        document.getElementById('detalhes-endereco').textContent = agendamento.endereco;
+        document.getElementById('detalhes-telefone').textContent = agendamento.telefone || 'Não informado';
+        document.getElementById('detalhes-endereco').textContent = agendamento.endereco || 'Não informado';
         document.getElementById('detalhes-servico').textContent = agendamento.servico;
         document.getElementById('detalhes-funcionarios').textContent = agendamento.funcionarios.join(', ');
         document.getElementById('detalhes-status').textContent = agendamento.status;
@@ -304,9 +309,18 @@ if (document.body.classList.contains('pagina-agenda')) {
             botaoReverter.style.display = 'block';
         }
 
-        document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
-        document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
+        if (agendamento.telefone) {
+            document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
+        } else {
+            document.getElementById('botao-whatsapp').href = '#';
+        }
         
+        if (agendamento.endereco) {
+            document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
+        } else {
+            document.getElementById('botao-maps').href = '#';
+        }
+
         modalEditar.classList.add('ativo');
     }
 
@@ -406,4 +420,3 @@ if (document.body.classList.contains('pagina-agenda')) {
         }
     });
 }
-
