@@ -12,6 +12,7 @@ function carregarDados(chave, valorPadrao = []) {
 let agendamentos = carregarDados('agendamentos', [
     {
         id: 'agendamento-0800',
+        data: '2025-08-15', // Exemplo com data real para testar
         horario: '08:00',
         cliente: 'Wagner',
         telefone: '21987654321',
@@ -22,6 +23,7 @@ let agendamentos = carregarDados('agendamentos', [
     },
     {
         id: 'agendamento-1000',
+        data: '2025-08-15',
         horario: '10:00',
         cliente: 'João',
         telefone: '21987654322',
@@ -303,7 +305,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         }
 
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
-        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/7{encodeURIComponent(agendamento.endereco)}`;
+        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/9{encodeURIComponent(agendamento.endereco)}`;
         
         modalEditar.classList.add('ativo');
     }
