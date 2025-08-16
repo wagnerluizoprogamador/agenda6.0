@@ -103,9 +103,17 @@ if (document.body.classList.contains('pagina-agenda')) {
     const botaoReverter = document.getElementById('botao-reverter');
     const dataSelecionadaH2 = document.getElementById('data-selecionada');
     const diasDaSemanaDiv = document.getElementById('dias-da-semana');
+    const botaoIniciar = document.getElementById('botao-iniciar');
+    const blocoFinalizar = document.getElementById('bloco-finalizar');
+    const botaoFinalizar = document.getElementById('botao-finalizar');
+    const timerServico = document.getElementById('timer-servico');
+    const valorTimer = document.getElementById('valor-timer');
+    const fotoServico = document.getElementById('foto-servico');
 
     let agendamentoSelecionadoId = null;
     let dataAtual = new Date();
+    let timerInterval = null;
+    let startTime = null;
 
     formNovoAgendamento.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -208,6 +216,61 @@ if (document.body.classList.contains('pagina-agenda')) {
         alert('Agendamento alterado com sucesso!');
         modalEditar.classList.remove('ativo');
     });
+    
+    // NOVO: Adicionado o event listener para o botão de iniciar serviço
+    botaoIniciar.addEventListener('click', () => {
+        const agendamento = agendamentos.find(a => a.id === agendamentoSelecionadoId);
+        if (agendamento) {
+            agendamento.status = 'em andamento';
+            salvarDados('agendamentos', agendamentos);
+            
+            // Oculta o botão de iniciar e mostra o de finalizar
+            botaoIniciar.style.display = 'none';
+            blocoFinalizar.style.display = 'block';
+            
+            // Atualiza o texto e a aparência
+            tituloModalEdicao.textContent = 'Serviço em Andamento';
+            document.getElementById('detalhes-status').textContent = 'em andamento';
+            detalhesDuracao.style.display = 'none'; // Esconde a duração final
+            timerServico.style.display = 'block'; // Mostra o timer
+
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const elapsedTime = Date.now() - startTime;
+                const seconds = Math.floor((elapsedTime / 1000) % 60);
+                const minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
+                const hours = Math.floor((elapsedTime / (1000 * 60 * 60)) % 24);
+                
+                const formatTime = (time) => String(time).padStart(2, '0');
+                valorTimer.textContent = `${formatTime(hours)}:${formatTime(minutes)}:${formatTime(seconds)}`;
+            }, 1000);
+        }
+    });
+
+    // NOVO: Adicionado o event listener para o botão de finalizar serviço
+    botaoFinalizar.addEventListener('click', () => {
+        const agendamento = agendamentos.find(a => a.id === agendamentoSelecionadoId);
+        if (agendamento) {
+            clearInterval(timerInterval);
+            const duracao = valorTimer.textContent;
+            
+            agendamento.status = 'finalizado';
+            agendamento.duracao = duracao;
+
+            // Lógica para salvar a foto aqui
+            if (fotoServico.files.length > 0) {
+                // Em um cenário real, você enviaria a foto para um servidor
+                console.log('Foto do serviço selecionada e pronta para ser salva:', fotoServico.files[0].name);
+            }
+            
+            salvarDados('agendamentos', agendamentos);
+            
+            alert(`Serviço finalizado! Duração: ${duracao}`);
+            
+            criarAgendaDiaria(dataAtual);
+            modalEditar.classList.remove('ativo');
+        }
+    });
 
     function preencherSelects(selectId, options) {
         const selectElement = document.getElementById(selectId);
@@ -286,11 +349,11 @@ if (document.body.classList.contains('pagina-agenda')) {
             }
         });
 
-        const blocoFinalizar = document.getElementById('bloco-finalizar');
-        const botaoIniciar = document.getElementById('botao-iniciar');
-
         document.getElementById('botao-alterar-dados').style.display = 'block';
         document.getElementById('botao-cancelar').style.display = 'block';
+        
+        clearInterval(timerInterval); // Para qualquer timer anterior
+        timerServico.style.display = 'none';
 
         if (agendamento.status === 'agendado') {
             tituloModalEdicao.textContent = 'Detalhes do Agendamento';
@@ -299,6 +362,14 @@ if (document.body.classList.contains('pagina-agenda')) {
             detalhesDuracao.style.display = 'none';
             formFluxo.style.display = 'block';
             botaoReverter.style.display = 'none';
+        } else if (agendamento.status === 'em andamento') {
+            tituloModalEdicao.textContent = 'Serviço em Andamento';
+            botaoIniciar.style.display = 'none';
+            blocoFinalizar.style.display = 'block';
+            detalhesDuracao.style.display = 'none';
+            formFluxo.style.display = 'block';
+            botaoReverter.style.display = 'none';
+            timerServico.style.display = 'block';
         } else if (agendamento.status === 'finalizado') {
             tituloModalEdicao.textContent = 'Serviço Finalizado';
             botaoIniciar.style.display = 'none';
@@ -316,7 +387,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         }
         
         if (agendamento.endereco) {
-            document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
+            document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(agendamento.endereco)}`;
         } else {
             document.getElementById('botao-maps').href = '#';
         }
