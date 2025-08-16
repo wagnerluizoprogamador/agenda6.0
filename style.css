@@ -207,3 +207,79 @@ button[type="submit"],
 .bloco-agendamento.agendado:hover {
     background-color: #c3e6cb;
 }
+
+/* ------------------------------------------- */
+/* NOVOS ESTILOS PARA ADAPTAÇÃO A CELULARES */
+/* ------------------------------------------- */
+
+/* Para telas com largura máxima de 768px (smartphones e tablets) */
+@media (max-width: 768px) {
+    
+    header {
+        padding: 0.5rem 0;
+    }
+
+    nav {
+        flex-wrap: wrap; /* Permite que os links quebrem a linha */
+        gap: 10px;
+        padding: 0 10px;
+    }
+
+    nav a {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-container,
+    .agenda-container {
+        padding: 15px;
+        margin: 10px;
+    }
+
+    .modal .form-container {
+        width: 90%;
+        max-height: 90vh; /* Limita a altura do modal para que ele caiba na tela */
+        overflow-y: auto; /* Adiciona rolagem se o conteúdo for muito longo */
+    }
+
+    .modal .fechar-modal-btn {
+        top: 5px;
+        right: 5px;
+    }
+
+    #calendario-diario {
+        grid-template-columns: 60px 1fr; /* Reduz a largura da coluna de horários */
+        gap: 5px;
+    }
+    
+    .horario {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+    
+    .bloco-agendamento {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+
+    .botoes-edicao {
+        flex-direction: column;
+    }
+}
+
+/* Para telas com largura máxima de 480px (smartphones menores) */
+@media (max-width: 480px) {
+    
+    .form-container {
+        width: 100%; /* Ocupa toda a largura em telas muito pequenas */
+    }
+    
+    .botoes-acao-rapida {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .btn-acao-rapida {
+        width: 100%;
+    }
+}
