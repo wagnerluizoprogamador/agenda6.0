@@ -1,209 +1,406 @@
-/* Estilos Gerais */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f2f5;
+// Funções para salvar e carregar dados do localStorage
+function salvarDados(chave, dados) {
+    localStorage.setItem(chave, JSON.stringify(dados));
 }
 
-header {
-    background-color: #007bff;
-    color: white;
-    padding: 1rem 0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+function carregarDados(chave, valorPadrao = []) {
+    const dados = localStorage.getItem(chave);
+    return dados ? JSON.parse(dados) : valorPadrao;
 }
 
-nav {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
+// Dados de exemplo (simulando um "banco de dados" local)
+let agendamentos = carregarDados('agendamentos', [
+    {
+        id: 'agendamento-0800',
+        horario: '08:00',
+        cliente: 'Wagner',
+        telefone: '21987654321',
+        endereco: 'Rua Exemplo, 123, Rio de Janeiro',
+        servico: 'Montagem de 50',
+        funcionarios: ['Arthur'],
+        status: 'agendado'
+    },
+    {
+        id: 'agendamento-1000',
+        horario: '10:00',
+        cliente: 'João',
+        telefone: '21987654322',
+        endereco: 'Av. Principal, 456, Rio de Janeiro',
+        servico: 'Manutenção de 100',
+        funcionarios: ['Arthur'],
+        status: 'finalizado',
+        duracao: '01:30:00'
+    }
+]);
+let clientes = carregarDados('clientes', ['Wagner', 'João', 'Maria', 'Pedro']);
+let servicos = carregarDados('servicos', ['Montagem de 50', 'Manutenção de 100', 'Formatação', 'Instalação']);
+let funcionarios = carregarDados('funcionarios', ['Arthur', 'Beatriz', 'Carlos', 'Diana']);
+
+// Lógica para a página de cadastro (index.html)
+if (document.body.classList.contains('pagina-cadastro')) {
+    const formCliente = document.getElementById('form-cadastro-cliente');
+    const formServico = document.getElementById('form-cadastro-servico');
+    const formFuncionario = document.getElementById('form-cadastro-funcionario');
+
+    formCliente.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome-cliente').value;
+        if (!clientes.includes(nome)) {
+            clientes.push(nome);
+            salvarDados('clientes', clientes);
+            alert(`Cliente "${nome}" cadastrado com sucesso!`);
+            formCliente.reset();
+        } else {
+            alert(`Cliente "${nome}" já existe.`);
+        }
+    });
+
+    formServico.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome-servico').value;
+        if (!servicos.includes(nome)) {
+            servicos.push(nome);
+            salvarDados('servicos', servicos);
+            alert(`Serviço "${nome}" cadastrado com sucesso!`);
+            formServico.reset();
+        } else {
+            alert(`Serviço "${nome}" já existe.`);
+        }
+    });
+
+    formFuncionario.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome-funcionario').value;
+        if (!funcionarios.includes(nome)) {
+            funcionarios.push(nome);
+            salvarDados('funcionarios', funcionarios);
+            alert(`Funcionário "${nome}" cadastrado com sucesso!`);
+            formFuncionario.reset();
+        } else {
+            alert(`Funcionário "${nome}" já existe.`);
+        }
+    });
 }
 
-nav a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
+// Lógica para a página de agenda (agenda.html)
+if (document.body.classList.contains('pagina-agenda')) {
+    const formNovoAgendamento = document.getElementById('form-novo-agendamento');
+    const modalAgendamento = document.getElementById('modal-agendamento');
+    const fecharNovoAgendamentoBtn = document.getElementById('fechar-modal');
+    const modalEditar = document.getElementById('modal-editar-agendamento');
+    const fecharModalEdicaoBtn = document.getElementById('fechar-modal-edicao');
+    const botaoAlterarDados = document.getElementById('botao-alterar-dados');
+    const formAlterarDados = document.getElementById('form-alterar-dados');
+    const detalhesAgendamento = document.getElementById('detalhes-agendamento');
+    const botoesEdicao = document.getElementById('botoes-edicao');
+    const botaoVoltar = document.getElementById('botao-voltar');
+    const formFluxo = document.getElementById('form-fluxo');
+    const tituloModalEdicao = document.getElementById('titulo-modal-edicao');
+    const detalhesDuracao = document.getElementById('detalhes-duracao');
+    const botaoCancelar = document.getElementById('botao-cancelar');
+    const botaoReverter = document.getElementById('botao-reverter');
+    const dataSelecionadaH2 = document.getElementById('data-selecionada');
+    const diasDaSemanaDiv = document.getElementById('dias-da-semana');
 
-nav a.ativo,
-nav a:hover {
-    background-color: #0056b3;
-}
+    let agendamentoSelecionadoId = null;
+    let dataAtual = new Date();
 
-main {
-    padding: 20px;
-}
+    formNovoAgendamento.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const data = document.getElementById('data-agendamento').value;
+        const horario = document.getElementById('hora-agendamento').value;
+        const cliente = document.getElementById('cliente-agendamento').value;
+        const servico = document.getElementById('servico-agendamento').value;
+        const funcionariosSelecionados = Array.from(document.getElementById('funcionario-agendamento').selectedOptions).map(option => option.value);
 
-.form-container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin: 20px auto;
-    max-width: 500px;
-}
+        const novoAgendamento = {
+            id: `agendamento-${Date.now()}`,
+            data: data,
+            horario: horario,
+            cliente: cliente,
+            servico: servico,
+            funcionarios: funcionariosSelecionados,
+            status: 'agendado'
+        };
 
-.form-group {
-    margin-bottom: 15px;
-}
+        agendamentos.push(novoAgendamento);
+        salvarDados('agendamentos', agendamentos);
+        criarAgendaDiaria(dataAtual);
+        modalAgendamento.classList.remove('ativo');
+        alert('Agendamento salvo com sucesso!');
+        formNovoAgendamento.reset();
+    });
 
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
+    fecharNovoAgendamentoBtn.addEventListener('click', () => {
+        modalAgendamento.classList.remove('ativo');
+    });
 
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="time"],
-input[type="datetime-local"],
-select,
-textarea {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
+    fecharModalEdicaoBtn.addEventListener('click', () => {
+        modalEditar.classList.remove('ativo');
+    });
 
-button[type="submit"],
-.btn-fluxo,
-.btn-acao-rapida,
-.botoes-edicao button,
-#botao-iniciar,
-#botao-alterar-dados,
-#botao-finalizar,
-#botao-cancelar {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    color: white;
-    font-weight: bold;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 10px;
-}
+    botaoAlterarDados.addEventListener('click', () => {
+        detalhesAgendamento.style.display = 'none';
+        formFluxo.style.display = 'none';
+        formAlterarDados.style.display = 'block';
+        botoesEdicao.style.display = 'none';
+        tituloModalEdicao.textContent = 'Editar Atendimento';
+    });
 
-#botao-iniciar { background-color: #28a745; }
-#botao-alterar-dados { background-color: #007bff; }
-#botao-finalizar { background-color: #dc3545; }
-#botao-cancelar { background-color: #dc3545; }
-#botao-reverter { background-color: #ffc107; }
+    botaoVoltar.addEventListener('click', () => {
+        detalhesAgendamento.style.display = 'block';
+        formFluxo.style.display = 'block';
+        formAlterarDados.style.display = 'none';
+        botoesEdicao.style.display = 'flex';
+        tituloModalEdicao.textContent = 'Detalhes do Agendamento';
+    });
 
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.4);
-    justify-content: center;
-    align-items: center;
-}
+    botaoCancelar.addEventListener('click', () => {
+        if (agendamentoSelecionadoId && confirm('Tem certeza que deseja cancelar este agendamento?')) {
+            agendamentos = agendamentos.filter(agendamento => agendamento.id !== agendamentoSelecionadoId);
+            salvarDados('agendamentos', agendamentos);
+            criarAgendaDiaria(dataAtual);
+            alert('Agendamento cancelado com sucesso!');
+            modalEditar.classList.remove('ativo');
+        }
+    });
 
-.modal.ativo {
-    display: flex;
-}
+    botaoReverter.addEventListener('click', () => {
+        if (agendamentoSelecionadoId && confirm('Tem certeza que deseja reverter este agendamento para o status "Agendado"?')) {
+            const agendamento = agendamentos.find(a => a.id === agendamentoSelecionadoId);
+            if (agendamento) {
+                agendamento.status = 'agendado';
+                agendamento.duracao = '';
+                salvarDados('agendamentos', agendamentos);
+                criarAgendaDiaria(dataAtual);
+                alert('Agendamento revertido com sucesso!');
+                modalEditar.classList.remove('ativo');
+            }
+        }
+    });
 
-.fechar-modal-btn {
-    background-color: #ccc;
-    color: black;
-    border: none;
-    padding: 5px 10px;
-    font-size: 1.2rem;
-    cursor: pointer;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
+    formAlterarDados.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('agendamento-id').value;
+        const dataHora = document.getElementById('data-hora-edicao').value;
+        const cliente = document.getElementById('cliente-edicao').value;
+        const servico = document.getElementById('servico-edicao').value;
+        const funcionariosSelecionados = Array.from(document.getElementById('funcionario-edicao').selectedOptions).map(option => option.value);
+    
+        const agendamento = agendamentos.find(a => a.id === id);
+        if (agendamento) {
+            const novaData = new Date(dataHora);
+            agendamento.data = novaData.toISOString().split('T')[0];
+            agendamento.horario = novaData.toTimeString().substring(0, 5);
+            agendamento.cliente = cliente;
+            agendamento.servico = servico;
+            agendamento.funcionarios = funcionariosSelecionados;
+            salvarDados('agendamentos', agendamentos);
+        }
+    
+        criarAgendaDiaria(dataAtual);
+        alert('Agendamento alterado com sucesso!');
+        modalEditar.classList.remove('ativo');
+    });
 
-.agenda-container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin: 20px auto;
-    max-width: 900px;
-}
+    function preencherSelects(selectId, options) {
+        const selectElement = document.getElementById(selectId);
+        selectElement.innerHTML = '';
+        if (selectId.includes('agendamento')) {
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = `Selecione um ${selectId.replace('-agendamento', '')}`;
+            selectElement.appendChild(defaultOption);
+        }
+        options.forEach(optionText => {
+            const option = document.createElement('option');
+            option.value = optionText;
+            option.textContent = optionText;
+            selectElement.appendChild(option);
+        });
+    }
 
-.navegacao-semanal {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+    function preencherSelectsEdicao() {
+        const clienteSelect = document.getElementById('cliente-edicao');
+        const servicoSelect = document.getElementById('servico-edicao');
+        const funcionarioSelect = document.getElementById('funcionario-edicao');
 
-#dias-da-semana {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-    width: 100%;
-    text-align: center;
-    font-weight: bold;
-    cursor: pointer;
-    overflow-x: auto; /* Permite rolagem horizontal */
-    white-space: nowrap; /* Impede que os itens quebrem a linha */
-    padding-bottom: 10px; /* Para que a barra de rolagem não atrapalhe */
-}
+        clienteSelect.innerHTML = '';
+        servicoSelect.innerHTML = '';
+        funcionarioSelect.innerHTML = '';
 
-.dia-semana {
-    padding: 10px;
-    border-radius: 5px;
-    background-color: #e9ecef;
-    min-width: 80px; /* Garante que os itens não encolham demais */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+        clientes.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente;
+            option.textContent = cliente;
+            clienteSelect.appendChild(option);
+        });
 
-.dia-semana.ativo,
-.dia-semana:hover {
-    background-color: #007bff;
-    color: white;
-}
+        servicos.forEach(servico => {
+            const option = document.createElement('option');
+            option.value = servico;
+            option.textContent = servico;
+            servicoSelect.appendChild(option);
+        });
 
-#calendario-diario {
-    display: grid;
-    grid-template-columns: 80px 1fr;
-    gap: 10px;
-    margin-top: 20px;
-}
+        funcionarios.forEach(funcionario => {
+            const option = document.createElement('option');
+            option.value = funcionario;
+            option.textContent = funcionario;
+            funcionarioSelect.appendChild(option);
+        });
+    }
 
-.horario {
-    padding: 10px;
-    background-color: #e9ecef;
-    border-radius: 4px;
-    font-weight: bold;
-    text-align: center;
-    align-self: center;
-}
+    function abrirModalComDetalhes(agendamento) {
+        agendamentoSelecionadoId = agendamento.id;
 
-.bloco-agendamento {
-    padding: 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
+        formAlterarDados.style.display = 'none';
+        detalhesAgendamento.style.display = 'block';
+        botoesEdicao.style.display = 'flex';
 
-.bloco-agendamento span {
-    display: block;
-}
+        document.getElementById('detalhes-cliente').textContent = agendamento.cliente;
+        document.getElementById('detalhes-telefone').textContent = agendamento.telefone;
+        document.getElementById('detalhes-endereco').textContent = agendamento.endereco;
+        document.getElementById('detalhes-servico').textContent = agendamento.servico;
+        document.getElementById('detalhes-funcionarios').textContent = agendamento.funcionarios.join(', ');
+        document.getElementById('detalhes-status').textContent = agendamento.status;
+        
+        preencherSelectsEdicao();
+        document.getElementById('agendamento-id').value = agendamento.id;
+        document.getElementById('cliente-edicao').value = agendamento.cliente;
+        document.getElementById('servico-edicao').value = agendamento.servico;
 
-.bloco-agendamento:hover {
-    background-color: #e9ecef;
-}
+        const funcionariosSelecionados = Array.from(document.getElementById('funcionario-edicao').options);
+        funcionariosSelecionados.forEach(option => {
+            if (agendamento.funcionarios.includes(option.value)) {
+                option.selected = true;
+            } else {
+                option.selected = false;
+            }
+        });
 
-.bloco-agendamento.agendado {
-    background-color: #d4edda;
-    border: 1px solid #c3e6cb;
-}
-.bloco-agendamento.agendado:hover {
-    background-color: #c3e6cb;
+        const blocoFinalizar = document.getElementById('bloco-finalizar');
+        const botaoIniciar = document.getElementById('botao-iniciar');
+
+        document.getElementById('botao-alterar-dados').style.display = 'block';
+        document.getElementById('botao-cancelar').style.display = 'block';
+
+        if (agendamento.status === 'agendado') {
+            tituloModalEdicao.textContent = 'Detalhes do Agendamento';
+            botaoIniciar.style.display = 'block';
+            blocoFinalizar.style.display = 'none';
+            detalhesDuracao.style.display = 'none';
+            formFluxo.style.display = 'block';
+            botaoReverter.style.display = 'none';
+        } else if (agendamento.status === 'finalizado') {
+            tituloModalEdicao.textContent = 'Serviço Finalizado';
+            botaoIniciar.style.display = 'none';
+            blocoFinalizar.style.display = 'none';
+            detalhesDuracao.style.display = 'block';
+            document.getElementById('valor-duracao').textContent = agendamento.duracao;
+            formFluxo.style.display = 'none';
+            botaoReverter.style.display = 'block';
+        }
+
+        document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
+        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/7{encodeURIComponent(agendamento.endereco)}`;
+        
+        modalEditar.classList.add('ativo');
+    }
+
+    function abrirModalNovoAgendamento(horario, data) {
+        modalAgendamento.classList.add('ativo');
+        document.getElementById('data-agendamento').value = data;
+        document.getElementById('hora-agendamento').value = horario;
+        preencherSelects('cliente-agendamento', clientes);
+        preencherSelects('servico-agendamento', servicos);
+        preencherSelects('funcionario-agendamento', funcionarios);
+    }
+
+    function criarAgendaDiaria(data) {
+        const calendarioDiario = document.getElementById('calendario-diario');
+        calendarioDiario.innerHTML = '';
+
+        const horarios = [];
+        for (let i = 0; i < 24; i++) {
+            horarios.push(`${String(i).padStart(2, '0')}:00`);
+            horarios.push(`${String(i).padStart(2, '0')}:30`);
+        }
+        
+        const dataFormatada = data.toISOString().split('T')[0];
+
+        horarios.forEach(horario => {
+            const horarioDiv = document.createElement('div');
+            horarioDiv.classList.add('horario');
+            horarioDiv.textContent = horario;
+            calendarioDiario.appendChild(horarioDiv);
+
+            const agendamentoDoHorario = agendamentos.find(a => a.horario === horario && a.data === dataFormatada);
+            
+            const agendamentoDiv = document.createElement('div');
+            agendamentoDiv.classList.add('bloco-agendamento');
+
+            if (agendamentoDoHorario) {
+                agendamentoDiv.classList.add('agendado');
+                agendamentoDiv.innerHTML = `
+                    <span>${agendamentoDoHorario.horario} - ${agendamentoDoHorario.servico}</span>
+                    <span>Cliente: ${agendamentoDoHorario.cliente}</span>
+                    <span>Funcionário(s): ${agendamentoDoHorario.funcionarios.join(', ')}</span>
+                `;
+                agendamentoDiv.addEventListener('click', () => {
+                    abrirModalComDetalhes(agendamentoDoHorario);
+                });
+            } else {
+                agendamentoDiv.innerHTML = `<span>${horario} - Livre</span>`;
+                agendamentoDiv.addEventListener('click', () => {
+                    abrirModalNovoAgendamento(horario, dataFormatada);
+                });
+            }
+            calendarioDiario.appendChild(agendamentoDiv);
+        });
+    }
+    
+    function criarNavegacaoSemanal() {
+        const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        diasDaSemanaDiv.innerHTML = '';
+        
+        const hoje = new Date();
+        const dataInicial = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - 15);
+
+        for (let i = 0; i < 30; i++) {
+            const dataDoDia = new Date(dataInicial);
+            dataDoDia.setDate(dataInicial.getDate() + i);
+            
+            const diaDiv = document.createElement('div');
+            diaDiv.classList.add('dia-semana');
+            
+            const diaSemana = dias[dataDoDia.getDay()];
+            const diaMes = dataDoDia.getDate();
+            
+            diaDiv.innerHTML = `<span>${diaSemana}</span><span>${diaMes}</span>`;
+            
+            const dataFormatada = dataDoDia.toISOString().split('T')[0];
+            const hojeFormatado = hoje.toISOString().split('T')[0];
+            
+            if (dataFormatada === hojeFormatado) {
+                diaDiv.classList.add('ativo');
+            }
+            
+            diaDiv.addEventListener('click', () => {
+                dataAtual = dataDoDia;
+                document.querySelectorAll('.dia-semana').forEach(d => d.classList.remove('ativo'));
+                diaDiv.classList.add('ativo');
+                criarAgendaDiaria(dataAtual);
+            });
+            
+            diasDaSemanaDiv.appendChild(diaDiv);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.body.classList.contains('pagina-agenda')) {
+            criarNavegacaoSemanal();
+            criarAgendaDiaria(dataAtual);
+        }
+    });
 }
