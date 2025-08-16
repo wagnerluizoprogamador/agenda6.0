@@ -3,135 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda de Serviços</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Agenda</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+
+        .menu-botao {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            z-index: 1001;
+            font-size: 30px;
+            color: #333;
+        }
+        .menu-lateral {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: -250px;
+            background-color: white;
+            overflow-x: hidden;
+            transition: 0.3s;
+            padding-top: 60px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+        }
+        .menu-lateral.aberto {
+            left: 0;
+        }
+        .menu-lateral a {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+        .menu-lateral a:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .agendamento-card {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .agendamento-card h3 {
+            margin: 0 0 10px;
+            color: #333;
+        }
+        
+        .agendamento-card p {
+            margin: 5px 0;
+            color: #555;
+        }
+        
+        .agendamento-card .botoes {
+            margin-top: 10px;
+            text-align: right;
+        }
+        
+        .agendamento-card .botoes a {
+            padding: 8px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007BFF;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="agenda.html">Agenda</a>
-            <a href="index.html">Cadastros</a>
-            <a href="clientes.html">Clientes</a>
-            <a href="servicos.html">Serviços</a>
-            <a href="funcionarios.html">Funcionários</a>
-            <a href="financeiro.html" class="ativo">Financeiro</a>
-            <a href="comissoes.html" class="ativo">Comissões</a>
-        </nav>
-    </header>
 
-    <main>
-        <section class="agenda-container">
-            <div class="navegacao-semanal">
-                <h2 id="data-selecionada"></h2>
-                <div id="dias-da-semana">
-                </div>
-            </div>
-            <div id="calendario-diario"></div>
-        </section>
+    <span class="menu-botao" onclick="toggleMenu()">&#9776;</span>
 
-        <div id="modal-agendamento" class="modal">
-            <section class="form-container">
-                <button id="fechar-modal" class="fechar-modal-btn">×</button>
-                <h2>Novo Agendamento</h2>
-                <form id="form-novo-agendamento">
-                    <div class="form-group">
-                        <label for="data-agendamento">Data:</label>
-                        <input type="date" id="data-agendamento" name="data-agendamento" required readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="hora-agendamento">Hora:</label>
-                        <input type="time" id="hora-agendamento" name="hora-agendamento" required readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="cliente-agendamento">Cliente:</label>
-                        <select id="cliente-agendamento" name="cliente-agendamento" required>
-                            <option value="">Selecione um cliente</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="servico-agendamento">Serviço:</label>
-                        <select id="servico-agendamento" name="servico-agendamento" required>
-                            <option value="">Selecione um serviço</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="funcionario-agendamento">Funcionário(s):</label>
-                        <select id="funcionario-agendamento" name="funcionario-agendamento" multiple required>
-                        </select>
-                        <small>Mantenha a tecla Ctrl (Windows) ou Cmd (Mac) para selecionar mais de um.</small>
-                    </div>
-                    <button type="submit">Agendar Serviço</button>
-                </form>
-            </section>
+    <div id="meuMenuLateral" class="menu-lateral">
+        <a href="agenda.html">Agenda</a>
+        <a href="clientes.html">Clientes & Anamnese</a>
+        <a href="servicos.html">Serviços & Pacotes</a>
+        <a href="financeiro.html">Financeiro</a>
+        <a href="funcionarios.html">Funcionários</a>
+        <a href="comissoes.html">Comissões</a>
+    </div>
+
+    <div class="header">
+        <h2>Minha Agenda</h2>
+    </div>
+
+    <div class="container" id="lista-agendamentos">
         </div>
-        
-        <div id="modal-editar-agendamento" class="modal">
-            <section class="form-container">
-                <button id="fechar-modal-edicao" class="fechar-modal-btn">×</button>
-                <h2 id="titulo-modal-edicao">Detalhes do Agendamento</h2>
 
-                <div id="detalhes-agendamento">
-                    <p><strong>Cliente:</strong> <span id="detalhes-cliente"></span></p>
-                    <p><strong>Telefone:</strong> <span id="detalhes-telefone"></span></p>
-                    <p><strong>Endereço:</strong> <span id="detalhes-endereco"></span></p>
-                    <p><strong>Serviço:</strong> <span id="detalhes-servico"></span></p>
-                    <p><strong>Funcionário(s):</strong> <span id="detalhes-funcionarios"></span></p>
-                    <p><strong>Status:</strong> <span id="detalhes-status"></span></p>
-                    <p id="detalhes-duracao" style="display: none;"><strong>Duração:</strong> <span id="valor-duracao"></span></p>
-                    <p id="timer-servico" style="display: none;"><strong>Tempo Decorrido:</strong> <span id="valor-timer">00:00:00</span></p>
-                    
-                    <div class="botoes-acao-rapida">
-                        <a id="botao-whatsapp" href="#" target="_blank" class="btn-acao-rapida">Chamar no WhatsApp</a>
-                        <a id="botao-maps" href="#" target="_blank" class="btn-acao-rapida">Abrir Google Maps</a>
-                    </div>
-                </div>
+    <script>
+        function toggleMenu() {
+            var menu = document.getElementById("meuMenuLateral");
+            if (menu.classList.contains("aberto")) {
+                menu.classList.remove("aberto");
+            } else {
+                menu.classList.add("aberto");
+            }
+        }
+    </script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-                <div id="form-fluxo">
-                    <button type="button" id="botao-iniciar" class="btn-fluxo">Iniciar Serviço</button>
-                    
-                    <div id="bloco-finalizar" style="display: none;">
-                        <button type="button" id="botao-finalizar" class="btn-fluxo">Finalizar Serviço</button>
-                        <div class="form-group">
-                            <label for="foto-servico">Foto do Serviço (opcional):</label>
-                            <input type="file" id="foto-servico" accept="image/*">
+        const firebaseConfig = {
+            apiKey: "AIzaSyBW54cVtXEjXcbF_ADxS-HXz3b4xvZBM9o",
+            authDomain: "agenda6-7ba82.firebaseapp.com",
+            projectId: "agenda6-7ba82",
+            storageBucket: "agenda6-7ba82.firebasestorage.app",
+            messagingSenderId: "247288925241",
+            appId: "1:247288925241:web:bf8ff055b46410327251e8",
+            measurementId: "G-Y92QYKMYRT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function carregarAgendamentos() {
+            const listaAgendamentos = document.getElementById('lista-agendamentos');
+            listaAgendamentos.innerHTML = 'Carregando agendamentos...';
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "agendamentos"));
+                listaAgendamentos.innerHTML = '';
+                
+                if (querySnapshot.empty) {
+                    listaAgendamentos.innerHTML = '<p>Nenhum agendamento encontrado.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const dados = doc.data();
+                    const agendamentoId = doc.id;
+                    const card = document.createElement('div');
+                    card.classList.add('agendamento-card');
+                    card.innerHTML = `
+                        <h3>Cliente: ${dados.cliente}</h3>
+                        <p><strong>Data:</strong> ${dados.data} | <strong>Horário:</strong> ${dados.horario}</p>
+                        <p><strong>Profissional:</strong> ${dados.profissional}</p>
+                        <p><strong>Serviços:</strong> ${dados.servicos.join(', ')}</p>
+                        <p><strong>Total:</strong> ${dados.total}</p>
+                        <div class="botoes">
+                            <a href="agendamento.html?id=${agendamentoId}">Editar</a>
                         </div>
-                    </div>
-                </div>
+                    `;
+                    listaAgendamentos.appendChild(card);
+                });
+            } catch (e) {
+                console.error("Erro ao carregar agendamentos: ", e);
+                listaAgendamentos.innerHTML = '<p>Erro ao carregar agendamentos. Verifique sua conexão e as regras do Firebase.</p>';
+            }
+        }
 
-                <div class="botoes-edicao" id="botoes-edicao">
-                    <button type="button" id="botao-alterar-dados">Alterar Dados</button>
-                    <button type="button" id="botao-reverter" style="display: none;">Reverter para Agendado</button>
-                    <button type="button" id="botao-cancelar">Cancelar Agendamento</button>
-                </div>
-
-                <form id="form-alterar-dados" style="display: none;">
-                    <input type="hidden" id="agendamento-id">
-                    <div class="form-group">
-                        <label>Data e Hora:</label>
-                        <input type="datetime-local" id="data-hora-edicao" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Cliente:</label>
-                        <select id="cliente-edicao" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Serviço:</label>
-                        <select id="servico-edicao" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Funcionário(s):</label>
-                        <select id="funcionario-edicao" multiple required></select>
-                    </div>
-                    <div class="botoes-edicao">
-                        <button type="submit">Salvar Alterações</button>
-                        <button type="button" id="botao-voltar">Voltar</button>
-                    </div>
-                </form>
-            </section>
-        </div>
-    </main>
-
-    <script src="script.js"></script>
+        carregarAgendamentos();
+    </script>
 </body>
-<body class="pagina-agenda"></body>
 </html>
