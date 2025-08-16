@@ -84,6 +84,7 @@ if (document.body.classList.contains('pagina-cadastro')) {
 
 // Lógica para a página de agenda (agenda.html)
 if (document.body.classList.contains('pagina-agenda')) {
+    const formNovoAgendamento = document.getElementById('form-novo-agendamento');
     const modalAgendamento = document.getElementById('modal-agendamento');
     const fecharNovoAgendamentoBtn = document.getElementById('fechar-modal');
     const modalEditar = document.getElementById('modal-editar-agendamento');
@@ -102,6 +103,33 @@ if (document.body.classList.contains('pagina-agenda')) {
     const diasDaSemanaDiv = document.getElementById('dias-da-semana');
 
     let agendamentoSelecionadoId = null;
+    let dataAtual = new Date();
+
+    formNovoAgendamento.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const data = document.getElementById('data-agendamento').value;
+        const horario = document.getElementById('hora-agendamento').value;
+        const cliente = document.getElementById('cliente-agendamento').value;
+        const servico = document.getElementById('servico-agendamento').value;
+        const funcionariosSelecionados = Array.from(document.getElementById('funcionario-agendamento').selectedOptions).map(option => option.value);
+
+        const novoAgendamento = {
+            id: `agendamento-${Date.now()}`,
+            data: data,
+            horario: horario,
+            cliente: cliente,
+            servico: servico,
+            funcionarios: funcionariosSelecionados,
+            status: 'agendado'
+        };
+
+        agendamentos.push(novoAgendamento);
+        salvarDados('agendamentos', agendamentos);
+        criarAgendaDiaria(dataAtual);
+        modalAgendamento.classList.remove('ativo');
+        alert('Agendamento salvo com sucesso!');
+        formNovoAgendamento.reset();
+    });
 
     fecharNovoAgendamentoBtn.addEventListener('click', () => {
         modalAgendamento.classList.remove('ativo');
@@ -131,7 +159,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         if (agendamentoSelecionadoId && confirm('Tem certeza que deseja cancelar este agendamento?')) {
             agendamentos = agendamentos.filter(agendamento => agendamento.id !== agendamentoSelecionadoId);
             salvarDados('agendamentos', agendamentos);
-            criarAgendaDiaria();
+            criarAgendaDiaria(dataAtual);
             alert('Agendamento cancelado com sucesso!');
             modalEditar.classList.remove('ativo');
         }
@@ -144,7 +172,7 @@ if (document.body.classList.contains('pagina-agenda')) {
                 agendamento.status = 'agendado';
                 agendamento.duracao = '';
                 salvarDados('agendamentos', agendamentos);
-                criarAgendaDiaria();
+                criarAgendaDiaria(dataAtual);
                 alert('Agendamento revertido com sucesso!');
                 modalEditar.classList.remove('ativo');
             }
@@ -170,7 +198,7 @@ if (document.body.classList.contains('pagina-agenda')) {
             salvarDados('agendamentos', agendamentos);
         }
     
-        criarAgendaDiaria();
+        criarAgendaDiaria(dataAtual);
         alert('Agendamento alterado com sucesso!');
         modalEditar.classList.remove('ativo');
     });
@@ -275,7 +303,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         }
 
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
-        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/8{encodeURIComponent(agendamento.endereco)}`;
+        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/7{encodeURIComponent(agendamento.endereco)}`;
         
         modalEditar.classList.add('ativo');
     }
@@ -289,12 +317,17 @@ if (document.body.classList.contains('pagina-agenda')) {
         preencherSelects('funcionario-agendamento', funcionarios);
     }
 
-    function criarAgendaDiaria() {
+    function criarAgendaDiaria(data) {
         const calendarioDiario = document.getElementById('calendario-diario');
-        const horarios = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'];
-
         calendarioDiario.innerHTML = '';
-        const hoje = new Date().toISOString().split('T')[0];
+
+        const horarios = [];
+        for (let i = 0; i < 24; i++) {
+            horarios.push(`${String(i).padStart(2, '0')}:00`);
+            horarios.push(`${String(i).padStart(2, '0')}:30`);
+        }
+        
+        const dataFormatada = data.toISOString().split('T')[0];
 
         horarios.forEach(horario => {
             const horarioDiv = document.createElement('div');
@@ -302,7 +335,7 @@ if (document.body.classList.contains('pagina-agenda')) {
             horarioDiv.textContent = horario;
             calendarioDiario.appendChild(horarioDiv);
 
-            const agendamentoDoHorario = agendamentos.find(a => a.horario === horario);
+            const agendamentoDoHorario = agendamentos.find(a => a.horario === horario && a.data === dataFormatada);
             
             const agendamentoDiv = document.createElement('div');
             agendamentoDiv.classList.add('bloco-agendamento');
@@ -320,40 +353,46 @@ if (document.body.classList.contains('pagina-agenda')) {
             } else {
                 agendamentoDiv.innerHTML = `<span>${horario} - Livre</span>`;
                 agendamentoDiv.addEventListener('click', () => {
-                    abrirModalNovoAgendamento(horario, hoje);
+                    abrirModalNovoAgendamento(horario, dataFormatada);
                 });
             }
             calendarioDiario.appendChild(agendamentoDiv);
         });
     }
     
-    // NOVO: Função para criar a navegação de dias da semana
     function criarNavegacaoSemanal() {
         const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
         diasDaSemanaDiv.innerHTML = '';
+        
         const hoje = new Date();
-        const diaAtual = hoje.getDay(); // 0 = Domingo, 1 = Segunda, etc.
-        const dataAtual = hoje.getDate();
-        const mesAtual = hoje.getMonth();
-        const anoAtual = hoje.getFullYear();
+        const dataInicial = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - 15);
 
-        const dataSelecionadaFormatada = `${dias[diaAtual]}, ${dataAtual} de ${mesAtual + 1} de ${anoAtual}`;
-        dataSelecionadaH2.textContent = `Agendamentos para hoje, ${dataSelecionadaFormatada}`;
-
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 30; i++) {
+            const dataDoDia = new Date(dataInicial);
+            dataDoDia.setDate(dataInicial.getDate() + i);
+            
             const diaDiv = document.createElement('div');
             diaDiv.classList.add('dia-semana');
-
-            const dataDoDia = new Date(anoAtual, mesAtual, dataAtual + (i - diaAtual));
+            
             const diaSemana = dias[dataDoDia.getDay()];
             const diaMes = dataDoDia.getDate();
-
+            
             diaDiv.innerHTML = `<span>${diaSemana}</span><span>${diaMes}</span>`;
-
-            if (i === diaAtual) {
+            
+            const dataFormatada = dataDoDia.toISOString().split('T')[0];
+            const hojeFormatado = hoje.toISOString().split('T')[0];
+            
+            if (dataFormatada === hojeFormatado) {
                 diaDiv.classList.add('ativo');
             }
-
+            
+            diaDiv.addEventListener('click', () => {
+                dataAtual = dataDoDia;
+                document.querySelectorAll('.dia-semana').forEach(d => d.classList.remove('ativo'));
+                diaDiv.classList.add('ativo');
+                criarAgendaDiaria(dataAtual);
+            });
+            
             diasDaSemanaDiv.appendChild(diaDiv);
         }
     }
@@ -361,7 +400,7 @@ if (document.body.classList.contains('pagina-agenda')) {
     document.addEventListener('DOMContentLoaded', () => {
         if (document.body.classList.contains('pagina-agenda')) {
             criarNavegacaoSemanal();
-            criarAgendaDiaria();
+            criarAgendaDiaria(dataAtual);
         }
     });
 }
