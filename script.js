@@ -1,5 +1,15 @@
+// Funções para salvar e carregar dados do localStorage
+function salvarDados(chave, dados) {
+    localStorage.setItem(chave, JSON.stringify(dados));
+}
+
+function carregarDados(chave, valorPadrao = []) {
+    const dados = localStorage.getItem(chave);
+    return dados ? JSON.parse(dados) : valorPadrao;
+}
+
 // Dados de exemplo (simulando um "banco de dados" local)
-let agendamentos = [
+let agendamentos = carregarDados('agendamentos', [
     {
         id: 'agendamento-0800',
         horario: '08:00',
@@ -21,11 +31,56 @@ let agendamentos = [
         status: 'finalizado',
         duracao: '01:30:00'
     }
-];
+]);
+let clientes = carregarDados('clientes', ['Wagner', 'João', 'Maria', 'Pedro']);
+let servicos = carregarDados('servicos', ['Montagem de 50', 'Manutenção de 100', 'Formatação', 'Instalação']);
+let funcionarios = carregarDados('funcionarios', ['Arthur', 'Beatriz', 'Carlos', 'Diana']);
 
-const clientes = ['Wagner', 'João', 'Maria', 'Pedro'];
-const servicos = ['Montagem de 50', 'Manutenção de 100', 'Formatação', 'Instalação'];
-const funcionarios = ['Arthur', 'Beatriz', 'Carlos', 'Diana'];
+// Lógica para a página de cadastro (index.html)
+if (document.body.classList.contains('pagina-cadastro')) {
+    const formCliente = document.getElementById('form-cadastro-cliente');
+    const formServico = document.getElementById('form-cadastro-servico');
+    const formFuncionario = document.getElementById('form-cadastro-funcionario');
+
+    formCliente.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome-cliente').value;
+        if (!clientes.includes(nome)) {
+            clientes.push(nome);
+            salvarDados('clientes', clientes);
+            alert(`Cliente "${nome}" cadastrado com sucesso!`);
+            formCliente.reset();
+        } else {
+            alert(`Cliente "${nome}" já existe.`);
+        }
+    });
+
+    formServico.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome-servico').value;
+        if (!servicos.includes(nome)) {
+            servicos.push(nome);
+            salvarDados('servicos', servicos);
+            alert(`Serviço "${nome}" cadastrado com sucesso!`);
+            formServico.reset();
+        } else {
+            alert(`Serviço "${nome}" já existe.`);
+        }
+    });
+
+    formFuncionario.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome-funcionario').value;
+        if (!funcionarios.includes(nome)) {
+            funcionarios.push(nome);
+            salvarDados('funcionarios', funcionarios);
+            alert(`Funcionário "${nome}" cadastrado com sucesso!`);
+            formFuncionario.reset();
+        } else {
+            alert(`Funcionário "${nome}" já existe.`);
+        }
+    });
+}
 
 // Lógica para a página de agenda (agenda.html)
 if (document.body.classList.contains('pagina-agenda')) {
@@ -75,6 +130,7 @@ if (document.body.classList.contains('pagina-agenda')) {
     botaoCancelar.addEventListener('click', () => {
         if (agendamentoSelecionadoId && confirm('Tem certeza que deseja cancelar este agendamento?')) {
             agendamentos = agendamentos.filter(agendamento => agendamento.id !== agendamentoSelecionadoId);
+            salvarDados('agendamentos', agendamentos);
             criarAgendaDiaria();
             alert('Agendamento cancelado com sucesso!');
             modalEditar.classList.remove('ativo');
@@ -87,6 +143,7 @@ if (document.body.classList.contains('pagina-agenda')) {
             if (agendamento) {
                 agendamento.status = 'agendado';
                 agendamento.duracao = '';
+                salvarDados('agendamentos', agendamentos);
                 criarAgendaDiaria();
                 alert('Agendamento revertido com sucesso!');
                 modalEditar.classList.remove('ativo');
@@ -110,6 +167,7 @@ if (document.body.classList.contains('pagina-agenda')) {
             agendamento.cliente = cliente;
             agendamento.servico = servico;
             agendamento.funcionarios = funcionariosSelecionados;
+            salvarDados('agendamentos', agendamentos);
         }
     
         criarAgendaDiaria();
@@ -217,7 +275,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         }
 
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
-        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/9{encodeURIComponent(agendamento.endereco)}`;
+        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/8{encodeURIComponent(agendamento.endereco)}`;
         
         modalEditar.classList.add('ativo');
     }
