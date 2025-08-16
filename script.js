@@ -218,7 +218,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         }
 
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
-        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/8{encodeURIComponent(agendamento.endereco)}`;
+        document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$1{encodeURIComponent(agendamento.endereco)}`;
         
         modalEditar.classList.add('ativo');
     }
@@ -270,5 +270,9 @@ if (document.body.classList.contains('pagina-agenda')) {
         });
     }
 
-    document.addEventListener('DOMContentLoaded', criarAgendaDiaria);
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.body.classList.contains('pagina-agenda')) {
+            criarAgendaDiaria();
+        }
+    });
 }
