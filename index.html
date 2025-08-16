@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="pagina-cadastro">
+
     <header>
         <nav>
             <a href="agenda.html">Agenda</a>
@@ -35,10 +36,10 @@
                     <label for="endereco-cliente">Endereço (opcional):</label>
                     <input type="text" id="endereco-cliente" name="endereco-cliente">
                 </div>
-                <button type="submit">Cadastrar Cliente</button>
+                <button type="submit" id="cadastrar-cliente-btn">Cadastrar Cliente</button>
             </form>
         </section>
-        
+
         <section class="form-container">
             <h2>Cadastro de Serviço</h2>
             <form id="form-cadastro-servico">
@@ -54,7 +55,7 @@
                     <label for="valor-servico">Valor (R$):</label>
                     <input type="number" id="valor-servico" name="valor-servico" step="0.01" required>
                 </div>
-                <button type="submit">Cadastrar Serviço</button>
+                <button type="submit" id="cadastrar-servico-btn">Cadastrar Serviço</button>
             </form>
         </section>
 
@@ -69,7 +70,7 @@
                     <label for="comissao-funcionario">Comissão (%)</label>
                     <input type="number" id="comissao-funcionario" name="comissao-funcionario" required>
                 </div>
-                <button type="submit">Cadastrar Funcionário</button>
+                <button type="submit" id="cadastrar-funcionario-btn">Cadastrar Funcionário</button>
             </form>
         </section>
     </main>
