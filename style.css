@@ -73,7 +73,11 @@ textarea {
 button[type="submit"],
 .btn-fluxo,
 .btn-acao-rapida,
-.botoes-edicao button {
+.botoes-edicao button,
+#botao-iniciar,
+#botao-alterar-dados,
+#botao-finalizar,
+#botao-cancelar {
     display: block;
     width: 100%;
     padding: 10px;
@@ -85,6 +89,12 @@ button[type="submit"],
     transition: background-color 0.3s;
     margin-top: 10px;
 }
+
+#botao-iniciar { background-color: #28a745; }
+#botao-alterar-dados, .botoes-edicao button { background-color: #007bff; }
+#botao-finalizar { background-color: #dc3545; }
+#botao-cancelar { background-color: #dc3545; }
+#botao-reverter { background-color: #ffc107; }
 
 .modal {
     display: none;
@@ -124,10 +134,40 @@ button[type="submit"],
     max-width: 900px;
 }
 
+.navegacao-semanal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#dias-da-semana {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.dia-semana {
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #e9ecef;
+}
+
+.dia-semana.ativo,
+.dia-semana:hover {
+    background-color: #007bff;
+    color: white;
+}
+
 #calendario-diario {
     display: grid;
     grid-template-columns: 80px 1fr;
     gap: 10px;
+    margin-top: 20px;
 }
 
 .horario {
