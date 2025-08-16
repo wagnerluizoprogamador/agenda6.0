@@ -305,7 +305,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         }
 
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
-        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/9{encodeURIComponent(agendamento.endereco)}`;
+        document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
         
         modalEditar.classList.add('ativo');
     }
