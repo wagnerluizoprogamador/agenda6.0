@@ -2,6 +2,7 @@
 function salvarDados(chave, dados) {
     try {
         localStorage.setItem(chave, JSON.stringify(dados));
+        console.log(`Dados salvos com sucesso na chave: ${chave}`);
     } catch (e) {
         console.error(`Erro ao salvar dados na chave "${chave}":`, e);
     }
@@ -11,11 +12,13 @@ function carregarDados(chave, valorPadrao = []) {
     try {
         const dados = localStorage.getItem(chave);
         if (dados) {
+            console.log(`Dados carregados com sucesso da chave: ${chave}`);
             return JSON.parse(dados);
         }
     } catch (e) {
         console.error(`Erro ao carregar dados da chave "${chave}":`, e);
     }
+    console.log(`Nenhum dado encontrado para a chave: ${chave}. Usando valor padrão.`);
     return valorPadrao;
 }
 
@@ -388,7 +391,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${telefoneFormatado}`;
         
         const enderecoFormatado = agendamento.endereco ? encodeURIComponent(agendamento.endereco) : '';
-        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/7{enderecoFormatado}`;
+        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/8{enderecoFormatado}`;
 
         if (agendamento.status === 'agendado') {
             tituloModalEdicao.textContent = 'Detalhes do Agendamento';
@@ -629,6 +632,10 @@ if (document.body.classList.contains('pagina-agenda')) {
         if (document.body.classList.contains('pagina-agenda')) {
             criarNavegacaoSemanal();
             criarAgendaDiaria(dataAtual);
+        }
+        if (document.body.classList.contains('pagina-clientes')) {
+            // Garante que a renderização inicial dos clientes aconteça ao carregar a página
+            renderizarClientes();
         }
     });
 }
