@@ -161,15 +161,27 @@ if (document.body.classList.contains('pagina-agenda')) {
         const servico = document.getElementById('servico-agendamento').value;
         const funcionariosSelecionados = Array.from(document.getElementById('funcionario-agendamento').selectedOptions).map(option => option.value);
 
-        const clienteSelecionado = clientes.find(c => c.nome === clienteNome);
+        // Verifica se o cliente já existe na lista de clientes
+        let clienteExistente = clientes.find(c => c.nome === clienteNome);
+        if (!clienteExistente) {
+            // Se o cliente não existir, adiciona à lista
+            clienteExistente = {
+                id: `cli-${Date.now()}`,
+                nome: clienteNome,
+                telefone: '',
+                endereco: ''
+            };
+            clientes.push(clienteExistente);
+            salvarDados('clientes', clientes);
+        }
 
         const novoAgendamento = {
             id: `agendamento-${Date.now()}`,
             data: data,
             horario: horario,
             cliente: clienteNome,
-            telefone: clienteSelecionado ? clienteSelecionado.telefone : '',
-            endereco: clienteSelecionado ? clienteSelecionado.endereco : '',
+            telefone: clienteExistente.telefone || '',
+            endereco: clienteExistente.endereco || '',
             servico: servico,
             funcionarios: funcionariosSelecionados,
             status: 'agendado'
@@ -376,7 +388,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${telefoneFormatado}`;
         
         const enderecoFormatado = agendamento.endereco ? encodeURIComponent(agendamento.endereco) : '';
-        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/6{enderecoFormatado}`;
+        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/7{enderecoFormatado}`;
 
         if (agendamento.status === 'agendado') {
             tituloModalEdicao.textContent = 'Detalhes do Agendamento';
