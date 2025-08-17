@@ -118,10 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
             selectElemento.appendChild(option);
         });
     };
-
+    
     // --- Funções de renderização da Agenda ---
 
     const renderizarCalendarioDiario = async (data) => {
+        console.log(`Renderizando calendário para a data: ${data}`); // Adicionado para debug
         if (!calendarioDiario || !db) return;
 
         const dataFormatada = formatarDataParaFirestore(data);
@@ -166,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderizarDiasDaSemana = (data) => {
+        console.log(`Renderizando dias da semana para a data: ${data}`); // Adicionado para debug
         if (!diasDaSemanaDiv) return;
 
         const hoje = new Date();
@@ -303,7 +305,9 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarCalendarioDiario(dataAtual);
 
         diasDaSemanaDiv.addEventListener('click', (e) => {
+            console.log('Evento de clique detectado!'); // Adicionado para debug
             if (e.target.closest('.dia-semana')) {
+                console.log('Clique em um dia da semana!'); // Adicionado para debug
                 const diaElemento = e.target.closest('.dia-semana');
                 const dataString = diaElemento.dataset.data;
                 const [ano, mes, dia] = dataString.split('-').map(Number);
@@ -350,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const agendamentoId = card.dataset.id;
                 const doc = await db.collection('agendamentos').doc(agendamentoId).get();
                 agendamentoAtual = { id: doc.id, ...doc.data() };
-
+                
                 detalhesClienteSpan.textContent = agendamentoAtual.cliente;
                 detalhesTelefoneSpan.textContent = agendamentoAtual.telefone;
                 detalhesEnderecoSpan.textContent = agendamentoAtual.endereco;
@@ -363,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 blocoFinalizar.style.display = status === 'iniciado' ? 'block' : 'none';
                 detalhesDuracao.style.display = status === 'finalizado' ? 'block' : 'none';
                 timerServico.style.display = status === 'iniciado' ? 'block' : 'none';
-
+                
                 if (status === 'iniciado') {
                     const inicio = agendamentoAtual.inicio.toDate();
                     timerInterval = setInterval(() => {
@@ -381,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const telefone = agendamentoAtual.telefone.replace(/\D/g, '');
                 botaoWhatsapp.href = `https://api.whatsapp.com/send?phone=55${telefone}`;
                 botaoMaps.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(agendamentoAtual.endereco)}`;
-
+                
                 // Botões de edição
                 botaoReverter.style.display = status === 'finalizado' ? 'block' : 'none';
                 formAlterarDados.style.display = 'none';
@@ -410,9 +414,9 @@ document.addEventListener('DOMContentLoaded', () => {
             renderizarCalendarioDiario(dataAtual);
             alert('Agendamento salvo com sucesso!');
         });
-
+        
         // --- Eventos do modal de edição/detalhes ---
-
+        
         // Botão Iniciar Serviço
         botaoIniciar?.addEventListener('click', async () => {
             if (agendamentoAtual) {
@@ -424,7 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderizarCalendarioDiario(dataAtual);
             }
         });
-
+        
         // Botão Finalizar Serviço
         botaoFinalizar?.addEventListener('click', async () => {
             if (agendamentoAtual) {
@@ -449,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderizarCalendarioDiario(dataAtual);
             }
         });
-
+        
         // Botão Reverter
         botaoReverter?.addEventListener('click', async () => {
             if (agendamentoAtual) {
@@ -462,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderizarCalendarioDiario(dataAtual);
             }
         });
-
+        
         // Botão Cancelar
         botaoCancelar?.addEventListener('click', async () => {
             if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
@@ -473,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-
+        
         // Botão Alterar Dados
         botaoAlterarDados?.addEventListener('click', async () => {
             formAlterarDados.style.display = 'block';
@@ -493,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dataHoraEdicaoInput.value = dataHora.toISOString().slice(0, 16);
             clienteEdicaoSelect.value = agendamentoAtual.cliente;
             servicoEdicaoSelect.value = agendamentoAtual.servico;
-
+            
             Array.from(funcionarioEdicaoSelect.options).forEach(option => {
                 if (agendamentoAtual.funcionarios.includes(option.value)) {
                     option.selected = true;
@@ -514,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const novaDataHora = new Date(dataHoraEdicaoInput.value);
             const novaData = formatarDataParaFirestore(novaDataHora);
             const novaHora = `${String(novaDataHora.getHours()).padStart(2, '0')}:${String(novaDataHora.getMinutes()).padStart(2, '0')}`;
-
+            
             const dadosAtualizados = {
                 data: novaData,
                 hora: novaHora,
@@ -522,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 servico: servicoEdicaoSelect.value,
                 funcionarios: Array.from(funcionarioEdicaoSelect.selectedOptions).map(opt => opt.value)
             };
-
+            
             await db.collection('agendamentos').doc(agendamentoIdInput.value).update(dadosAtualizados);
             esconderModal(modalEdicaoAgendamento);
             renderizarCalendarioDiario(dataAtual);
