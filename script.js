@@ -16,10 +16,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // Inicia a lógica da aplicação após o DOM e o Firebase estarem prontos
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log("DOM totalmente carregado. Tentando renderizar a agenda...");
 
-    // Referências do DOM - MOVIDAS PARA DENTRO DO DOMContentLoaded
+    // Referências do DOM
     const formNovoAgendamento = document.getElementById('form-novo-agendamento');
     const formCadastroCliente = document.getElementById('form-cadastro-cliente');
     const formCadastroServico = document.getElementById('form-cadastro-servico');
@@ -72,6 +72,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let agendamentoAtual = null;
     let timerInterval = null;
+
+    // --- OTIMIZAÇÃO: Carregamento inicial de dados ---
+    let clientesCache = [];
+    let servicosCache = [];
+    let funcionariosCache = [];
+
+    const carregarDadosIniciais = async () => {
+        if (window.location.pathname.includes('agenda.html')) {
+            console.log("Pré-carregando dados para a agenda...");
+            clientesCache = await buscarItens('clientes');
+            servicosCache = await buscarItens('servicos');
+            funcionariosCache = await buscarItens('funcionarios');
+        }
+    };
 
     // --- Funções de interação com o Firebase ---
 
@@ -324,6 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (window.location.pathname.includes('agenda.html')) {
+        await carregarDadosIniciais(); // Chama a função otimizada
         let dataAtual = new Date();
         renderizarDiasDaSemana(dataAtual);
         renderizarCalendarioDiario(dataAtual);
@@ -361,12 +376,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (agendamentoExistente.empty) {
                     console.log("Nenhum agendamento encontrado no banco de dados para este horário. Prosseguindo para abrir o modal...");
                     
-                    const clientes = await buscarItens('clientes');
-                    popularSelect(clienteAgendamentoSelect, clientes);
-                    const servicos = await buscarItens('servicos');
-                    popularSelect(servicoAgendamentoSelect, servicos);
-                    const funcionarios = await buscarItens('funcionarios');
-                    popularSelectFuncionarios(funcionarioAgendamentoSelect, funcionarios);
+                    popularSelect(clienteAgendamentoSelect, clientesCache); // Usa os dados do cache
+                    popularSelect(servicoAgendamentoSelect, servicosCache); // Usa os dados do cache
+                    popularSelectFuncionarios(funcionarioAgendamentoSelect, funcionariosCache); // Usa os dados do cache
 
                     dataAgendamentoInput.value = data;
                     horaAgendamentoInput.value = hora;
@@ -511,12 +523,9 @@ document.addEventListener('DOMContentLoaded', () => {
             botoesEdicao.style.display = 'none';
 
             // Popular selects para edição
-            const clientes = await buscarItens('clientes');
-            popularSelect(clienteEdicaoSelect, clientes);
-            const servicos = await buscarItens('servicos');
-            popularSelect(servicoEdicaoSelect, servicos);
-            const funcionarios = await buscarItens('funcionarios');
-            popularSelectFuncionarios(funcionarioEdicaoSelect, funcionarios);
+            popularSelect(clienteEdicaoSelect, clientesCache); // Usa os dados do cache
+            popularSelect(servicoEdicaoSelect, servicosCache); // Usa os dados do cache
+            popularSelectFuncionarios(funcionarioEdicaoSelect, funcionariosCache); // Usa os dados do cache
 
             // Preencher o formulário de edição com os dados atuais
             agendamentoIdInput.value = agendamentoAtual.id;
@@ -561,6 +570,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         fecharModalBtn?.addEventListener('click', () => esconderModal(modalAgendamento));
-        fecharModalEdicaoBtn?.addEventListener('click', () => esconderModal(modalEdicaoAgendamento));
+        fecharModalEdicaoBtn?.addEventListener('click', ()(() => esconderModal(modalEdicaoAgendamento)));
     }
 });
