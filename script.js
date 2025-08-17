@@ -305,7 +305,8 @@ if (document.body.classList.contains('pagina-agenda')) {
             botaoReverter.style.display = 'block';
         }
 
-        document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
+      const telefoneFormatado = agendamento.telefone ? agendamento.telefone.replace(/\D/g, '') : '';
+document.getElementById('botao-whatsapp').href = `https://wa.me/55${telefoneFormatado}`;
         document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
         
         modalEditar.classList.add('ativo');
