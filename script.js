@@ -570,6 +570,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         fecharModalBtn?.addEventListener('click', () => esconderModal(modalAgendamento));
-        fecharModalEdicaoBtn?.addEventListener('click', ()(() => esconderModal(modalEdicaoAgendamento)));
+        fecharModalEdicaoBtn?.addEventListener('click', () => esconderModal(modalEdicaoAgendamento)));
     }
 });
