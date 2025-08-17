@@ -374,10 +374,10 @@ if (document.body.classList.contains('pagina-agenda')) {
         
         const telefoneFormatado = (agendamento.telefone || '').replace(/\D/g, '');
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${telefoneFormatado}`;
-
-        const enderecoFormatado = agendamento.endereco ? encodeURIComponent(agendamento.endereco) : '';
-        document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=${enderecoFormatado}`;
         
+        const enderecoFormatado = agendamento.endereco ? encodeURIComponent(agendamento.endereco) : '';
+        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/6{enderecoFormatado}`;
+
         if (agendamento.status === 'agendado') {
             tituloModalEdicao.textContent = 'Detalhes do Agendamento';
             botaoIniciar.style.display = 'block';
