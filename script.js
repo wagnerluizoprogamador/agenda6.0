@@ -129,7 +129,10 @@ if (document.body.classList.contains('pagina-agenda')) {
             cliente: cliente,
             servico: servico,
             funcionarios: funcionariosSelecionados,
-            status: 'agendado'
+            status: 'agendado',
+            // Adicionando as propriedades telefone e endereco com valores vazios para evitar o erro.
+            telefone: '',
+            endereco: ''
         };
 
         agendamentos.push(novoAgendamento);
@@ -327,7 +330,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         
         const telefoneFormatado = agendamento.telefone ? agendamento.telefone.replace(/\D/g, '') : '';
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${telefoneFormatado}`;
-        document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
+        document.getElementById('botao-maps').href = `http://maps.google.com/?q=${encodeURIComponent(agendamento.endereco)}`;
         
         if (agendamento.status === 'agendado') {
             tituloModalEdicao.textContent = 'Detalhes do Agendamento';
