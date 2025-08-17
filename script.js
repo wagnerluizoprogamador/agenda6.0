@@ -9,6 +9,14 @@ function carregarDados(chave, valorPadrao = []) {
 }
 
 // Dados de exemplo (simulando um "banco de dados" local)
+// ATENÇÃO: A estrutura dos clientes foi alterada para um array de objetos
+let clientes = carregarDados('clientes', [
+    { id: 'cli-1', nome: 'Wagner', telefone: '21987654321', endereco: 'Rua A, 123' },
+    { id: 'cli-2', nome: 'João', telefone: '21987654322', endereco: 'Av. Principal, 456' },
+    { id: 'cli-3', nome: 'Maria', telefone: '', endereco: '' },
+    { id: 'cli-4', nome: 'Pedro', telefone: '', endereco: '' }
+]);
+
 let agendamentos = carregarDados('agendamentos', [
     {
         id: 'agendamento-0800',
@@ -34,9 +42,10 @@ let agendamentos = carregarDados('agendamentos', [
         duracao: '01:30:00'
     }
 ]);
-let clientes = carregarDados('clientes', ['Wagner', 'João', 'Maria', 'Pedro']);
+
 let servicos = carregarDados('servicos', ['Montagem de 50', 'Manutenção de 100', 'Formatação', 'Instalação']);
 let funcionarios = carregarDados('funcionarios', ['Arthur', 'Beatriz', 'Carlos', 'Diana']);
+
 
 // Lógica para a página de cadastro (index.html)
 if (document.body.classList.contains('pagina-cadastro')) {
@@ -47,8 +56,15 @@ if (document.body.classList.contains('pagina-cadastro')) {
     formCliente.addEventListener('submit', (e) => {
         e.preventDefault();
         const nome = document.getElementById('nome-cliente').value;
-        if (!clientes.includes(nome)) {
-            clientes.push(nome);
+        const clienteExistente = clientes.some(c => c.nome === nome);
+        if (!clienteExistente) {
+            const novoCliente = {
+                id: `cli-${Date.now()}`,
+                nome: nome,
+                telefone: '',
+                endereco: ''
+            };
+            clientes.push(novoCliente);
             salvarDados('clientes', clientes);
             alert(`Cliente "${nome}" cadastrado com sucesso!`);
             formCliente.reset();
@@ -118,21 +134,22 @@ if (document.body.classList.contains('pagina-agenda')) {
         e.preventDefault();
         const data = document.getElementById('data-agendamento').value;
         const horario = document.getElementById('hora-agendamento').value;
-        const cliente = document.getElementById('cliente-agendamento').value;
+        const clienteNome = document.getElementById('cliente-agendamento').value;
         const servico = document.getElementById('servico-agendamento').value;
         const funcionariosSelecionados = Array.from(document.getElementById('funcionario-agendamento').selectedOptions).map(option => option.value);
+
+        const clienteSelecionado = clientes.find(c => c.nome === clienteNome);
 
         const novoAgendamento = {
             id: `agendamento-${Date.now()}`,
             data: data,
             horario: horario,
-            cliente: cliente,
+            cliente: clienteNome,
+            telefone: clienteSelecionado ? clienteSelecionado.telefone : '',
+            endereco: clienteSelecionado ? clienteSelecionado.endereco : '',
             servico: servico,
             funcionarios: funcionariosSelecionados,
-            status: 'agendado',
-            // Adicionando as propriedades telefone e endereco com valores vazios para evitar o erro.
-            telefone: '',
-            endereco: ''
+            status: 'agendado'
         };
 
         agendamentos.push(novoAgendamento);
@@ -195,16 +212,20 @@ if (document.body.classList.contains('pagina-agenda')) {
         e.preventDefault();
         const id = document.getElementById('agendamento-id').value;
         const dataHora = document.getElementById('data-hora-edicao').value;
-        const cliente = document.getElementById('cliente-edicao').value;
+        const clienteNome = document.getElementById('cliente-edicao').value;
         const servico = document.getElementById('servico-edicao').value;
         const funcionariosSelecionados = Array.from(document.getElementById('funcionario-edicao').selectedOptions).map(option => option.value);
     
         const agendamento = agendamentos.find(a => a.id === id);
         if (agendamento) {
             const novaData = new Date(dataHora);
+            const clienteSelecionado = clientes.find(c => c.nome === clienteNome);
+
             agendamento.data = novaData.toISOString().split('T')[0];
             agendamento.horario = novaData.toTimeString().substring(0, 5);
-            agendamento.cliente = cliente;
+            agendamento.cliente = clienteNome;
+            agendamento.telefone = clienteSelecionado ? clienteSelecionado.telefone : agendamento.telefone;
+            agendamento.endereco = clienteSelecionado ? clienteSelecionado.endereco : agendamento.endereco;
             agendamento.servico = servico;
             agendamento.funcionarios = funcionariosSelecionados;
             salvarDados('agendamentos', agendamentos);
@@ -231,7 +252,7 @@ if (document.body.classList.contains('pagina-agenda')) {
             selectElement.appendChild(option);
         });
     }
-
+    
     function preencherSelectsEdicao() {
         const clienteSelect = document.getElementById('cliente-edicao');
         const servicoSelect = document.getElementById('servico-edicao');
@@ -243,8 +264,8 @@ if (document.body.classList.contains('pagina-agenda')) {
 
         clientes.forEach(cliente => {
             const option = document.createElement('option');
-            option.value = cliente;
-            option.textContent = cliente;
+            option.value = cliente.nome;
+            option.textContent = cliente.nome;
             clienteSelect.appendChild(option);
         });
 
@@ -262,7 +283,7 @@ if (document.body.classList.contains('pagina-agenda')) {
             funcionarioSelect.appendChild(option);
         });
     }
-    
+
     // Funções para o timer
     function formatarTempo(segundos) {
         const horas = Math.floor(segundos / 3600);
@@ -330,7 +351,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         
         const telefoneFormatado = agendamento.telefone ? agendamento.telefone.replace(/\D/g, '') : '';
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${telefoneFormatado}`;
-        document.getElementById('botao-maps').href = `http://maps.google.com/?q=${encodeURIComponent(agendamento.endereco)}`;
+        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/4{encodeURIComponent(agendamento.endereco)}`;
         
         if (agendamento.status === 'agendado') {
             tituloModalEdicao.textContent = 'Detalhes do Agendamento';
@@ -406,7 +427,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         modalAgendamento.classList.add('ativo');
         document.getElementById('data-agendamento').value = data;
         document.getElementById('hora-agendamento').value = horario;
-        preencherSelects('cliente-agendamento', clientes);
+        preencherSelects('cliente-agendamento', clientes.map(c => c.nome));
         preencherSelects('servico-agendamento', servicos);
         preencherSelects('funcionario-agendamento', funcionarios);
     }
@@ -491,10 +512,87 @@ if (document.body.classList.contains('pagina-agenda')) {
         }
     }
 
+    // Lógica para a página de clientes (clientes.html)
+    if (document.body.classList.contains('pagina-clientes')) {
+        const tabelaClientesBody = document.querySelector('#tabela-clientes tbody');
+        const modalEditarCliente = document.getElementById('modal-editar-cliente');
+        const fecharModalClienteBtn = document.getElementById('fechar-modal-cliente');
+        const formEditarCliente = document.getElementById('form-editar-cliente');
+
+        function renderizarClientes() {
+            tabelaClientesBody.innerHTML = '';
+            clientes.forEach(cliente => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${cliente.nome}</td>
+                    <td>${cliente.telefone || 'N/A'}</td>
+                    <td>${cliente.endereco || 'N/A'}</td>
+                    <td>
+                        <button class="btn-editar" data-id="${cliente.id}">Editar</button>
+                        <button class="btn-excluir" data-id="${cliente.id}">Excluir</button>
+                    </td>
+                `;
+                tabelaClientesBody.appendChild(tr);
+            });
+
+            // Adiciona event listeners para os botões de editar e excluir
+            document.querySelectorAll('.btn-editar').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    const clienteParaEditar = clientes.find(c => c.id === id);
+                    if (clienteParaEditar) {
+                        document.getElementById('cliente-id').value = clienteParaEditar.id;
+                        document.getElementById('nome-cliente-edicao').value = clienteParaEditar.nome;
+                        document.getElementById('telefone-cliente-edicao').value = clienteParaEditar.telefone;
+                        document.getElementById('endereco-cliente-edicao').value = clienteParaEditar.endereco;
+                        modalEditarCliente.classList.add('ativo');
+                    }
+                });
+            });
+
+            document.querySelectorAll('.btn-excluir').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    if (confirm('Tem certeza que deseja excluir este cliente?')) {
+                        clientes = clientes.filter(c => c.id !== id);
+                        salvarDados('clientes', clientes);
+                        renderizarClientes();
+                    }
+                });
+            });
+        }
+        
+        formEditarCliente.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('cliente-id').value;
+            const nome = document.getElementById('nome-cliente-edicao').value;
+            const telefone = document.getElementById('telefone-cliente-edicao').value;
+            const endereco = document.getElementById('endereco-cliente-edicao').value;
+            
+            const clienteParaAtualizar = clientes.find(c => c.id === id);
+            if (clienteParaAtualizar) {
+                clienteParaAtualizar.nome = nome;
+                clienteParaAtualizar.telefone = telefone;
+                clienteParaAtualizar.endereco = endereco;
+                salvarDados('clientes', clientes);
+                renderizarClientes();
+                modalEditarCliente.classList.remove('ativo');
+                alert('Cliente atualizado com sucesso!');
+            }
+        });
+
+        fecharModalClienteBtn.addEventListener('click', () => {
+            modalEditarCliente.classList.remove('ativo');
+        });
+
+        renderizarClientes();
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         if (document.body.classList.contains('pagina-agenda')) {
             criarNavegacaoSemanal();
             criarAgendaDiaria(dataAtual);
         }
     });
+
 }
