@@ -1,575 +1,409 @@
-// Importa as bibliotecas do Firebase como módulos
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+// Funções para salvar e carregar dados do localStorage
+function salvarDados(chave, dados) {
+    localStorage.setItem(chave, JSON.stringify(dados));
+}
 
-// Configuração do Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyAqHg12C8aVXy_B7q5HZVPfZfEuzBQ5N1I",
-    authDomain: "agenda6-42c28.firebaseapp.com",
-    projectId: "agenda6-42c28",
-    storageBucket: "agenda6-42c28.firebasestorage.app",
-    messagingSenderId: "743866426484",
-    appId: "1:743866426484:web:4a7557e2fd31b671ff1d21",
-    measurementId: "G-7FC4DPM35L"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+function carregarDados(chave, valorPadrao = []) {
+    const dados = localStorage.getItem(chave);
+    return dados ? JSON.parse(dados) : valorPadrao;
+}
 
-// Inicia a lógica da aplicação após o DOM e o Firebase estarem prontos
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log("DOM totalmente carregado. Tentando renderizar a agenda...");
+// Dados de exemplo (simulando um "banco de dados" local)
+let agendamentos = carregarDados('agendamentos', [
+    {
+        id: 'agendamento-0800',
+        data: '2025-08-15', // Exemplo com data real para testar
+        horario: '08:00',
+        cliente: 'Wagner',
+        telefone: '21987654321',
+        endereco: 'Rua Exemplo, 123, Rio de Janeiro',
+        servico: 'Montagem de 50',
+        funcionarios: ['Arthur'],
+        status: 'agendado'
+    },
+    {
+        id: 'agendamento-1000',
+        data: '2025-08-15',
+        horario: '10:00',
+        cliente: 'João',
+        telefone: '21987654322',
+        endereco: 'Av. Principal, 456, Rio de Janeiro',
+        servico: 'Manutenção de 100',
+        funcionarios: ['Arthur'],
+        status: 'finalizado',
+        duracao: '01:30:00'
+    }
+]);
+let clientes = carregarDados('clientes', ['Wagner', 'João', 'Maria', 'Pedro']);
+let servicos = carregarDados('servicos', ['Montagem de 50', 'Manutenção de 100', 'Formatação', 'Instalação']);
+let funcionarios = carregarDados('funcionarios', ['Arthur', 'Beatriz', 'Carlos', 'Diana']);
 
-    // Referências do DOM
+// Lógica para a página de cadastro (index.html)
+if (document.body.classList.contains('pagina-cadastro')) {
+    const formCliente = document.getElementById('form-cadastro-cliente');
+    const formServico = document.getElementById('form-cadastro-servico');
+    const formFuncionario = document.getElementById('form-cadastro-funcionario');
+
+    formCliente.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome-cliente').value;
+        if (!clientes.includes(nome)) {
+            clientes.push(nome);
+            salvarDados('clientes', clientes);
+            alert(`Cliente "${nome}" cadastrado com sucesso!`);
+            formCliente.reset();
+        } else {
+            alert(`Cliente "${nome}" já existe.`);
+        }
+    });
+
+    formServico.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome-servico').value;
+        if (!servicos.includes(nome)) {
+            servicos.push(nome);
+            salvarDados('servicos', servicos);
+            alert(`Serviço "${nome}" cadastrado com sucesso!`);
+            formServico.reset();
+        } else {
+            alert(`Serviço "${nome}" já existe.`);
+        }
+    });
+
+    formFuncionario.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome-funcionario').value;
+        if (!funcionarios.includes(nome)) {
+            funcionarios.push(nome);
+            salvarDados('funcionarios', funcionarios);
+            alert(`Funcionário "${nome}" cadastrado com sucesso!`);
+            formFuncionario.reset();
+        } else {
+            alert(`Funcionário "${nome}" já existe.`);
+        }
+    });
+}
+
+// Lógica para a página de agenda (agenda.html)
+if (document.body.classList.contains('pagina-agenda')) {
     const formNovoAgendamento = document.getElementById('form-novo-agendamento');
-    const formCadastroCliente = document.getElementById('form-cadastro-cliente');
-    const formCadastroServico = document.getElementById('form-cadastro-servico');
-    const formCadastroFuncionario = document.getElementById('form-cadastro-funcionario');
-    const listaClientes = document.getElementById('lista-clientes');
-    const listaServicos = document.getElementById('lista-servicos');
-    const listaFuncionarios = document.getElementById('lista-funcionarios');
-    const calendarioDiario = document.getElementById('calendario-diario');
-    const diasDaSemanaDiv = document.getElementById('dias-da-semana');
-    const dataSelecionadaH2 = document.getElementById('data-selecionada');
     const modalAgendamento = document.getElementById('modal-agendamento');
-    const fecharModalBtn = document.getElementById('fechar-modal');
-    const dataAgendamentoInput = document.getElementById('data-agendamento');
-    const horaAgendamentoInput = document.getElementById('hora-agendamento');
-    const clienteAgendamentoSelect = document.getElementById('cliente-agendamento');
-    const servicoAgendamentoSelect = document.getElementById('servico-agendamento');
-    const funcionarioAgendamentoSelect = document.getElementById('funcionario-agendamento');
-    const telefoneAgendamentoInput = document.getElementById('telefone-agendamento');
-    const enderecoAgendamentoInput = document.getElementById('endereco-agendamento');
-
-    const modalEdicaoAgendamento = document.getElementById('modal-editar-agendamento');
+    const fecharNovoAgendamentoBtn = document.getElementById('fechar-modal');
+    const modalEditar = document.getElementById('modal-editar-agendamento');
     const fecharModalEdicaoBtn = document.getElementById('fechar-modal-edicao');
-    const detalhesClienteSpan = document.getElementById('detalhes-cliente');
-    const detalhesTelefoneSpan = document.getElementById('detalhes-telefone');
-    const detalhesEnderecoSpan = document.getElementById('detalhes-endereco');
-    const detalhesServicoSpan = document.getElementById('detalhes-servico');
-    const detalhesFuncionariosSpan = document.getElementById('detalhes-funcionarios');
-    const detalhesStatusSpan = document.getElementById('detalhes-status');
-    const detalhesDuracao = document.getElementById('detalhes-duracao');
-    const valorDuracao = document.getElementById('valor-duracao');
-    const timerServico = document.getElementById('timer-servico');
-    const valorTimer = document.getElementById('valor-timer');
-    const botaoIniciar = document.getElementById('botao-iniciar');
-    const botaoFinalizar = document.getElementById('botao-finalizar');
-    const blocoFinalizar = document.getElementById('bloco-finalizar');
-    const fotoServicoInput = document.getElementById('foto-servico');
-    const botaoWhatsapp = document.getElementById('botao-whatsapp');
-    const botaoMaps = document.getElementById('botao-maps');
-    const botoesEdicao = document.getElementById('botoes-edicao');
     const botaoAlterarDados = document.getElementById('botao-alterar-dados');
-    const botaoReverter = document.getElementById('botao-reverter');
-    const botaoCancelar = document.getElementById('botao-cancelar');
     const formAlterarDados = document.getElementById('form-alterar-dados');
-    const agendamentoIdInput = document.getElementById('agendamento-id');
-    const dataHoraEdicaoInput = document.getElementById('data-hora-edicao');
-    const clienteEdicaoSelect = document.getElementById('cliente-edicao');
-    const servicoEdicaoSelect = document.getElementById('servico-edicao');
-    const funcionarioEdicaoSelect = document.getElementById('funcionario-edicao');
+    const detalhesAgendamento = document.getElementById('detalhes-agendamento');
+    const botoesEdicao = document.getElementById('botoes-edicao');
     const botaoVoltar = document.getElementById('botao-voltar');
+    const formFluxo = document.getElementById('form-fluxo');
+    const tituloModalEdicao = document.getElementById('titulo-modal-edicao');
+    const detalhesDuracao = document.getElementById('detalhes-duracao');
+    const botaoCancelar = document.getElementById('botao-cancelar');
+    const botaoReverter = document.getElementById('botao-reverter');
+    const dataSelecionadaH2 = document.getElementById('data-selecionada');
+    const diasDaSemanaDiv = document.getElementById('dias-da-semana');
 
-    let agendamentoAtual = null;
-    let timerInterval = null;
+    let agendamentoSelecionadoId = null;
+    let dataAtual = new Date();
 
-    // --- OTIMIZAÇÃO: Carregamento inicial de dados ---
-    let clientesCache = [];
-    let servicosCache = [];
-    let funcionariosCache = [];
+    formNovoAgendamento.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const data = document.getElementById('data-agendamento').value;
+        const horario = document.getElementById('hora-agendamento').value;
+        const cliente = document.getElementById('cliente-agendamento').value;
+        const servico = document.getElementById('servico-agendamento').value;
+        const funcionariosSelecionados = Array.from(document.getElementById('funcionario-agendamento').selectedOptions).map(option => option.value);
 
-    const carregarDadosIniciais = async () => {
-        if (window.location.pathname.includes('agenda.html')) {
-            console.log("Pré-carregando dados para a agenda...");
-            clientesCache = await buscarItens('clientes');
-            servicosCache = await buscarItens('servicos');
-            funcionariosCache = await buscarItens('funcionarios');
+        const novoAgendamento = {
+            id: `agendamento-${Date.now()}`,
+            data: data,
+            horario: horario,
+            cliente: cliente,
+            servico: servico,
+            funcionarios: funcionariosSelecionados,
+            status: 'agendado'
+        };
+
+        agendamentos.push(novoAgendamento);
+        salvarDados('agendamentos', agendamentos);
+        criarAgendaDiaria(dataAtual);
+        modalAgendamento.classList.remove('ativo');
+        alert('Agendamento salvo com sucesso!');
+        formNovoAgendamento.reset();
+    });
+
+    fecharNovoAgendamentoBtn.addEventListener('click', () => {
+        modalAgendamento.classList.remove('ativo');
+    });
+
+    fecharModalEdicaoBtn.addEventListener('click', () => {
+        modalEditar.classList.remove('ativo');
+    });
+
+    botaoAlterarDados.addEventListener('click', () => {
+        detalhesAgendamento.style.display = 'none';
+        formFluxo.style.display = 'none';
+        formAlterarDados.style.display = 'block';
+        botoesEdicao.style.display = 'none';
+        tituloModalEdicao.textContent = 'Editar Atendimento';
+    });
+
+    botaoVoltar.addEventListener('click', () => {
+        detalhesAgendamento.style.display = 'block';
+        formFluxo.style.display = 'block';
+        formAlterarDados.style.display = 'none';
+        botoesEdicao.style.display = 'flex';
+        tituloModalEdicao.textContent = 'Detalhes do Agendamento';
+    });
+
+    botaoCancelar.addEventListener('click', () => {
+        if (agendamentoSelecionadoId && confirm('Tem certeza que deseja cancelar este agendamento?')) {
+            agendamentos = agendamentos.filter(agendamento => agendamento.id !== agendamentoSelecionadoId);
+            salvarDados('agendamentos', agendamentos);
+            criarAgendaDiaria(dataAtual);
+            alert('Agendamento cancelado com sucesso!');
+            modalEditar.classList.remove('ativo');
         }
-    };
+    });
 
-    // --- Funções de interação com o Firebase ---
-
-    // Função genérica para salvar um novo item
-    const salvarItem = async (colecao, dados) => {
-        try {
-            const docRef = await addDoc(collection(db, colecao), {
-                ...dados,
-                criadoEm: serverTimestamp()
-            });
-            console.log("Documento escrito com ID: ", docRef.id);
-            return docRef;
-        } catch (e) {
-            console.error("Erro ao adicionar documento: ", e);
-            alert("Erro ao salvar. Verifique o console para mais detalhes.");
+    botaoReverter.addEventListener('click', () => {
+        if (agendamentoSelecionadoId && confirm('Tem certeza que deseja reverter este agendamento para o status "Agendado"?')) {
+            const agendamento = agendamentos.find(a => a.id === agendamentoSelecionadoId);
+            if (agendamento) {
+                agendamento.status = 'agendado';
+                agendamento.duracao = '';
+                salvarDados('agendamentos', agendamentos);
+                criarAgendaDiaria(dataAtual);
+                alert('Agendamento revertido com sucesso!');
+                modalEditar.classList.remove('ativo');
+            }
         }
-    };
+    });
 
-    // Função genérica para buscar todos os itens de uma coleção
-    const buscarItens = async (colecao) => {
-        const querySnapshot = await getDocs(collection(db, colecao));
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    };
-
-    // Função para renderizar listas
-    const renderizarLista = (listaElemento, itens) => {
-        if (!listaElemento) return;
-        listaElemento.innerHTML = '';
-        if (itens.length === 0) {
-            listaElemento.innerHTML = '<p>Nenhum item cadastrado.</p>';
-            return;
-        }
-        itens.forEach(item => {
-            const li = document.createElement('li');
-            li.textContent = item.nome;
-            li.dataset.id = item.id;
-            li.dataset.nome = item.nome;
-            li.classList.add('item-lista');
-            listaElemento.appendChild(li);
-        });
-    };
-
-    // Função para popular selects
-    const popularSelect = (selectElemento, itens) => {
-        selectElemento.innerHTML = '<option value="">Selecione...</option>';
-        itens.forEach(item => {
-            const option = document.createElement('option');
-            option.value = item.nome;
-            option.textContent = item.nome;
-            selectElemento.appendChild(option);
-        });
-    };
-
-    // Função para popular selects de funcionários com múltiplos
-    const popularSelectFuncionarios = (selectElemento, itens) => {
-        selectElemento.innerHTML = '';
-        itens.forEach(item => {
-            const option = document.createElement('option');
-            option.value = item.nome;
-            option.textContent = item.nome;
-            selectElemento.appendChild(option);
-        });
-    };
+    formAlterarDados.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('agendamento-id').value;
+        const dataHora = document.getElementById('data-hora-edicao').value;
+        const cliente = document.getElementById('cliente-edicao').value;
+        const servico = document.getElementById('servico-edicao').value;
+        const funcionariosSelecionados = Array.from(document.getElementById('funcionario-edicao').selectedOptions).map(option => option.value);
     
-    // --- Funções de renderização da Agenda ---
-
-    const renderizarCalendarioDiario = async (data) => {
-        console.log(`Renderizando calendário para a data: ${data}`);
-        if (!calendarioDiario) {
-            console.error("Erro: Elemento de calendário não disponível.");
-            return;
+        const agendamento = agendamentos.find(a => a.id === id);
+        if (agendamento) {
+            const novaData = new Date(dataHora);
+            agendamento.data = novaData.toISOString().split('T')[0];
+            agendamento.horario = novaData.toTimeString().substring(0, 5);
+            agendamento.cliente = cliente;
+            agendamento.servico = servico;
+            agendamento.funcionarios = funcionariosSelecionados;
+            salvarDados('agendamentos', agendamentos);
         }
+    
+        criarAgendaDiaria(dataAtual);
+        alert('Agendamento alterado com sucesso!');
+        modalEditar.classList.remove('ativo');
+    });
 
-        const dataFormatada = formatarDataParaFirestore(data);
-        dataSelecionadaH2.textContent = `Agendamentos para ${formatarDataParaExibicao(data)}`;
-
-        calendarioDiario.innerHTML = '';
-        const q = query(collection(db, 'agendamentos'), where('data', '==', dataFormatada));
-        const snapshot = await getDocs(q);
-        const agendamentos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        const horarios = gerarHorarios();
-
-        horarios.forEach(hora => {
-            const agendamentosNoHorario = agendamentos.filter(a => a.hora === hora);
-            const slotElement = document.createElement('div');
-            slotElement.classList.add('horario-slot');
-            slotElement.dataset.hora = hora;
-            slotElement.dataset.data = dataFormatada;
-
-            let htmlConteudo = `<div class="horario">${hora}</div><div class="agendamento-info">`;
-
-            if (agendamentosNoHorario.length > 0) {
-                agendamentosNoHorario.forEach(agendamento => {
-                    const statusClass = agendamento.status === 'agendado' ? 'agendado' : agendamento.status === 'iniciado' ? 'iniciado' : 'finalizado';
-                    htmlConteudo += `
-                        <div class="agendamento-card ${statusClass}" data-id="${agendamento.id}">
-                            <span>${hora} - ${agendamento.servico}</span>
-                            <span>Cliente: ${agendamento.cliente}</span>
-                            <span>Funcionário(s): ${agendamento.funcionarios.join(', ')}</span>
-                        </div>
-                    `;
-                });
-            } else {
-                htmlConteudo += `<span>Livre</span>`;
-            }
-
-            htmlConteudo += `</div>`;
-            slotElement.innerHTML = htmlConteudo;
-            calendarioDiario.appendChild(slotElement);
+    function preencherSelects(selectId, options) {
+        const selectElement = document.getElementById(selectId);
+        selectElement.innerHTML = '';
+        if (selectId.includes('agendamento')) {
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = `Selecione um ${selectId.replace('-agendamento', '')}`;
+            selectElement.appendChild(defaultOption);
+        }
+        options.forEach(optionText => {
+            const option = document.createElement('option');
+            option.value = optionText;
+            option.textContent = optionText;
+            selectElement.appendChild(option);
         });
-        console.log("Calendário diário renderizado.");
-    };
+    }
 
-    const renderizarDiasDaSemana = (data) => {
-        console.log(`Renderizando dias da semana para a data: ${data}`);
-        if (!diasDaSemanaDiv) {
-            console.error("Erro: Elemento de dias da semana não disponível.");
-            return;
+    function preencherSelectsEdicao() {
+        const clienteSelect = document.getElementById('cliente-edicao');
+        const servicoSelect = document.getElementById('servico-edicao');
+        const funcionarioSelect = document.getElementById('funcionario-edicao');
+
+        clienteSelect.innerHTML = '';
+        servicoSelect.innerHTML = '';
+        funcionarioSelect.innerHTML = '';
+
+        clientes.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente;
+            option.textContent = cliente;
+            clienteSelect.appendChild(option);
+        });
+
+        servicos.forEach(servico => {
+            const option = document.createElement('option');
+            option.value = servico;
+            option.textContent = servico;
+            servicoSelect.appendChild(option);
+        });
+
+        funcionarios.forEach(funcionario => {
+            const option = document.createElement('option');
+            option.value = funcionario;
+            option.textContent = funcionario;
+            funcionarioSelect.appendChild(option);
+        });
+    }
+
+    function abrirModalComDetalhes(agendamento) {
+        agendamentoSelecionadoId = agendamento.id;
+        console.log("Status do agendamento:", agendamento.status); // Adicionado para diagnóstico
+
+        formAlterarDados.style.display = 'none';
+        detalhesAgendamento.style.display = 'block';
+        botoesEdicao.style.display = 'flex';
+
+        document.getElementById('detalhes-cliente').textContent = agendamento.cliente;
+        document.getElementById('detalhes-telefone').textContent = agendamento.telefone;
+        document.getElementById('detalhes-endereco').textContent = agendamento.endereco;
+        document.getElementById('detalhes-servico').textContent = agendamento.servico;
+        document.getElementById('detalhes-funcionarios').textContent = agendamento.funcionarios.join(', ');
+        document.getElementById('detalhes-status').textContent = agendamento.status;
+        
+        preencherSelectsEdicao();
+        document.getElementById('agendamento-id').value = agendamento.id;
+        document.getElementById('cliente-edicao').value = agendamento.cliente;
+        document.getElementById('servico-edicao').value = agendamento.servico;
+
+        const funcionariosSelecionados = Array.from(document.getElementById('funcionario-edicao').options);
+        funcionariosSelecionados.forEach(option => {
+            if (agendamento.funcionarios.includes(option.value)) {
+                option.selected = true;
+            } else {
+                option.selected = false;
+            }
+        });
+
+        const blocoFinalizar = document.getElementById('bloco-finalizar');
+        const botaoIniciar = document.getElementById('botao-iniciar');
+
+        document.getElementById('botao-alterar-dados').style.display = 'block';
+        document.getElementById('botao-cancelar').style.display = 'block';
+
+        if (agendamento.status === 'agendado') {
+            tituloModalEdicao.textContent = 'Detalhes do Agendamento';
+            botaoIniciar.style.display = 'block';
+            blocoFinalizar.style.display = 'none';
+            detalhesDuracao.style.display = 'none';
+            formFluxo.style.display = 'block';
+            botaoReverter.style.display = 'none';
+        } else if (agendamento.status === 'finalizado') {
+            tituloModalEdicao.textContent = 'Serviço Finalizado';
+            botaoIniciar.style.display = 'none';
+            blocoFinalizar.style.display = 'none';
+            detalhesDuracao.style.display = 'block';
+            document.getElementById('valor-duracao').textContent = agendamento.duracao;
+            formFluxo.style.display = 'none';
+            botaoReverter.style.display = 'block';
         }
 
-        const hoje = new Date();
-        const diaDaSemana = data.getDay();
-        const inicioSemana = new Date(data);
-        inicioSemana.setDate(data.getDate() - diaDaSemana);
+        document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
+        document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
+        
+        modalEditar.classList.add('ativo');
+    }
 
-        diasDaSemanaDiv.innerHTML = '';
+    function abrirModalNovoAgendamento(horario, data) {
+        modalAgendamento.classList.add('ativo');
+        document.getElementById('data-agendamento').value = data;
+        document.getElementById('hora-agendamento').value = horario;
+        preencherSelects('cliente-agendamento', clientes);
+        preencherSelects('servico-agendamento', servicos);
+        preencherSelects('funcionario-agendamento', funcionarios);
+    }
 
-        for (let i = 0; i < 7; i++) {
-            const dia = new Date(inicioSemana);
-            dia.setDate(inicioSemana.getDate() + i);
+    function criarAgendaDiaria(data) {
+        const calendarioDiario = document.getElementById('calendario-diario');
+        calendarioDiario.innerHTML = '';
 
-            const diaElemento = document.createElement('div');
-            diaElemento.classList.add('dia-semana');
-            if (dia.getDate() === hoje.getDate() && dia.getMonth() === hoje.getMonth() && dia.getFullYear() === hoje.getFullYear()) {
-                diaElemento.classList.add('hoje');
-            }
-            if (dia.getDate() === data.getDate() && dia.getMonth() === data.getMonth() && dia.getFullYear() === data.getFullYear()) {
-                diaElemento.classList.add('ativo');
-            }
-
-            const nomeDia = dia.toLocaleDateString('pt-BR', { weekday: 'short' });
-            const numeroDia = dia.getDate();
-            const mes = dia.getMonth() + 1;
-            
-            diaElemento.innerHTML = `<span>${nomeDia}</span><br><span>${numeroDia}</span>`;
-            diaElemento.dataset.data = `${dia.getFullYear()}-${String(mes).padStart(2, '0')}-${String(numeroDia).padStart(2, '0')}`;
-            diasDaSemanaDiv.appendChild(diaElemento);
-        }
-        console.log("Dias da semana renderizados.");
-    };
-
-    // --- Funções Auxiliares ---
-
-    const gerarHorarios = () => {
         const horarios = [];
         for (let i = 0; i < 24; i++) {
-            for (let j = 0; j < 60; j += 30) {
-                const hora = String(i).padStart(2, '0');
-                const minuto = String(j).padStart(2, '0');
-                horarios.push(`${hora}:${minuto}`);
-            }
+            horarios.push(`${String(i).padStart(2, '0')}:00`);
+            horarios.push(`${String(i).padStart(2, '0')}:30`);
         }
-        return horarios;
-    };
+        
+        const dataFormatada = data.toISOString().split('T')[0];
 
-    const formatarDataParaFirestore = (data) => {
-        const ano = data.getFullYear();
-        const mes = String(data.getMonth() + 1).padStart(2, '0');
-        const dia = String(data.getDate()).padStart(2, '0');
-        return `${ano}-${mes}-${dia}`;
-    };
+        horarios.forEach(horario => {
+            const horarioDiv = document.createElement('div');
+            horarioDiv.classList.add('horario');
+            horarioDiv.textContent = horario;
+            calendarioDiario.appendChild(horarioDiv);
 
-    const formatarDataParaExibicao = (data) => {
-        return data.toLocaleDateString('pt-BR', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        });
-    };
+            const agendamentoDoHorario = agendamentos.find(a => a.horario === horario && a.data === dataFormatada);
+            
+            const agendamentoDiv = document.createElement('div');
+            agendamentoDiv.classList.add('bloco-agendamento');
 
-    const segundosParaTempo = (segundos) => {
-        const h = Math.floor(segundos / 3600);
-        const m = Math.floor((segundos % 3600) / 60);
-        const s = segundos % 60;
-        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    };
-
-    const esconderModal = (modal) => {
-        modal.classList.remove('visivel');
-        agendamentoAtual = null;
-        if (timerInterval) {
-            clearInterval(timerInterval);
-            timerInterval = null;
-        }
-    };
-
-    // --- Lógica da Aplicação (Event Listeners) ---
-
-    // Rotação de Páginas
-    if (window.location.pathname.includes('index.html')) {
-        formCadastroCliente?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const nome = document.getElementById('nome-cliente').value;
-            await salvarItem('clientes', { nome });
-            e.target.reset();
-            alert('Cliente cadastrado com sucesso!');
-        });
-
-        formCadastroServico?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const nome = document.getElementById('nome-servico').value;
-            await salvarItem('servicos', { nome });
-            e.target.reset();
-            alert('Serviço cadastrado com sucesso!');
-        });
-
-        formCadastroFuncionario?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const nome = document.getElementById('nome-funcionario').value;
-            await salvarItem('funcionarios', { nome });
-            e.target.reset();
-            alert('Funcionário cadastrado com sucesso!');
-        });
-    }
-
-    if (window.location.pathname.includes('clientes.html')) {
-        const carregarClientes = async () => {
-            const clientes = await buscarItens('clientes');
-            renderizarLista(listaClientes, clientes);
-        };
-        carregarClientes();
-    }
-
-    if (window.location.pathname.includes('servicos.html')) {
-        const carregarServicos = async () => {
-            const servicos = await buscarItens('servicos');
-            renderizarLista(listaServicos, servicos);
-        };
-        carregarServicos();
-    }
-
-    if (window.location.pathname.includes('funcionarios.html')) {
-        const carregarFuncionarios = async () => {
-            const funcionarios = await buscarItens('funcionarios');
-            renderizarLista(listaFuncionarios, funcionarios);
-        };
-        carregarFuncionarios();
-    }
-
-    if (window.location.pathname.includes('agenda.html')) {
-        await carregarDadosIniciais(); // Chama a função otimizada
-        let dataAtual = new Date();
-        renderizarDiasDaSemana(dataAtual);
-        renderizarCalendarioDiario(dataAtual);
-
-        diasDaSemanaDiv.addEventListener('click', (e) => {
-            console.log('Evento de clique detectado na navegação semanal.');
-            const diaElemento = e.target.closest('.dia-semana');
-            if (diaElemento) {
-                console.log('Clique em um dia da semana válido. Data:', diaElemento.dataset.data);
-                const dataString = diaElemento.dataset.data;
-                const [ano, mes, dia] = dataString.split('-').map(Number);
-                dataAtual = new Date(ano, mes - 1, dia);
-
-                document.querySelectorAll('.dia-semana').forEach(d => d.classList.remove('ativo'));
-                diaElemento.classList.add('ativo');
-
-                renderizarCalendarioDiario(dataAtual);
+            if (agendamentoDoHorario) {
+                agendamentoDiv.classList.add('agendado');
+                agendamentoDiv.innerHTML = `
+                    <span>${agendamentoDoHorario.horario} - ${agendamentoDoHorario.servico}</span>
+                    <span>Cliente: ${agendamentoDoHorario.cliente}</span>
+                    <span>Funcionário(s): ${agendamentoDoHorario.funcionarios.join(', ')}</span>
+                `;
+                agendamentoDiv.addEventListener('click', () => {
+                    abrirModalComDetalhes(agendamentoDoHorario);
+                });
             } else {
-                console.log('Clique não foi em um dia da semana.');
-            }
-        });
-
-        // Abrir modal de novo agendamento
-        calendarioDiario.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('horario-slot') || e.target.closest('.horario-slot')) {
-                const slot = e.target.closest('.horario-slot');
-                const hora = slot.dataset.hora;
-                const data = slot.dataset.data;
-
-                console.log(`Você clicou no horário ${hora} da data ${data}.`);
-
-                const q = query(collection(db, 'agendamentos'), where('data', '==', data), where('hora', '==', hora));
-                const agendamentoExistente = await getDocs(q);
-
-                if (agendamentoExistente.empty) {
-                    console.log("Nenhum agendamento encontrado no banco de dados para este horário. Prosseguindo para abrir o modal...");
-                    
-                    popularSelect(clienteAgendamentoSelect, clientesCache); // Usa os dados do cache
-                    popularSelect(servicoAgendamentoSelect, servicosCache); // Usa os dados do cache
-                    popularSelectFuncionarios(funcionarioAgendamentoSelect, funcionariosCache); // Usa os dados do cache
-
-                    dataAgendamentoInput.value = data;
-                    horaAgendamentoInput.value = hora;
-                    modalAgendamento.classList.add('visivel');
-                } else {
-                    console.log("AGENDAMENTO JÁ EXISTE NESTE HORÁRIO. Não é possível criar um novo agendamento.");
-                    agendamentoExistente.forEach(doc => {
-                        console.log("Dados do agendamento existente:", doc.id, doc.data());
-                    });
-                }
-            }
-        });
-
-        // Abrir modal de detalhes do agendamento
-        calendarioDiario.addEventListener('click', async (e) => {
-            const card = e.target.closest('.agendamento-card');
-            if (card) {
-                const agendamentoId = card.dataset.id;
-                const docRef = doc(db, 'agendamentos', agendamentoId);
-                const docSnap = await getDoc(docRef);
-                agendamentoAtual = { id: docSnap.id, ...docSnap.data() };
-                
-                detalhesClienteSpan.textContent = agendamentoAtual.cliente;
-                detalhesTelefoneSpan.textContent = agendamentoAtual.telefone;
-                detalhesEnderecoSpan.textContent = agendamentoAtual.endereco;
-                detalhesServicoSpan.textContent = agendamentoAtual.servico;
-                detalhesFuncionariosSpan.textContent = agendamentoAtual.funcionarios.join(', ');
-                detalhesStatusSpan.textContent = agendamentoAtual.status;
-
-                const status = agendamentoAtual.status;
-                botaoIniciar.style.display = status === 'agendado' ? 'block' : 'none';
-                blocoFinalizar.style.display = status === 'iniciado' ? 'block' : 'none';
-                detalhesDuracao.style.display = status === 'finalizado' ? 'block' : 'none';
-                timerServico.style.display = status === 'iniciado' ? 'block' : 'none';
-                
-                if (status === 'iniciado') {
-                    const inicio = agendamentoAtual.inicio.toDate();
-                    timerInterval = setInterval(() => {
-                        const segundosDecorridos = Math.floor((new Date() - inicio) / 1000);
-                        valorTimer.textContent = segundosParaTempo(segundosDecorridos);
-                    }, 1000);
-                }
-
-                if (status === 'finalizado') {
-                    const duracaoSegundos = agendamentoAtual.duracao || 0;
-                    valorDuracao.textContent = segundosParaTempo(duracaoSegundos);
-                }
-
-                // Ações rápidas
-                const telefone = agendamentoAtual.telefone.replace(/\D/g, '');
-                botaoWhatsapp.href = `https://api.whatsapp.com/send?phone=55${telefone}`;
-                botaoMaps.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(agendamentoAtual.endereco)}`;
-                
-                // Botões de edição
-                botaoReverter.style.display = status === 'finalizado' ? 'block' : 'none';
-                formAlterarDados.style.display = 'none';
-                botoesEdicao.style.display = 'flex';
-
-                modalEdicaoAgendamento.classList.add('visivel');
-            }
-        });
-
-        // Enviar novo agendamento
-        formNovoAgendamento?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const agendamento = {
-                data: dataAgendamentoInput.value,
-                hora: horaAgendamentoInput.value,
-                cliente: clienteAgendamentoSelect.value,
-                telefone: telefoneAgendamentoInput.value,
-                endereco: enderecoAgendamentoInput.value,
-                servico: servicoAgendamentoSelect.value,
-                funcionarios: Array.from(funcionarioAgendamentoSelect.selectedOptions).map(opt => opt.value),
-                status: 'agendado'
-            };
-
-            await salvarItem('agendamentos', agendamento);
-            esconderModal(modalAgendamento);
-            renderizarCalendarioDiario(dataAtual);
-            alert('Agendamento salvo com sucesso!');
-        });
-        
-        // --- Eventos do modal de edição/detalhes ---
-        
-        // Botão Iniciar Serviço
-        botaoIniciar?.addEventListener('click', async () => {
-            if (agendamentoAtual) {
-                const docRef = doc(db, 'agendamentos', agendamentoAtual.id);
-                await updateDoc(docRef, {
-                    status: 'iniciado',
-                    inicio: serverTimestamp()
+                agendamentoDiv.innerHTML = `<span>${horario} - Livre</span>`;
+                agendamentoDiv.addEventListener('click', () => {
+                    abrirModalNovoAgendamento(horario, dataFormatada);
                 });
-                esconderModal(modalEdicaoAgendamento);
-                renderizarCalendarioDiario(dataAtual);
             }
+            calendarioDiario.appendChild(agendamentoDiv);
         });
-        
-        // Botão Finalizar Serviço
-        botaoFinalizar?.addEventListener('click', async () => {
-            if (agendamentoAtual) {
-                const inicio = agendamentoAtual.inicio.toDate();
-                const duracao = Math.floor((new Date() - inicio) / 1000);
-                const docRef = doc(db, 'agendamentos', agendamentoAtual.id);
-                await updateDoc(docRef, {
-                    status: 'finalizado',
-                    duracao: duracao
-                });
-                esconderModal(modalEdicaoAgendamento);
-                renderizarCalendarioDiario(dataAtual);
-            }
-        });
-        
-        // Botão Reverter
-        botaoReverter?.addEventListener('click', async () => {
-            if (agendamentoAtual) {
-                const docRef = doc(db, 'agendamentos', agendamentoAtual.id);
-                await updateDoc(docRef, {
-                    status: 'agendado',
-                    duracao: null,
-                    inicio: null
-                });
-                esconderModal(modalEdicaoAgendamento);
-                renderizarCalendarioDiario(dataAtual);
-            }
-        });
-        
-        // Botão Cancelar
-        botaoCancelar?.addEventListener('click', async () => {
-            if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
-                if (agendamentoAtual) {
-                    const docRef = doc(db, 'agendamentos', agendamentoAtual.id);
-                    await deleteDoc(docRef);
-                    esconderModal(modalEdicaoAgendamento);
-                    renderizarCalendarioDiario(dataAtual);
-                }
-            }
-        });
-        
-        // Botão Alterar Dados
-        botaoAlterarDados?.addEventListener('click', async () => {
-            formAlterarDados.style.display = 'block';
-            botoesEdicao.style.display = 'none';
-
-            // Popular selects para edição
-            popularSelect(clienteEdicaoSelect, clientesCache); // Usa os dados do cache
-            popularSelect(servicoEdicaoSelect, servicosCache); // Usa os dados do cache
-            popularSelectFuncionarios(funcionarioEdicaoSelect, funcionariosCache); // Usa os dados do cache
-
-            // Preencher o formulário de edição com os dados atuais
-            agendamentoIdInput.value = agendamentoAtual.id;
-            const dataHora = new Date(`${agendamentoAtual.data}T${agendamentoAtual.hora}`);
-            dataHoraEdicaoInput.value = dataHora.toISOString().slice(0, 16);
-            clienteEdicaoSelect.value = agendamentoAtual.cliente;
-            servicoEdicaoSelect.value = agendamentoAtual.servico;
-            
-            Array.from(funcionarioEdicaoSelect.options).forEach(option => {
-                if (agendamentoAtual.funcionarios.includes(option.value)) {
-                    option.selected = true;
-                }
-            });
-        });
-
-        // Botão Voltar do formulário de edição
-        botaoVoltar?.addEventListener('click', (e) => {
-            e.preventDefault();
-            formAlterarDados.style.display = 'none';
-            botoesEdicao.style.display = 'flex';
-        });
-
-        // Salvar alterações
-        formAlterarDados?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const novaDataHora = new Date(dataHoraEdicaoInput.value);
-            const novaData = formatarDataParaFirestore(novaDataHora);
-            const novaHora = `${String(novaDataHora.getHours()).padStart(2, '0')}:${String(novaDataHora.getMinutes()).padStart(2, '0')}`;
-            
-            const dadosAtualizados = {
-                data: novaData,
-                hora: novaHora,
-                cliente: clienteEdicaoSelect.value,
-                servico: servicoEdicaoSelect.value,
-                funcionarios: Array.from(funcionarioEdicaoSelect.selectedOptions).map(opt => opt.value)
-            };
-            
-            const docRef = doc(db, 'agendamentos', agendamentoIdInput.value);
-            await updateDoc(docRef, dadosAtualizados);
-            esconderModal(modalEdicaoAgendamento);
-            renderizarCalendarioDiario(dataAtual);
-        });
-
-        fecharModalBtn?.addEventListener('click', () => esconderModal(modalAgendamento));
-     fecharModalEdicaoBtn?.addEventListener('click', () => esconderModal(modalEdicaoAgendamento));
     }
-});
+    
+    function criarNavegacaoSemanal() {
+        const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        diasDaSemanaDiv.innerHTML = '';
+        
+        const hoje = new Date();
+        const dataInicial = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - 15);
+
+        for (let i = 0; i < 30; i++) {
+            const dataDoDia = new Date(dataInicial);
+            dataDoDia.setDate(dataInicial.getDate() + i);
+            
+            const diaDiv = document.createElement('div');
+            diaDiv.classList.add('dia-semana');
+            
+            const diaSemana = dias[dataDoDia.getDay()];
+            const diaMes = dataDoDia.getDate();
+            
+            diaDiv.innerHTML = `<span>${diaSemana}</span><span>${diaMes}</span>`;
+            
+            const dataFormatada = dataDoDia.toISOString().split('T')[0];
+            const hojeFormatado = hoje.toISOString().split('T')[0];
+            
+            if (dataFormatada === hojeFormatado) {
+                diaDiv.classList.add('ativo');
+            }
+            
+            diaDiv.addEventListener('click', () => {
+                dataAtual = dataDoDia;
+                document.querySelectorAll('.dia-semana').forEach(d => d.classList.remove('ativo'));
+                diaDiv.classList.add('ativo');
+                criarAgendaDiaria(dataAtual);
+            });
+            
+            diasDaSemanaDiv.appendChild(diaDiv);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.body.classList.contains('pagina-agenda')) {
+            criarNavegacaoSemanal();
+            criarAgendaDiaria(dataAtual);
+        }
+    });
+}
