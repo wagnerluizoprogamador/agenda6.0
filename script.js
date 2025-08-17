@@ -8,19 +8,31 @@ function carregarDados(chave, valorPadrao = []) {
     return dados ? JSON.parse(dados) : valorPadrao;
 }
 
+// ATENÇÃO: Adicionado uma verificação para migrar dados antigos
+function migrarDadosClientes(clientesAntigos) {
+    if (clientesAntigos.length > 0 && typeof clientesAntigos[0] === 'string') {
+        return clientesAntigos.map((nome, index) => ({
+            id: `cli-${Date.now() + index}`,
+            nome: nome,
+            telefone: '',
+            endereco: ''
+        }));
+    }
+    return clientesAntigos;
+}
+
 // Dados de exemplo (simulando um "banco de dados" local)
-// ATENÇÃO: A estrutura dos clientes foi alterada para um array de objetos
-let clientes = carregarDados('clientes', [
+let clientes = migrarDadosClientes(carregarDados('clientes', [
     { id: 'cli-1', nome: 'Wagner', telefone: '21987654321', endereco: 'Rua A, 123' },
     { id: 'cli-2', nome: 'João', telefone: '21987654322', endereco: 'Av. Principal, 456' },
     { id: 'cli-3', nome: 'Maria', telefone: '', endereco: '' },
     { id: 'cli-4', nome: 'Pedro', telefone: '', endereco: '' }
-]);
+]));
 
 let agendamentos = carregarDados('agendamentos', [
     {
         id: 'agendamento-0800',
-        data: '2025-08-15', // Exemplo com data real para testar
+        data: '2025-08-15',
         horario: '08:00',
         cliente: 'Wagner',
         telefone: '21987654321',
@@ -351,7 +363,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         
         const telefoneFormatado = agendamento.telefone ? agendamento.telefone.replace(/\D/g, '') : '';
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${telefoneFormatado}`;
-        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/4{encodeURIComponent(agendamento.endereco)}`;
+        document.getElementById('botao-maps').href = `http://maps.google.com/?q=${encodeURIComponent(agendamento.endereco)}`;
         
         if (agendamento.status === 'agendado') {
             tituloModalEdicao.textContent = 'Detalhes do Agendamento';
@@ -594,5 +606,4 @@ if (document.body.classList.contains('pagina-agenda')) {
             criarAgendaDiaria(dataAtual);
         }
     });
-
 }
