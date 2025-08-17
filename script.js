@@ -2,6 +2,8 @@
 const db = window.db;
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM totalmente carregado.");
+    
     // Referências do DOM
     const formNovoAgendamento = document.getElementById('form-novo-agendamento');
     const formCadastroCliente = document.getElementById('form-cadastro-cliente');
@@ -122,8 +124,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Funções de renderização da Agenda ---
 
     const renderizarCalendarioDiario = async (data) => {
-        console.log(`Renderizando calendário para a data: ${data}`); // Adicionado para debug
-        if (!calendarioDiario || !db) return;
+        console.log(`Renderizando calendário para a data: ${data}`);
+        if (!calendarioDiario || !db) {
+            console.error("Erro: Elemento de calendário ou banco de dados não disponível.");
+            return;
+        }
 
         const dataFormatada = formatarDataParaFirestore(data);
         dataSelecionadaH2.textContent = `Agendamentos para ${formatarDataParaExibicao(data)}`;
@@ -164,11 +169,15 @@ document.addEventListener('DOMContentLoaded', () => {
             slotElement.innerHTML = htmlConteudo;
             calendarioDiario.appendChild(slotElement);
         });
+        console.log("Calendário diário renderizado.");
     };
 
     const renderizarDiasDaSemana = (data) => {
-        console.log(`Renderizando dias da semana para a data: ${data}`); // Adicionado para debug
-        if (!diasDaSemanaDiv) return;
+        console.log(`Renderizando dias da semana para a data: ${data}`);
+        if (!diasDaSemanaDiv) {
+            console.error("Erro: Elemento de dias da semana não disponível.");
+            return;
+        }
 
         const hoje = new Date();
         const diaDaSemana = data.getDay();
@@ -198,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
             diaElemento.dataset.data = `${dia.getFullYear()}-${String(mes).padStart(2, '0')}-${String(numeroDia).padStart(2, '0')}`;
             diasDaSemanaDiv.appendChild(diaElemento);
         }
+        console.log("Dias da semana renderizados.");
     };
 
     // --- Funções Auxiliares ---
@@ -305,10 +315,10 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarCalendarioDiario(dataAtual);
 
         diasDaSemanaDiv.addEventListener('click', (e) => {
-            console.log('Evento de clique detectado!'); // Adicionado para debug
-            if (e.target.closest('.dia-semana')) {
-                console.log('Clique em um dia da semana!'); // Adicionado para debug
-                const diaElemento = e.target.closest('.dia-semana');
+            console.log('Evento de clique detectado na navegação semanal.');
+            const diaElemento = e.target.closest('.dia-semana');
+            if (diaElemento) {
+                console.log('Clique em um dia da semana válido. Data:', diaElemento.dataset.data);
                 const dataString = diaElemento.dataset.data;
                 const [ano, mes, dia] = dataString.split('-').map(Number);
                 dataAtual = new Date(ano, mes - 1, dia);
@@ -317,6 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 diaElemento.classList.add('ativo');
 
                 renderizarCalendarioDiario(dataAtual);
+            } else {
+                console.log('Clique não foi em um dia da semana.');
             }
         });
 
