@@ -1,11 +1,22 @@
 // Funções para salvar e carregar dados do localStorage
 function salvarDados(chave, dados) {
-    localStorage.setItem(chave, JSON.stringify(dados));
+    try {
+        localStorage.setItem(chave, JSON.stringify(dados));
+    } catch (e) {
+        console.error(`Erro ao salvar dados na chave "${chave}":`, e);
+    }
 }
 
 function carregarDados(chave, valorPadrao = []) {
-    const dados = localStorage.getItem(chave);
-    return dados ? JSON.parse(dados) : valorPadrao;
+    try {
+        const dados = localStorage.getItem(chave);
+        if (dados) {
+            return JSON.parse(dados);
+        }
+    } catch (e) {
+        console.error(`Erro ao carregar dados da chave "${chave}":`, e);
+    }
+    return valorPadrao;
 }
 
 // ATENÇÃO: Adicionado uma verificação para migrar dados antigos
@@ -336,12 +347,12 @@ if (document.body.classList.contains('pagina-agenda')) {
         detalhesAgendamento.style.display = 'block';
         botoesEdicao.style.display = 'flex';
         
-        document.getElementById('detalhes-cliente').textContent = agendamento.cliente;
+        document.getElementById('detalhes-cliente').textContent = agendamento.cliente || 'N/A';
         document.getElementById('detalhes-telefone').textContent = agendamento.telefone || 'N/A';
         document.getElementById('detalhes-endereco').textContent = agendamento.endereco || 'N/A';
-        document.getElementById('detalhes-servico').textContent = agendamento.servico;
-        document.getElementById('detalhes-funcionarios').textContent = agendamento.funcionarios.join(', ');
-        document.getElementById('detalhes-status').textContent = agendamento.status;
+        document.getElementById('detalhes-servico').textContent = agendamento.servico || 'N/A';
+        document.getElementById('detalhes-funcionarios').textContent = (agendamento.funcionarios || []).join(', ');
+        document.getElementById('detalhes-status').textContent = agendamento.status || 'N/A';
         
         preencherSelectsEdicao();
         document.getElementById('agendamento-id').value = agendamento.id;
@@ -350,7 +361,7 @@ if (document.body.classList.contains('pagina-agenda')) {
 
         const funcionariosSelecionados = Array.from(document.getElementById('funcionario-edicao').options);
         funcionariosSelecionados.forEach(option => {
-            if (agendamento.funcionarios.includes(option.value)) {
+            if (agendamento.funcionarios && agendamento.funcionarios.includes(option.value)) {
                 option.selected = true;
             } else {
                 option.selected = false;
@@ -361,9 +372,11 @@ if (document.body.classList.contains('pagina-agenda')) {
         const botoesAcaoRapida = document.querySelector('.botoes-acao-rapida');
         botoesAcaoRapida.style.display = 'flex';
         
-        const telefoneFormatado = agendamento.telefone ? agendamento.telefone.replace(/\D/g, '') : '';
+        const telefoneFormatado = (agendamento.telefone || '').replace(/\D/g, '');
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${telefoneFormatado}`;
-        document.getElementById('botao-maps').href = `http://maps.google.com/?q=${encodeURIComponent(agendamento.endereco)}`;
+
+        const enderecoFormatado = agendamento.endereco ? encodeURIComponent(agendamento.endereco) : '';
+        document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=${enderecoFormatado}`;
         
         if (agendamento.status === 'agendado') {
             tituloModalEdicao.textContent = 'Detalhes do Agendamento';
@@ -391,7 +404,7 @@ if (document.body.classList.contains('pagina-agenda')) {
             botaoIniciar.style.display = 'none';
             blocoFinalizar.style.display = 'none';
             detalhesDuracao.style.display = 'block';
-            document.getElementById('valor-duracao').textContent = agendamento.duracao;
+            document.getElementById('valor-duracao').textContent = agendamento.duracao || 'N/A';
             formFluxo.style.display = 'none';
             botaoReverter.style.display = 'block';
             timerServico.style.display = 'none';
@@ -470,9 +483,9 @@ if (document.body.classList.contains('pagina-agenda')) {
             if (agendamentoDoHorario) {
                 agendamentoDiv.classList.add('agendado');
                 agendamentoDiv.innerHTML = `
-                    <span>${agendamentoDoHorario.horario} - ${agendamentoDoHorario.servico}</span>
-                    <span>Cliente: ${agendamentoDoHorario.cliente}</span>
-                    <span>Funcionário(s): ${agendamentoDoHorario.funcionarios.join(', ')}</span>
+                    <span>${agendamentoDoHorario.horario} - ${agendamentoDoHorario.servico || 'Serviço não informado'}</span>
+                    <span>Cliente: ${agendamentoDoHorario.cliente || 'Cliente não informado'}</span>
+                    <span>Funcionário(s): ${(agendamentoDoHorario.funcionarios || []).join(', ') || 'N/A'}</span>
                 `;
                 agendamentoDiv.addEventListener('click', () => {
                     abrirModalComDetalhes(agendamentoDoHorario);
