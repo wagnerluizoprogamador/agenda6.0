@@ -103,9 +103,16 @@ if (document.body.classList.contains('pagina-agenda')) {
     const botaoReverter = document.getElementById('botao-reverter');
     const dataSelecionadaH2 = document.getElementById('data-selecionada');
     const diasDaSemanaDiv = document.getElementById('dias-da-semana');
-
+    const botaoIniciar = document.getElementById('botao-iniciar');
+    const blocoFinalizar = document.getElementById('bloco-finalizar');
+    const botaoFinalizar = document.getElementById('botao-finalizar');
+    const valorTimer = document.getElementById('valor-timer');
+    const timerServico = document.getElementById('timer-servico');
+    
     let agendamentoSelecionadoId = null;
     let dataAtual = new Date();
+    let intervaloTimer = null;
+    let tempoInicial = 0;
 
     formNovoAgendamento.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -252,18 +259,50 @@ if (document.body.classList.contains('pagina-agenda')) {
             funcionarioSelect.appendChild(option);
         });
     }
+    
+    // Funções para o timer
+    function formatarTempo(segundos) {
+        const horas = Math.floor(segundos / 3600);
+        const minutos = Math.floor((segundos % 3600) / 60);
+        const secs = segundos % 60;
+        return [horas, minutos, secs]
+            .map(v => v < 10 ? "0" + v : v)
+            .join(":");
+    }
+
+    function iniciarTimer() {
+        if (intervaloTimer) clearInterval(intervaloTimer);
+        tempoInicial = Math.floor(Date.now() / 1000); // Tempo em segundos
+        valorTimer.textContent = "00:00:00";
+        timerServico.style.display = 'block';
+
+        intervaloTimer = setInterval(() => {
+            const tempoAtual = Math.floor(Date.now() / 1000);
+            const tempoDecorrido = tempoAtual - tempoInicial;
+            valorTimer.textContent = formatarTempo(tempoDecorrido);
+        }, 1000);
+    }
+    
+    function pararTimer() {
+        if (intervaloTimer) {
+            clearInterval(intervaloTimer);
+            intervaloTimer = null;
+        }
+        const tempoFinal = Math.floor(Date.now() / 1000);
+        const duracao = tempoFinal - tempoInicial;
+        return formatarTempo(duracao);
+    }
 
     function abrirModalComDetalhes(agendamento) {
         agendamentoSelecionadoId = agendamento.id;
-        console.log("Status do agendamento:", agendamento.status); // Adicionado para diagnóstico
 
         formAlterarDados.style.display = 'none';
         detalhesAgendamento.style.display = 'block';
         botoesEdicao.style.display = 'flex';
-
+        
         document.getElementById('detalhes-cliente').textContent = agendamento.cliente;
-        document.getElementById('detalhes-telefone').textContent = agendamento.telefone;
-        document.getElementById('detalhes-endereco').textContent = agendamento.endereco;
+        document.getElementById('detalhes-telefone').textContent = agendamento.telefone || 'N/A';
+        document.getElementById('detalhes-endereco').textContent = agendamento.endereco || 'N/A';
         document.getElementById('detalhes-servico').textContent = agendamento.servico;
         document.getElementById('detalhes-funcionarios').textContent = agendamento.funcionarios.join(', ');
         document.getElementById('detalhes-status').textContent = agendamento.status;
@@ -282,12 +321,14 @@ if (document.body.classList.contains('pagina-agenda')) {
             }
         });
 
-        const blocoFinalizar = document.getElementById('bloco-finalizar');
-        const botaoIniciar = document.getElementById('botao-iniciar');
-
-        document.getElementById('botao-alterar-dados').style.display = 'block';
-        document.getElementById('botao-cancelar').style.display = 'block';
-
+        // Garantir que os botões de ação rápida estejam visíveis
+        const botoesAcaoRapida = document.querySelector('.botoes-acao-rapida');
+        botoesAcaoRapida.style.display = 'flex';
+        
+        const telefoneFormatado = agendamento.telefone ? agendamento.telefone.replace(/\D/g, '') : '';
+        document.getElementById('botao-whatsapp').href = `https://wa.me/55${telefoneFormatado}`;
+        document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
+        
         if (agendamento.status === 'agendado') {
             tituloModalEdicao.textContent = 'Detalhes do Agendamento';
             botaoIniciar.style.display = 'block';
@@ -295,6 +336,20 @@ if (document.body.classList.contains('pagina-agenda')) {
             detalhesDuracao.style.display = 'none';
             formFluxo.style.display = 'block';
             botaoReverter.style.display = 'none';
+            timerServico.style.display = 'none';
+            botaoAlterarDados.style.display = 'block';
+            botaoCancelar.style.display = 'block';
+        } else if (agendamento.status === 'iniciado') {
+            tituloModalEdicao.textContent = 'Serviço em Andamento';
+            botaoIniciar.style.display = 'none';
+            blocoFinalizar.style.display = 'block';
+            detalhesDuracao.style.display = 'none';
+            formFluxo.style.display = 'block';
+            botaoReverter.style.display = 'none';
+            timerServico.style.display = 'block';
+            botaoAlterarDados.style.display = 'none';
+            botaoCancelar.style.display = 'none';
+            iniciarTimer(); // Reinicia o timer ao abrir o modal
         } else if (agendamento.status === 'finalizado') {
             tituloModalEdicao.textContent = 'Serviço Finalizado';
             botaoIniciar.style.display = 'none';
@@ -303,14 +358,46 @@ if (document.body.classList.contains('pagina-agenda')) {
             document.getElementById('valor-duracao').textContent = agendamento.duracao;
             formFluxo.style.display = 'none';
             botaoReverter.style.display = 'block';
+            timerServico.style.display = 'none';
+            botaoAlterarDados.style.display = 'none';
+            botaoCancelar.style.display = 'none';
         }
 
-      const telefoneFormatado = agendamento.telefone ? agendamento.telefone.replace(/\D/g, '') : '';
-document.getElementById('botao-whatsapp').href = `https://wa.me/55${telefoneFormatado}`;
-        document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
-        
         modalEditar.classList.add('ativo');
     }
+
+    // Event listeners dos botões de fluxo de trabalho
+    botaoIniciar.addEventListener('click', () => {
+        const agendamento = agendamentos.find(a => a.id === agendamentoSelecionadoId);
+        if (agendamento) {
+            agendamento.status = 'iniciado';
+            salvarDados('agendamentos', agendamentos);
+            iniciarTimer();
+            alert('Serviço iniciado!');
+            // Atualiza a exibição do modal para mostrar o bloco de finalizar
+            abrirModalComDetalhes(agendamento);
+        }
+    });
+
+    botaoFinalizar.addEventListener('click', () => {
+        const agendamento = agendamentos.find(a => a.id === agendamentoSelecionadoId);
+        if (agendamento) {
+            const duracao = pararTimer();
+            agendamento.status = 'finalizado';
+            agendamento.duracao = duracao;
+            // Lógica para a foto do serviço
+            const fotoInput = document.getElementById('foto-servico');
+            if (fotoInput.files.length > 0) {
+                // Aqui você pode adicionar a lógica para fazer upload da foto para o Firebase Storage
+                // ou apenas registrar que uma foto foi tirada.
+                console.log('Foto capturada, mas não salva. Implementar lógica de upload.');
+            }
+            salvarDados('agendamentos', agendamentos);
+            alert(`Serviço finalizado! Duração: ${duracao}`);
+            criarAgendaDiaria(dataAtual);
+            modalEditar.classList.remove('ativo');
+        }
+    });
 
     function abrirModalNovoAgendamento(horario, data) {
         modalAgendamento.classList.add('ativo');
