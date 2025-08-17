@@ -1,9 +1,24 @@
-// Acessando as variáveis globais 'db' e 'auth' do window (definidas no HTML)
-const db = window.db;
+// Importa as bibliotecas do Firebase como módulos
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
+// Configuração do Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyAqHg12C8aVXy_B7q5HZVPfZfEuzBQ5N1I",
+    authDomain: "agenda6-42c28.firebaseapp.com",
+    projectId: "agenda6-42c28",
+    storageBucket: "agenda6-42c28.firebasestorage.app",
+    messagingSenderId: "743866426484",
+    appId: "1:743866426484:web:4a7557e2fd31b671ff1d21",
+    measurementId: "G-7FC4DPM35L"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Inicia a lógica da aplicação após o DOM e o Firebase estarem prontos
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM totalmente carregado.");
-    
+    console.log("DOM totalmente carregado. Tentando renderizar a agenda...");
+
     // Referências do DOM
     const formNovoAgendamento = document.getElementById('form-novo-agendamento');
     const formCadastroCliente = document.getElementById('form-cadastro-cliente');
@@ -63,9 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Função genérica para salvar um novo item
     const salvarItem = async (colecao, dados) => {
         try {
-            const docRef = await db.collection(colecao).add({
+            const docRef = await addDoc(collection(db, colecao), {
                 ...dados,
-                criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                criadoEm: serverTimestamp()
             });
             console.log("Documento escrito com ID: ", docRef.id);
             return docRef;
@@ -77,8 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função genérica para buscar todos os itens de uma coleção
     const buscarItens = async (colecao) => {
-        const snapshot = await db.collection(colecao).orderBy('nome').get();
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const querySnapshot = await getDocs(collection(db, colecao));
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     };
 
     // Função para renderizar listas
@@ -125,8 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderizarCalendarioDiario = async (data) => {
         console.log(`Renderizando calendário para a data: ${data}`);
-        if (!calendarioDiario || !db) {
-            console.error("Erro: Elemento de calendário ou banco de dados não disponível.");
+        if (!calendarioDiario) {
+            console.error("Erro: Elemento de calendário não disponível.");
             return;
         }
 
@@ -134,9 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
         dataSelecionadaH2.textContent = `Agendamentos para ${formatarDataParaExibicao(data)}`;
 
         calendarioDiario.innerHTML = '';
-        const agendamentosRef = db.collection('agendamentos').where('data', '==', dataFormatada);
-
-        const snapshot = await agendamentosRef.get();
+        const q = query(collection(db, 'agendamentos'), where('data', '==', dataFormatada));
+        const snapshot = await getDocs(q);
         const agendamentos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         const horarios = gerarHorarios();
@@ -201,8 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const nomeDia = dia.toLocaleDateString('pt-BR', { weekday: 'short' });
             const numeroDia = dia.getDate();
-            const mes = dia.getMonth() + 1; // getMonth() é base 0
-
+            const mes = dia.getMonth() + 1;
+            
             diaElemento.innerHTML = `<span>${nomeDia}</span><br><span>${numeroDia}</span>`;
             diaElemento.dataset.data = `${dia.getFullYear()}-${String(mes).padStart(2, '0')}-${String(numeroDia).padStart(2, '0')}`;
             diasDaSemanaDiv.appendChild(diaElemento);
@@ -339,10 +353,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const hora = slot.dataset.hora;
                 const data = slot.dataset.data;
 
-                const agendamentoExistente = await db.collection('agendamentos')
-                    .where('data', '==', data)
-                    .where('hora', '==', hora)
-                    .get();
+                const q = query(collection(db, 'agendamentos'), where('data', '==', data), where('hora', '==', hora));
+                const agendamentoExistente = await getDocs(q);
 
                 if (agendamentoExistente.empty) {
                     const clientes = await buscarItens('clientes');
@@ -364,8 +376,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = e.target.closest('.agendamento-card');
             if (card) {
                 const agendamentoId = card.dataset.id;
-                const doc = await db.collection('agendamentos').doc(agendamentoId).get();
-                agendamentoAtual = { id: doc.id, ...doc.data() };
+                const docRef = doc(db, 'agendamentos', agendamentoId);
+                const docSnap = await getDoc(docRef);
+                agendamentoAtual = { id: docSnap.id, ...docSnap.data() };
                 
                 detalhesClienteSpan.textContent = agendamentoAtual.cliente;
                 detalhesTelefoneSpan.textContent = agendamentoAtual.telefone;
@@ -432,9 +445,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Botão Iniciar Serviço
         botaoIniciar?.addEventListener('click', async () => {
             if (agendamentoAtual) {
-                await db.collection('agendamentos').doc(agendamentoAtual.id).update({
+                const docRef = doc(db, 'agendamentos', agendamentoAtual.id);
+                await updateDoc(docRef, {
                     status: 'iniciado',
-                    inicio: firebase.firestore.FieldValue.serverTimestamp()
+                    inicio: serverTimestamp()
                 });
                 esconderModal(modalEdicaoAgendamento);
                 renderizarCalendarioDiario(dataAtual);
@@ -446,20 +460,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (agendamentoAtual) {
                 const inicio = agendamentoAtual.inicio.toDate();
                 const duracao = Math.floor((new Date() - inicio) / 1000);
-
-                let fotoUrl = null;
-                if (fotoServicoInput.files[0]) {
-                    // Upload da foto para o Firebase Storage (código futuro)
-                    // Por enquanto, vamos ignorar
-                    // const storageRef = firebase.storage().ref(`servicos/${agendamentoAtual.id}`);
-                    // await storageRef.put(fotoServicoInput.files[0]);
-                    // fotoUrl = await storageRef.getDownloadURL();
-                }
-
-                await db.collection('agendamentos').doc(agendamentoAtual.id).update({
+                const docRef = doc(db, 'agendamentos', agendamentoAtual.id);
+                await updateDoc(docRef, {
                     status: 'finalizado',
-                    duracao: duracao,
-                    foto: fotoUrl
+                    duracao: duracao
                 });
                 esconderModal(modalEdicaoAgendamento);
                 renderizarCalendarioDiario(dataAtual);
@@ -469,10 +473,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Botão Reverter
         botaoReverter?.addEventListener('click', async () => {
             if (agendamentoAtual) {
-                await db.collection('agendamentos').doc(agendamentoAtual.id).update({
+                const docRef = doc(db, 'agendamentos', agendamentoAtual.id);
+                await updateDoc(docRef, {
                     status: 'agendado',
-                    duracao: firebase.firestore.FieldValue.delete(),
-                    inicio: firebase.firestore.FieldValue.delete()
+                    duracao: null,
+                    inicio: null
                 });
                 esconderModal(modalEdicaoAgendamento);
                 renderizarCalendarioDiario(dataAtual);
@@ -483,7 +488,8 @@ document.addEventListener('DOMContentLoaded', () => {
         botaoCancelar?.addEventListener('click', async () => {
             if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
                 if (agendamentoAtual) {
-                    await db.collection('agendamentos').doc(agendamentoAtual.id).delete();
+                    const docRef = doc(db, 'agendamentos', agendamentoAtual.id);
+                    await deleteDoc(docRef);
                     esconderModal(modalEdicaoAgendamento);
                     renderizarCalendarioDiario(dataAtual);
                 }
@@ -539,7 +545,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 funcionarios: Array.from(funcionarioEdicaoSelect.selectedOptions).map(opt => opt.value)
             };
             
-            await db.collection('agendamentos').doc(agendamentoIdInput.value).update(dadosAtualizados);
+            const docRef = doc(db, 'agendamentos', agendamentoIdInput.value);
+            await updateDoc(docRef, dadosAtualizados);
             esconderModal(modalEdicaoAgendamento);
             renderizarCalendarioDiario(dataAtual);
         });
