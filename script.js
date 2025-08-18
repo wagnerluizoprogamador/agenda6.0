@@ -1,29 +1,44 @@
 // Funções para salvar e carregar dados do localStorage
 function salvarDados(chave, dados) {
-    // ...
-}
-
-function carregarDados(chave, valorPadrao = []) {
-    // ...
-}
-
-// COLOQUE A NOVA FUNÇÃO AQUI
-function renderizarLista(listaId, dados, chaveLocalStorage) {
-    // ... o código da função que eu te dei ...
-}
-
-// ... Dados de exemplo ...
-let agendamentos = carregarDados('agendamentos', [ ... ]);
-let clientes = carregarDados('clientes', [ ... ]);
-// ... e assim por diante ...
-// Funções para salvar e carregar dados do localStorage
-function salvarDados(chave, dados) {
     localStorage.setItem(chave, JSON.stringify(dados));
 }
 
 function carregarDados(chave, valorPadrao = []) {
     const dados = localStorage.getItem(chave);
     return dados ? JSON.parse(dados) : valorPadrao;
+}
+
+// NOVA FUNÇÃO GENÉRICA PARA RENDERIZAR LISTAS
+function renderizarLista(listaId, dados, chaveLocalStorage) {
+    const lista = document.getElementById(listaId);
+    lista.innerHTML = '';
+    dados.forEach(item => {
+        const li = document.createElement('li');
+        // Adiciona a comissão se o item for um funcionário, ou o preço se for um serviço
+        const infoExtra = item.comissao ? ` (${item.comissao}%)` : ` (R$ ${item.preco.toFixed(2)})`;
+        li.innerHTML = `
+            <span>${item.nome}${infoExtra}</span>
+            <button class="btn-excluir" data-nome="${item.nome}" data-chave="${chaveLocalStorage}">Excluir</button>
+        `;
+        lista.appendChild(li);
+    });
+
+    document.querySelectorAll('.btn-excluir').forEach(botao => {
+        botao.addEventListener('click', (e) => {
+            const nomeItem = e.target.dataset.nome;
+            const chave = e.target.dataset.chave;
+            if (confirm(`Tem certeza que deseja excluir "${nomeItem}"?`)) {
+                // Filtra os dados com base na chave de localStorage
+                let dadosAtuais = JSON.parse(localStorage.getItem(chave));
+                dadosAtuais = dadosAtuais.filter(item => item.nome !== nomeItem);
+                
+                salvarDados(chave, dadosAtuais);
+                
+                // Recarrega a página para atualizar a lista
+                window.location.reload(); 
+            }
+        });
+    });
 }
 
 // Dados de exemplo (simulando um "banco de dados" local)
@@ -83,29 +98,6 @@ if (document.body.classList.contains('pagina-servicos')) {
     const formCadastroServico = document.getElementById('form-cadastro-servico');
     const listaServicos = document.getElementById('lista-servicos');
 
-    function renderizarServicos() {
-        listaServicos.innerHTML = '';
-        servicos.forEach(servico => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span>${servico.nome} (R$ ${servico.preco.toFixed(2)})</span>
-                <button class="btn-excluir" data-nome="${servico.nome}">Excluir</button>
-            `;
-            listaServicos.appendChild(li);
-        });
-
-        document.querySelectorAll('.btn-excluir').forEach(botao => {
-            botao.addEventListener('click', (e) => {
-                const nomeServico = e.target.dataset.nome;
-                if (confirm(`Tem certeza que deseja excluir o serviço "${nomeServico}"?`)) {
-                    servicos = servicos.filter(s => s.nome !== nomeServico);
-                    salvarDados('servicos', servicos);
-                    renderizarServicos();
-                }
-            });
-        });
-    }
-
     formCadastroServico.addEventListener('submit', (e) => {
         e.preventDefault();
         const nome = document.getElementById('nome-servico').value;
@@ -115,42 +107,19 @@ if (document.body.classList.contains('pagina-servicos')) {
             salvarDados('servicos', servicos);
             alert(`Serviço "${nome}" cadastrado com sucesso!`);
             formCadastroServico.reset();
-            renderizarServicos();
+            renderizarLista('lista-servicos', servicos, 'servicos');
         } else {
             alert(`Serviço "${nome}" já existe.`);
         }
     });
 
-    renderizarServicos();
+    renderizarLista('lista-servicos', servicos, 'servicos');
 }
 
 // Lógica para a página de funcionários (funcionarios.html)
 if (document.body.classList.contains('pagina-funcionarios')) {
     const formCadastroFuncionario = document.getElementById('form-cadastro-funcionario');
     const listaFuncionarios = document.getElementById('lista-funcionarios');
-
-    function renderizarFuncionarios() {
-        listaFuncionarios.innerHTML = '';
-        funcionarios.forEach(funcionario => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span>${funcionario.nome} (${funcionario.comissao}%)</span>
-                <button class="btn-excluir" data-nome="${funcionario.nome}">Excluir</button>
-            `;
-            listaFuncionarios.appendChild(li);
-        });
-
-        document.querySelectorAll('.btn-excluir').forEach(botao => {
-            botao.addEventListener('click', (e) => {
-                const nomeFuncionario = e.target.dataset.nome;
-                if (confirm(`Tem certeza que deseja excluir o funcionário "${nomeFuncionario}"?`)) {
-                    funcionarios = funcionarios.filter(f => f.nome !== nomeFuncionario);
-                    salvarDados('funcionarios', funcionarios);
-                    renderizarFuncionarios();
-                }
-            });
-        });
-    }
 
     formCadastroFuncionario.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -161,13 +130,13 @@ if (document.body.classList.contains('pagina-funcionarios')) {
             salvarDados('funcionarios', funcionarios);
             alert(`Funcionário "${nome}" cadastrado com sucesso!`);
             formCadastroFuncionario.reset();
-            renderizarFuncionarios();
+            renderizarLista('lista-funcionarios', funcionarios, 'funcionarios');
         } else {
             alert(`Funcionário "${nome}" já existe.`);
         }
     });
-    
-    renderizarFuncionarios();
+
+    renderizarLista('lista-funcionarios', funcionarios, 'funcionarios');
 }
 
 // Lógica para a página de financeiro (financeiro.html)
@@ -180,7 +149,7 @@ if (document.body.classList.contains('pagina-financeiro')) {
         const servicosFinalizados = agendamentos.filter(ag => ag.status === 'finalizado');
         let receitaTotal = 0;
         let comissoesPendentes = 0;
-        
+
         listaServicosFinalizados.innerHTML = '';
 
         servicosFinalizados.forEach(agendamento => {
@@ -216,7 +185,7 @@ if (document.body.classList.contains('pagina-financeiro')) {
         receitaTotalElement.textContent = `R$ ${receitaTotal.toFixed(2)}`;
         comissoesPendentesElement.textContent = `R$ ${comissoesPendentes.toFixed(2)}`;
     }
-    
+
     document.addEventListener('DOMContentLoaded', calcularEExibirValores);
 }
 
@@ -326,7 +295,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         const cliente = document.getElementById('cliente-edicao').value;
         const servico = document.getElementById('servico-edicao').value;
         const funcionariosSelecionados = Array.from(document.getElementById('funcionario-edicao').selectedOptions).map(option => option.value);
-    
+
         const agendamento = agendamentos.find(a => a.id === id);
         if (agendamento) {
             const novaData = new Date(dataHora);
@@ -337,7 +306,7 @@ if (document.body.classList.contains('pagina-agenda')) {
             agendamento.funcionarios = funcionariosSelecionados;
             salvarDados('agendamentos', agendamentos);
         }
-    
+
         criarAgendaDiaria(dataAtual);
         alert('Agendamento alterado com sucesso!');
         modalEditar.classList.remove('ativo');
@@ -407,7 +376,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         document.getElementById('detalhes-servico').textContent = agendamento.servico;
         document.getElementById('detalhes-funcionarios').textContent = agendamento.funcionarios.join(', ');
         document.getElementById('detalhes-status').textContent = agendamento.status;
-        
+
         preencherSelectsEdicao();
         document.getElementById('agendamento-id').value = agendamento.id;
         document.getElementById('cliente-edicao').value = agendamento.cliente;
@@ -447,7 +416,7 @@ if (document.body.classList.contains('pagina-agenda')) {
 
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
         document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
-        
+
         modalEditar.classList.add('ativo');
     }
 
@@ -469,7 +438,7 @@ if (document.body.classList.contains('pagina-agenda')) {
             horarios.push(`${String(i).padStart(2, '0')}:00`);
             horarios.push(`${String(i).padStart(2, '0')}:30`);
         }
-        
+
         const dataFormatada = data.toISOString().split('T')[0];
 
         horarios.forEach(horario => {
@@ -479,7 +448,7 @@ if (document.body.classList.contains('pagina-agenda')) {
             calendarioDiario.appendChild(horarioDiv);
 
             const agendamentoDoHorario = agendamentos.find(a => a.horario === horario && a.data === dataFormatada);
-            
+
             const agendamentoDiv = document.createElement('div');
             agendamentoDiv.classList.add('bloco-agendamento');
 
@@ -502,40 +471,40 @@ if (document.body.classList.contains('pagina-agenda')) {
             calendarioDiario.appendChild(agendamentoDiv);
         });
     }
-    
+
     function criarNavegacaoSemanal() {
         const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
         diasDaSemanaDiv.innerHTML = '';
-        
+
         const hoje = new Date();
         const dataInicial = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - 15);
 
         for (let i = 0; i < 30; i++) {
             const dataDoDia = new Date(dataInicial);
             dataDoDia.setDate(dataInicial.getDate() + i);
-            
+
             const diaDiv = document.createElement('div');
             diaDiv.classList.add('dia-semana');
-            
+
             const diaSemana = dias[dataDoDia.getDay()];
             const diaMes = dataDoDia.getDate();
-            
+
             diaDiv.innerHTML = `<span>${diaSemana}</span><span>${diaMes}</span>`;
-            
+
             const dataFormatada = dataDoDia.toISOString().split('T')[0];
             const hojeFormatado = hoje.toISOString().split('T')[0];
-            
+
             if (dataFormatada === hojeFormatado) {
                 diaDiv.classList.add('ativo');
             }
-            
+
             diaDiv.addEventListener('click', () => {
                 dataAtual = dataDoDia;
                 document.querySelectorAll('.dia-semana').forEach(d => d.classList.remove('ativo'));
                 diaDiv.classList.add('ativo');
                 criarAgendaDiaria(dataAtual);
             });
-            
+
             diasDaSemanaDiv.appendChild(diaDiv);
         }
     }
@@ -546,4 +515,3 @@ if (document.body.classList.contains('pagina-agenda')) {
             criarAgendaDiaria(dataAtual);
         }
     });
-}
