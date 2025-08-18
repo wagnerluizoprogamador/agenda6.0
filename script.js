@@ -2,9 +2,9 @@
 function salvarDados(chave, dados) {
     try {
         localStorage.setItem(chave, JSON.stringify(dados));
-        console.log(`Dados salvos com sucesso na chave: ${chave}`);
+        console.log(`[SALVAR] Dados salvos com sucesso na chave: ${chave}`, dados);
     } catch (e) {
-        console.error(`Erro ao salvar dados na chave "${chave}":`, e);
+        console.error(`[ERRO] Erro ao salvar dados na chave "${chave}":`, e);
     }
 }
 
@@ -12,13 +12,13 @@ function carregarDados(chave, valorPadrao = []) {
     try {
         const dados = localStorage.getItem(chave);
         if (dados) {
-            console.log(`Dados carregados com sucesso da chave: ${chave}`);
+            console.log(`[CARREGAR] Dados carregados com sucesso da chave: ${chave}`);
             return JSON.parse(dados);
         }
     } catch (e) {
-        console.error(`Erro ao carregar dados da chave "${chave}":`, e);
+        console.error(`[ERRO] Erro ao carregar dados da chave "${chave}":`, e);
     }
-    console.log(`Nenhum dado encontrado para a chave: ${chave}. Usando valor padrão.`);
+    console.log(`[CARREGAR] Nenhum dado encontrado para a chave: ${chave}. Usando valor padrão.`);
     return valorPadrao;
 }
 
@@ -391,7 +391,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         document.getElementById('botao-whatsapp').href = `https://wa.me/55${telefoneFormatado}`;
         
         const enderecoFormatado = agendamento.endereco ? encodeURIComponent(agendamento.endereco) : '';
-        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/8{enderecoFormatado}`;
+        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/9{enderecoFormatado}`;
 
         if (agendamento.status === 'agendado') {
             tituloModalEdicao.textContent = 'Detalhes do Agendamento';
