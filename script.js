@@ -1,5 +1,23 @@
 // Funções para salvar e carregar dados do localStorage
 function salvarDados(chave, dados) {
+    // ...
+}
+
+function carregarDados(chave, valorPadrao = []) {
+    // ...
+}
+
+// COLOQUE A NOVA FUNÇÃO AQUI
+function renderizarLista(listaId, dados, chaveLocalStorage) {
+    // ... o código da função que eu te dei ...
+}
+
+// ... Dados de exemplo ...
+let agendamentos = carregarDados('agendamentos', [ ... ]);
+let clientes = carregarDados('clientes', [ ... ]);
+// ... e assim por diante ...
+// Funções para salvar e carregar dados do localStorage
+function salvarDados(chave, dados) {
     localStorage.setItem(chave, JSON.stringify(dados));
 }
 
