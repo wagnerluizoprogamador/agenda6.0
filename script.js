@@ -12,7 +12,7 @@ function carregarDados(chave, valorPadrao = []) {
 let agendamentos = carregarDados('agendamentos', [
     {
         id: 'agendamento-0800',
-        data: '2025-08-15', // Exemplo com data real para testar
+        data: '2025-08-15',
         horario: '08:00',
         cliente: 'Wagner',
         telefone: '21987654321',
@@ -31,12 +31,14 @@ let agendamentos = carregarDados('agendamentos', [
         servico: 'Manutenção de 100',
         funcionarios: ['Arthur'],
         status: 'finalizado',
-        duracao: '01:30:00'
+        duracao: '01:30:00',
+        valor: 150.00,
+        comissaoPaga: false
     }
 ]);
-let clientes = carregarDados('clientes', ['Wagner', 'João', 'Maria', 'Pedro']);
-let servicos = carregarDados('servicos', ['Montagem de 50', 'Manutenção de 100', 'Formatação', 'Instalação']);
-let funcionarios = carregarDados('funcionarios', ['Arthur', 'Beatriz', 'Carlos', 'Diana']);
+let clientes = carregarDados('clientes', [{ nome: 'Wagner' }, { nome: 'João' }, { nome: 'Maria' }, { nome: 'Pedro' }]);
+let servicos = carregarDados('servicos', [{ nome: 'Montagem de 50', preco: 100 }, { nome: 'Manutenção de 100', preco: 150 }, { nome: 'Formatação', preco: 80 }]);
+let funcionarios = carregarDados('funcionarios', [{ nome: 'Arthur', comissao: 10 }, { nome: 'Beatriz', comissao: 15 }, { nome: 'Carlos', comissao: 10 }, { nome: 'Diana', comissao: 20 }]);
 
 // Lógica para a página de cadastro (index.html)
 if (document.body.classList.contains('pagina-cadastro')) {
@@ -47,39 +49,13 @@ if (document.body.classList.contains('pagina-cadastro')) {
     formCliente.addEventListener('submit', (e) => {
         e.preventDefault();
         const nome = document.getElementById('nome-cliente').value;
-        if (!clientes.includes(nome)) {
-            clientes.push(nome);
+        if (!clientes.find(c => c.nome === nome)) {
+            clientes.push({ nome: nome });
             salvarDados('clientes', clientes);
             alert(`Cliente "${nome}" cadastrado com sucesso!`);
             formCliente.reset();
         } else {
             alert(`Cliente "${nome}" já existe.`);
-        }
-    });
-
-    formServico.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const nome = document.getElementById('nome-servico').value;
-        if (!servicos.includes(nome)) {
-            servicos.push(nome);
-            salvarDados('servicos', servicos);
-            alert(`Serviço "${nome}" cadastrado com sucesso!`);
-            formServico.reset();
-        } else {
-            alert(`Serviço "${nome}" já existe.`);
-        }
-    });
-
-    formFuncionario.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const nome = document.getElementById('nome-funcionario').value;
-        if (!funcionarios.includes(nome)) {
-            funcionarios.push(nome);
-            salvarDados('funcionarios', funcionarios);
-            alert(`Funcionário "${nome}" cadastrado com sucesso!`);
-            formFuncionario.reset();
-        } else {
-            alert(`Funcionário "${nome}" já existe.`);
         }
     });
 }
@@ -94,18 +70,17 @@ if (document.body.classList.contains('pagina-servicos')) {
         servicos.forEach(servico => {
             const li = document.createElement('li');
             li.innerHTML = `
-                <span>${servico}</span>
-                <button class="btn-excluir" data-nome="${servico}">Excluir</button>
+                <span>${servico.nome} (R$ ${servico.preco.toFixed(2)})</span>
+                <button class="btn-excluir" data-nome="${servico.nome}">Excluir</button>
             `;
             listaServicos.appendChild(li);
         });
 
-        // Adiciona eventos de clique para os botões de exclusão
         document.querySelectorAll('.btn-excluir').forEach(botao => {
             botao.addEventListener('click', (e) => {
                 const nomeServico = e.target.dataset.nome;
                 if (confirm(`Tem certeza que deseja excluir o serviço "${nomeServico}"?`)) {
-                    servicos = servicos.filter(s => s !== nomeServico);
+                    servicos = servicos.filter(s => s.nome !== nomeServico);
                     salvarDados('servicos', servicos);
                     renderizarServicos();
                 }
@@ -116,8 +91,9 @@ if (document.body.classList.contains('pagina-servicos')) {
     formCadastroServico.addEventListener('submit', (e) => {
         e.preventDefault();
         const nome = document.getElementById('nome-servico').value;
-        if (!servicos.includes(nome)) {
-            servicos.push(nome);
+        const preco = parseFloat(document.getElementById('preco-servico').value);
+        if (!servicos.find(s => s.nome === nome)) {
+            servicos.push({ nome: nome, preco: preco });
             salvarDados('servicos', servicos);
             alert(`Serviço "${nome}" cadastrado com sucesso!`);
             formCadastroServico.reset();
@@ -126,9 +102,104 @@ if (document.body.classList.contains('pagina-servicos')) {
             alert(`Serviço "${nome}" já existe.`);
         }
     });
-    
-    // Renderiza a lista inicial
+
     renderizarServicos();
+}
+
+// Lógica para a página de funcionários (funcionarios.html)
+if (document.body.classList.contains('pagina-funcionarios')) {
+    const formCadastroFuncionario = document.getElementById('form-cadastro-funcionario');
+    const listaFuncionarios = document.getElementById('lista-funcionarios');
+
+    function renderizarFuncionarios() {
+        listaFuncionarios.innerHTML = '';
+        funcionarios.forEach(funcionario => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${funcionario.nome} (${funcionario.comissao}%)</span>
+                <button class="btn-excluir" data-nome="${funcionario.nome}">Excluir</button>
+            `;
+            listaFuncionarios.appendChild(li);
+        });
+
+        document.querySelectorAll('.btn-excluir').forEach(botao => {
+            botao.addEventListener('click', (e) => {
+                const nomeFuncionario = e.target.dataset.nome;
+                if (confirm(`Tem certeza que deseja excluir o funcionário "${nomeFuncionario}"?`)) {
+                    funcionarios = funcionarios.filter(f => f.nome !== nomeFuncionario);
+                    salvarDados('funcionarios', funcionarios);
+                    renderizarFuncionarios();
+                }
+            });
+        });
+    }
+
+    formCadastroFuncionario.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome-funcionario').value;
+        const comissao = parseFloat(document.getElementById('comissao-funcionario').value);
+        if (!funcionarios.find(f => f.nome === nome)) {
+            funcionarios.push({ nome: nome, comissao: comissao });
+            salvarDados('funcionarios', funcionarios);
+            alert(`Funcionário "${nome}" cadastrado com sucesso!`);
+            formCadastroFuncionario.reset();
+            renderizarFuncionarios();
+        } else {
+            alert(`Funcionário "${nome}" já existe.`);
+        }
+    });
+    
+    renderizarFuncionarios();
+}
+
+// Lógica para a página de financeiro (financeiro.html)
+if (document.body.classList.contains('pagina-financeiro')) {
+    const receitaTotalElement = document.getElementById('receita-total');
+    const comissoesPendentesElement = document.getElementById('comissoes-pendentes');
+    const listaServicosFinalizados = document.getElementById('lista-servicos-finalizados');
+
+    function calcularEExibirValores() {
+        const servicosFinalizados = agendamentos.filter(ag => ag.status === 'finalizado');
+        let receitaTotal = 0;
+        let comissoesPendentes = 0;
+        
+        listaServicosFinalizados.innerHTML = '';
+
+        servicosFinalizados.forEach(agendamento => {
+            const servicoAssociado = servicos.find(s => s.nome === agendamento.servico);
+            if (!servicoAssociado) {
+                console.error(`Serviço "${agendamento.servico}" não encontrado.`);
+                return;
+            }
+
+            const valorServico = agendamento.valor || servicoAssociado.preco;
+            receitaTotal += valorServico;
+
+            let valorComissaoTotal = 0;
+            agendamento.funcionarios.forEach(funcNome => {
+                const funcionarioAssociado = funcionarios.find(f => f.nome === funcNome);
+                if (funcionarioAssociado && !agendamento.comissaoPaga) {
+                    const valorComissao = (valorServico * funcionarioAssociado.comissao) / 100;
+                    comissoesPendentes += valorComissao;
+                    valorComissaoTotal += valorComissao;
+                }
+            });
+
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${agendamento.data} - ${agendamento.horario}</span>
+                <span>${agendamento.servico} (R$ ${valorServico.toFixed(2)})</span>
+                <span>Funcionário(s): ${agendamento.funcionarios.join(', ')}</span>
+                <span>Comissão a pagar: R$ ${valorComissaoTotal.toFixed(2)}</span>
+            `;
+            listaServicosFinalizados.appendChild(li);
+        });
+
+        receitaTotalElement.textContent = `R$ ${receitaTotal.toFixed(2)}`;
+        comissoesPendentesElement.textContent = `R$ ${comissoesPendentes.toFixed(2)}`;
+    }
+    
+    document.addEventListener('DOMContentLoaded', calcularEExibirValores);
 }
 
 // Lógica para a página de agenda (agenda.html)
@@ -220,6 +291,8 @@ if (document.body.classList.contains('pagina-agenda')) {
             if (agendamento) {
                 agendamento.status = 'agendado';
                 agendamento.duracao = '';
+                agendamento.valor = undefined;
+                agendamento.comissaoPaga = false;
                 salvarDados('agendamentos', agendamentos);
                 criarAgendaDiaria(dataAtual);
                 alert('Agendamento revertido com sucesso!');
@@ -252,7 +325,7 @@ if (document.body.classList.contains('pagina-agenda')) {
         modalEditar.classList.remove('ativo');
     });
 
-    function preencherSelects(selectId, options) {
+    function preencherSelects(selectId, options, valueKey = 'nome') {
         const selectElement = document.getElementById(selectId);
         selectElement.innerHTML = '';
         if (selectId.includes('agendamento')) {
@@ -263,8 +336,10 @@ if (document.body.classList.contains('pagina-agenda')) {
         }
         options.forEach(optionText => {
             const option = document.createElement('option');
-            option.value = optionText;
-            option.textContent = optionText;
+            const valor = typeof optionText === 'object' ? optionText[valueKey] : optionText;
+            const texto = typeof optionText === 'object' ? optionText.nome : optionText;
+            option.value = valor;
+            option.textContent = texto;
             selectElement.appendChild(option);
         });
     }
@@ -280,29 +355,29 @@ if (document.body.classList.contains('pagina-agenda')) {
 
         clientes.forEach(cliente => {
             const option = document.createElement('option');
-            option.value = cliente;
-            option.textContent = cliente;
+            option.value = cliente.nome;
+            option.textContent = cliente.nome;
             clienteSelect.appendChild(option);
         });
 
         servicos.forEach(servico => {
             const option = document.createElement('option');
-            option.value = servico;
-            option.textContent = servico;
+            option.value = servico.nome;
+            option.textContent = servico.nome;
             servicoSelect.appendChild(option);
         });
 
         funcionarios.forEach(funcionario => {
             const option = document.createElement('option');
-            option.value = funcionario;
-            option.textContent = funcionario;
+            option.value = funcionario.nome;
+            option.textContent = funcionario.nome;
             funcionarioSelect.appendChild(option);
         });
     }
 
     function abrirModalComDetalhes(agendamento) {
         agendamentoSelecionadoId = agendamento.id;
-        console.log("Status do agendamento:", agendamento.status); // Adicionado para diagnóstico
+        console.log("Status do agendamento:", agendamento.status);
 
         formAlterarDados.style.display = 'none';
         detalhesAgendamento.style.display = 'block';
