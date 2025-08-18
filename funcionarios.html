@@ -3,29 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Funcionários</title>
+    <title>Gerenciamento de Funcionários</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="pagina-funcionarios">
     <header>
         <nav>
-            <a href="index.html">Cadastro</a>
+            <a href="agenda.html">Agenda</a>
+            <a href="index.html">Cadastros</a>
             <a href="clientes.html">Clientes</a>
             <a href="servicos.html">Serviços</a>
-            <a href="funcionarios.html">Funcionários</a>
-            <a href="financeiro.html"class="ativo">Financeiro</a>
-             <a href="comissoes.html"class="ativo">Comissões</a>
+            <a href="funcionarios.html" class="ativo">Funcionários</a>
+            <a href="financeiro.html">Financeiro</a>
+            <a href="comissoes.html">Comissões</a>
         </nav>
     </header>
 
     <main>
-        <section class="list-container">
-            <h2>Lista de Funcionários</h2>
-            <div id="lista-de-funcionarios"></div>
+        <section class="form-container">
+            <h2>Cadastro de Funcionário</h2>
+            <form id="form-cadastro-funcionario">
+                <div class="form-group">
+                    <label for="nome-funcionario">Nome do Funcionário:</label>
+                    <input type="text" id="nome-funcionario" name="nome-funcionario" required>
+                </div>
+                <div class="form-group">
+                    <label for="comissao-funcionario">Comissão (%)</label>
+                    <input type="number" id="comissao-funcionario" name="comissao-funcionario" required>
+                </div>
+                <button type="submit">Cadastrar Funcionário</button>
+            </form>
+        </section>
+
+        <section class="lista-container">
+            <h2>Funcionários Cadastrados</h2>
+            <ul id="lista-funcionarios"></ul>
         </section>
     </main>
 
-  <script type="module" src="script.js"></script>
+    <script src="script.js"></script>
 </body>
-<body class="pagina-cadastro"></body>
 </html>
