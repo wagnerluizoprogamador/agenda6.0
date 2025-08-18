@@ -1,52 +1,18 @@
 // Funções para salvar e carregar dados do localStorage
 function salvarDados(chave, dados) {
-    try {
-        localStorage.setItem(chave, JSON.stringify(dados));
-        console.log(`[SALVAR] Dados salvos com sucesso na chave: ${chave}`, dados);
-    } catch (e) {
-        console.error(`[ERRO] Erro ao salvar dados na chave "${chave}":`, e);
-    }
+    localStorage.setItem(chave, JSON.stringify(dados));
 }
 
 function carregarDados(chave, valorPadrao = []) {
-    try {
-        const dados = localStorage.getItem(chave);
-        if (dados) {
-            console.log(`[CARREGAR] Dados carregados com sucesso da chave: ${chave}`);
-            return JSON.parse(dados);
-        }
-    } catch (e) {
-        console.error(`[ERRO] Erro ao carregar dados da chave "${chave}":`, e);
-    }
-    console.log(`[CARREGAR] Nenhum dado encontrado para a chave: ${chave}. Usando valor padrão.`);
-    return valorPadrao;
-}
-
-// ATENÇÃO: Adicionado uma verificação para migrar dados antigos
-function migrarDadosClientes(clientesAntigos) {
-    if (clientesAntigos.length > 0 && typeof clientesAntigos[0] === 'string') {
-        return clientesAntigos.map((nome, index) => ({
-            id: `cli-${Date.now() + index}`,
-            nome: nome,
-            telefone: '',
-            endereco: ''
-        }));
-    }
-    return clientesAntigos;
+    const dados = localStorage.getItem(chave);
+    return dados ? JSON.parse(dados) : valorPadrao;
 }
 
 // Dados de exemplo (simulando um "banco de dados" local)
-let clientes = migrarDadosClientes(carregarDados('clientes', [
-    { id: 'cli-1', nome: 'Wagner', telefone: '21987654321', endereco: 'Rua A, 123' },
-    { id: 'cli-2', nome: 'João', telefone: '21987654322', endereco: 'Av. Principal, 456' },
-    { id: 'cli-3', nome: 'Maria', telefone: '', endereco: '' },
-    { id: 'cli-4', nome: 'Pedro', telefone: '', endereco: '' }
-]));
-
 let agendamentos = carregarDados('agendamentos', [
     {
         id: 'agendamento-0800',
-        data: '2025-08-15',
+        data: '2025-08-15', // Exemplo com data real para testar
         horario: '08:00',
         cliente: 'Wagner',
         telefone: '21987654321',
@@ -68,10 +34,9 @@ let agendamentos = carregarDados('agendamentos', [
         duracao: '01:30:00'
     }
 ]);
-
+let clientes = carregarDados('clientes', ['Wagner', 'João', 'Maria', 'Pedro']);
 let servicos = carregarDados('servicos', ['Montagem de 50', 'Manutenção de 100', 'Formatação', 'Instalação']);
 let funcionarios = carregarDados('funcionarios', ['Arthur', 'Beatriz', 'Carlos', 'Diana']);
-
 
 // Lógica para a página de cadastro (index.html)
 if (document.body.classList.contains('pagina-cadastro')) {
@@ -82,15 +47,8 @@ if (document.body.classList.contains('pagina-cadastro')) {
     formCliente.addEventListener('submit', (e) => {
         e.preventDefault();
         const nome = document.getElementById('nome-cliente').value;
-        const clienteExistente = clientes.some(c => c.nome === nome);
-        if (!clienteExistente) {
-            const novoCliente = {
-                id: `cli-${Date.now()}`,
-                nome: nome,
-                telefone: '',
-                endereco: ''
-            };
-            clientes.push(novoCliente);
+        if (!clientes.includes(nome)) {
+            clientes.push(nome);
             salvarDados('clientes', clientes);
             alert(`Cliente "${nome}" cadastrado com sucesso!`);
             formCliente.reset();
@@ -145,46 +103,23 @@ if (document.body.classList.contains('pagina-agenda')) {
     const botaoReverter = document.getElementById('botao-reverter');
     const dataSelecionadaH2 = document.getElementById('data-selecionada');
     const diasDaSemanaDiv = document.getElementById('dias-da-semana');
-    const botaoIniciar = document.getElementById('botao-iniciar');
-    const blocoFinalizar = document.getElementById('bloco-finalizar');
-    const botaoFinalizar = document.getElementById('botao-finalizar');
-    const valorTimer = document.getElementById('valor-timer');
-    const timerServico = document.getElementById('timer-servico');
-    
+
     let agendamentoSelecionadoId = null;
     let dataAtual = new Date();
-    let intervaloTimer = null;
-    let tempoInicial = 0;
 
     formNovoAgendamento.addEventListener('submit', (e) => {
         e.preventDefault();
         const data = document.getElementById('data-agendamento').value;
         const horario = document.getElementById('hora-agendamento').value;
-        const clienteNome = document.getElementById('cliente-agendamento').value;
+        const cliente = document.getElementById('cliente-agendamento').value;
         const servico = document.getElementById('servico-agendamento').value;
         const funcionariosSelecionados = Array.from(document.getElementById('funcionario-agendamento').selectedOptions).map(option => option.value);
-
-        // Verifica se o cliente já existe na lista de clientes
-        let clienteExistente = clientes.find(c => c.nome === clienteNome);
-        if (!clienteExistente) {
-            // Se o cliente não existir, adiciona à lista
-            clienteExistente = {
-                id: `cli-${Date.now()}`,
-                nome: clienteNome,
-                telefone: '',
-                endereco: ''
-            };
-            clientes.push(clienteExistente);
-            salvarDados('clientes', clientes);
-        }
 
         const novoAgendamento = {
             id: `agendamento-${Date.now()}`,
             data: data,
             horario: horario,
-            cliente: clienteNome,
-            telefone: clienteExistente.telefone || '',
-            endereco: clienteExistente.endereco || '',
+            cliente: cliente,
             servico: servico,
             funcionarios: funcionariosSelecionados,
             status: 'agendado'
@@ -250,20 +185,16 @@ if (document.body.classList.contains('pagina-agenda')) {
         e.preventDefault();
         const id = document.getElementById('agendamento-id').value;
         const dataHora = document.getElementById('data-hora-edicao').value;
-        const clienteNome = document.getElementById('cliente-edicao').value;
+        const cliente = document.getElementById('cliente-edicao').value;
         const servico = document.getElementById('servico-edicao').value;
         const funcionariosSelecionados = Array.from(document.getElementById('funcionario-edicao').selectedOptions).map(option => option.value);
     
         const agendamento = agendamentos.find(a => a.id === id);
         if (agendamento) {
             const novaData = new Date(dataHora);
-            const clienteSelecionado = clientes.find(c => c.nome === clienteNome);
-
             agendamento.data = novaData.toISOString().split('T')[0];
             agendamento.horario = novaData.toTimeString().substring(0, 5);
-            agendamento.cliente = clienteNome;
-            agendamento.telefone = clienteSelecionado ? clienteSelecionado.telefone : agendamento.telefone;
-            agendamento.endereco = clienteSelecionado ? clienteSelecionado.endereco : agendamento.endereco;
+            agendamento.cliente = cliente;
             agendamento.servico = servico;
             agendamento.funcionarios = funcionariosSelecionados;
             salvarDados('agendamentos', agendamentos);
@@ -290,7 +221,7 @@ if (document.body.classList.contains('pagina-agenda')) {
             selectElement.appendChild(option);
         });
     }
-    
+
     function preencherSelectsEdicao() {
         const clienteSelect = document.getElementById('cliente-edicao');
         const servicoSelect = document.getElementById('servico-edicao');
@@ -302,8 +233,8 @@ if (document.body.classList.contains('pagina-agenda')) {
 
         clientes.forEach(cliente => {
             const option = document.createElement('option');
-            option.value = cliente.nome;
-            option.textContent = cliente.nome;
+            option.value = cliente;
+            option.textContent = cliente;
             clienteSelect.appendChild(option);
         });
 
@@ -322,52 +253,20 @@ if (document.body.classList.contains('pagina-agenda')) {
         });
     }
 
-    // Funções para o timer
-    function formatarTempo(segundos) {
-        const horas = Math.floor(segundos / 3600);
-        const minutos = Math.floor((segundos % 3600) / 60);
-        const secs = segundos % 60;
-        return [horas, minutos, secs]
-            .map(v => v < 10 ? "0" + v : v)
-            .join(":");
-    }
-
-    function iniciarTimer() {
-        if (intervaloTimer) clearInterval(intervaloTimer);
-        tempoInicial = Math.floor(Date.now() / 1000); // Tempo em segundos
-        valorTimer.textContent = "00:00:00";
-        timerServico.style.display = 'block';
-
-        intervaloTimer = setInterval(() => {
-            const tempoAtual = Math.floor(Date.now() / 1000);
-            const tempoDecorrido = tempoAtual - tempoInicial;
-            valorTimer.textContent = formatarTempo(tempoDecorrido);
-        }, 1000);
-    }
-    
-    function pararTimer() {
-        if (intervaloTimer) {
-            clearInterval(intervaloTimer);
-            intervaloTimer = null;
-        }
-        const tempoFinal = Math.floor(Date.now() / 1000);
-        const duracao = tempoFinal - tempoInicial;
-        return formatarTempo(duracao);
-    }
-
     function abrirModalComDetalhes(agendamento) {
         agendamentoSelecionadoId = agendamento.id;
+        console.log("Status do agendamento:", agendamento.status); // Adicionado para diagnóstico
 
         formAlterarDados.style.display = 'none';
         detalhesAgendamento.style.display = 'block';
         botoesEdicao.style.display = 'flex';
-        
-        document.getElementById('detalhes-cliente').textContent = agendamento.cliente || 'N/A';
-        document.getElementById('detalhes-telefone').textContent = agendamento.telefone || 'N/A';
-        document.getElementById('detalhes-endereco').textContent = agendamento.endereco || 'N/A';
-        document.getElementById('detalhes-servico').textContent = agendamento.servico || 'N/A';
-        document.getElementById('detalhes-funcionarios').textContent = (agendamento.funcionarios || []).join(', ');
-        document.getElementById('detalhes-status').textContent = agendamento.status || 'N/A';
+
+        document.getElementById('detalhes-cliente').textContent = agendamento.cliente;
+        document.getElementById('detalhes-telefone').textContent = agendamento.telefone;
+        document.getElementById('detalhes-endereco').textContent = agendamento.endereco;
+        document.getElementById('detalhes-servico').textContent = agendamento.servico;
+        document.getElementById('detalhes-funcionarios').textContent = agendamento.funcionarios.join(', ');
+        document.getElementById('detalhes-status').textContent = agendamento.status;
         
         preencherSelectsEdicao();
         document.getElementById('agendamento-id').value = agendamento.id;
@@ -376,22 +275,18 @@ if (document.body.classList.contains('pagina-agenda')) {
 
         const funcionariosSelecionados = Array.from(document.getElementById('funcionario-edicao').options);
         funcionariosSelecionados.forEach(option => {
-            if (agendamento.funcionarios && agendamento.funcionarios.includes(option.value)) {
+            if (agendamento.funcionarios.includes(option.value)) {
                 option.selected = true;
             } else {
                 option.selected = false;
             }
         });
 
-        // Garantir que os botões de ação rápida estejam visíveis
-        const botoesAcaoRapida = document.querySelector('.botoes-acao-rapida');
-        botoesAcaoRapida.style.display = 'flex';
-        
-        const telefoneFormatado = (agendamento.telefone || '').replace(/\D/g, '');
-        document.getElementById('botao-whatsapp').href = `https://wa.me/55${telefoneFormatado}`;
-        
-        const enderecoFormatado = agendamento.endereco ? encodeURIComponent(agendamento.endereco) : '';
-        document.getElementById('botao-maps').href = `http://googleusercontent.com/maps.google.com/9{enderecoFormatado}`;
+        const blocoFinalizar = document.getElementById('bloco-finalizar');
+        const botaoIniciar = document.getElementById('botao-iniciar');
+
+        document.getElementById('botao-alterar-dados').style.display = 'block';
+        document.getElementById('botao-cancelar').style.display = 'block';
 
         if (agendamento.status === 'agendado') {
             tituloModalEdicao.textContent = 'Detalhes do Agendamento';
@@ -400,74 +295,27 @@ if (document.body.classList.contains('pagina-agenda')) {
             detalhesDuracao.style.display = 'none';
             formFluxo.style.display = 'block';
             botaoReverter.style.display = 'none';
-            timerServico.style.display = 'none';
-            botaoAlterarDados.style.display = 'block';
-            botaoCancelar.style.display = 'block';
-        } else if (agendamento.status === 'iniciado') {
-            tituloModalEdicao.textContent = 'Serviço em Andamento';
-            botaoIniciar.style.display = 'none';
-            blocoFinalizar.style.display = 'block';
-            detalhesDuracao.style.display = 'none';
-            formFluxo.style.display = 'block';
-            botaoReverter.style.display = 'none';
-            timerServico.style.display = 'block';
-            botaoAlterarDados.style.display = 'none';
-            botaoCancelar.style.display = 'none';
-            iniciarTimer(); // Reinicia o timer ao abrir o modal
         } else if (agendamento.status === 'finalizado') {
             tituloModalEdicao.textContent = 'Serviço Finalizado';
             botaoIniciar.style.display = 'none';
             blocoFinalizar.style.display = 'none';
             detalhesDuracao.style.display = 'block';
-            document.getElementById('valor-duracao').textContent = agendamento.duracao || 'N/A';
+            document.getElementById('valor-duracao').textContent = agendamento.duracao;
             formFluxo.style.display = 'none';
             botaoReverter.style.display = 'block';
-            timerServico.style.display = 'none';
-            botaoAlterarDados.style.display = 'none';
-            botaoCancelar.style.display = 'none';
         }
 
+        document.getElementById('botao-whatsapp').href = `https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}`;
+        document.getElementById('botao-maps').href = `https://www.google.com/maps/search/?api=1&query=$$0{encodeURIComponent(agendamento.endereco)}`;
+        
         modalEditar.classList.add('ativo');
     }
-
-    // Event listeners dos botões de fluxo de trabalho
-    botaoIniciar.addEventListener('click', () => {
-        const agendamento = agendamentos.find(a => a.id === agendamentoSelecionadoId);
-        if (agendamento) {
-            agendamento.status = 'iniciado';
-            salvarDados('agendamentos', agendamentos);
-            iniciarTimer();
-            alert('Serviço iniciado!');
-            // Atualiza a exibição do modal para mostrar o bloco de finalizar
-            abrirModalComDetalhes(agendamento);
-        }
-    });
-
-    botaoFinalizar.addEventListener('click', () => {
-        const agendamento = agendamentos.find(a => a.id === agendamentoSelecionadoId);
-        if (agendamento) {
-            const duracao = pararTimer();
-            agendamento.status = 'finalizado';
-            agendamento.duracao = duracao;
-            // Lógica para a foto do serviço
-            const fotoInput = document.getElementById('foto-servico');
-            if (fotoInput.files.length > 0) {
-                // Aqui você pode adicionar a lógica para fazer upload da foto para o Firebase Storage
-                // ou apenas registrar que uma foto foi tirada.
-                console.log('Foto capturada, mas não salva. Implementar lógica de upload.');
-            }
-            salvarDados('agendamentos', agendamentos);
-            alert(`Serviço finalizado! Duração: ${duracao}`);
-            criarAgendaDiaria(dataAtual);
-            modalEditar.classList.remove('ativo');
-        }
-    });
 
     function abrirModalNovoAgendamento(horario, data) {
         modalAgendamento.classList.add('ativo');
         document.getElementById('data-agendamento').value = data;
         document.getElementById('hora-agendamento').value = horario;
-        preencherSelects('cliente-agendamento', clientes.map(c => c.nome));
+        preencherSelects('cliente-agendamento', clientes);
         preencherSelects('servico-agendamento', servicos);
         preencherSelects('funcionario-agendamento', funcionarios);
     }
@@ -498,9 +346,9 @@ if (document.body.classList.contains('pagina-agenda')) {
             if (agendamentoDoHorario) {
                 agendamentoDiv.classList.add('agendado');
                 agendamentoDiv.innerHTML = `
-                    <span>${agendamentoDoHorario.horario} - ${agendamentoDoHorario.servico || 'Serviço não informado'}</span>
-                    <span>Cliente: ${agendamentoDoHorario.cliente || 'Cliente não informado'}</span>
-                    <span>Funcionário(s): ${(agendamentoDoHorario.funcionarios || []).join(', ') || 'N/A'}</span>
+                    <span>${agendamentoDoHorario.horario} - ${agendamentoDoHorario.servico}</span>
+                    <span>Cliente: ${agendamentoDoHorario.cliente}</span>
+                    <span>Funcionário(s): ${agendamentoDoHorario.funcionarios.join(', ')}</span>
                 `;
                 agendamentoDiv.addEventListener('click', () => {
                     abrirModalComDetalhes(agendamentoDoHorario);
@@ -552,90 +400,10 @@ if (document.body.classList.contains('pagina-agenda')) {
         }
     }
 
-    // Lógica para a página de clientes (clientes.html)
-    if (document.body.classList.contains('pagina-clientes')) {
-        const tabelaClientesBody = document.querySelector('#tabela-clientes tbody');
-        const modalEditarCliente = document.getElementById('modal-editar-cliente');
-        const fecharModalClienteBtn = document.getElementById('fechar-modal-cliente');
-        const formEditarCliente = document.getElementById('form-editar-cliente');
-
-        function renderizarClientes() {
-            tabelaClientesBody.innerHTML = '';
-            clientes.forEach(cliente => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${cliente.nome}</td>
-                    <td>${cliente.telefone || 'N/A'}</td>
-                    <td>${cliente.endereco || 'N/A'}</td>
-                    <td>
-                        <button class="btn-editar" data-id="${cliente.id}">Editar</button>
-                        <button class="btn-excluir" data-id="${cliente.id}">Excluir</button>
-                    </td>
-                `;
-                tabelaClientesBody.appendChild(tr);
-            });
-
-            // Adiciona event listeners para os botões de editar e excluir
-            document.querySelectorAll('.btn-editar').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    const clienteParaEditar = clientes.find(c => c.id === id);
-                    if (clienteParaEditar) {
-                        document.getElementById('cliente-id').value = clienteParaEditar.id;
-                        document.getElementById('nome-cliente-edicao').value = clienteParaEditar.nome;
-                        document.getElementById('telefone-cliente-edicao').value = clienteParaEditar.telefone;
-                        document.getElementById('endereco-cliente-edicao').value = clienteParaEditar.endereco;
-                        modalEditarCliente.classList.add('ativo');
-                    }
-                });
-            });
-
-            document.querySelectorAll('.btn-excluir').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    if (confirm('Tem certeza que deseja excluir este cliente?')) {
-                        clientes = clientes.filter(c => c.id !== id);
-                        salvarDados('clientes', clientes);
-                        renderizarClientes();
-                    }
-                });
-            });
-        }
-        
-        formEditarCliente.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const id = document.getElementById('cliente-id').value;
-            const nome = document.getElementById('nome-cliente-edicao').value;
-            const telefone = document.getElementById('telefone-cliente-edicao').value;
-            const endereco = document.getElementById('endereco-cliente-edicao').value;
-            
-            const clienteParaAtualizar = clientes.find(c => c.id === id);
-            if (clienteParaAtualizar) {
-                clienteParaAtualizar.nome = nome;
-                clienteParaAtualizar.telefone = telefone;
-                clienteParaAtualizar.endereco = endereco;
-                salvarDados('clientes', clientes);
-                renderizarClientes();
-                modalEditarCliente.classList.remove('ativo');
-                alert('Cliente atualizado com sucesso!');
-            }
-        });
-
-        fecharModalClienteBtn.addEventListener('click', () => {
-            modalEditarCliente.classList.remove('ativo');
-        });
-
-        renderizarClientes();
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
         if (document.body.classList.contains('pagina-agenda')) {
             criarNavegacaoSemanal();
             criarAgendaDiaria(dataAtual);
-        }
-        if (document.body.classList.contains('pagina-clientes')) {
-            // Garante que a renderização inicial dos clientes aconteça ao carregar a página
-            renderizarClientes();
         }
     });
 }
