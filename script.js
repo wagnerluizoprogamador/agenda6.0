@@ -84,6 +84,53 @@ if (document.body.classList.contains('pagina-cadastro')) {
     });
 }
 
+// Lógica para a página de serviços (servicos.html)
+if (document.body.classList.contains('pagina-servicos')) {
+    const formCadastroServico = document.getElementById('form-cadastro-servico');
+    const listaServicos = document.getElementById('lista-servicos');
+
+    function renderizarServicos() {
+        listaServicos.innerHTML = '';
+        servicos.forEach(servico => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${servico}</span>
+                <button class="btn-excluir" data-nome="${servico}">Excluir</button>
+            `;
+            listaServicos.appendChild(li);
+        });
+
+        // Adiciona eventos de clique para os botões de exclusão
+        document.querySelectorAll('.btn-excluir').forEach(botao => {
+            botao.addEventListener('click', (e) => {
+                const nomeServico = e.target.dataset.nome;
+                if (confirm(`Tem certeza que deseja excluir o serviço "${nomeServico}"?`)) {
+                    servicos = servicos.filter(s => s !== nomeServico);
+                    salvarDados('servicos', servicos);
+                    renderizarServicos();
+                }
+            });
+        });
+    }
+
+    formCadastroServico.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome-servico').value;
+        if (!servicos.includes(nome)) {
+            servicos.push(nome);
+            salvarDados('servicos', servicos);
+            alert(`Serviço "${nome}" cadastrado com sucesso!`);
+            formCadastroServico.reset();
+            renderizarServicos();
+        } else {
+            alert(`Serviço "${nome}" já existe.`);
+        }
+    });
+    
+    // Renderiza a lista inicial
+    renderizarServicos();
+}
+
 // Lógica para a página de agenda (agenda.html)
 if (document.body.classList.contains('pagina-agenda')) {
     const formNovoAgendamento = document.getElementById('form-novo-agendamento');
