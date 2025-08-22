@@ -1,80 +1,35 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Agenda de Serviços</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body class="pagina-cadastro">
-
-    <header>
-        <nav>
-            <a href="agenda.html">Agenda</a>
-            <a href="index.html" class="ativo">Cadastros</a>
-            <a href="clientes.html">Clientes</a>
-            <a href="servicos.html">Serviços</a>
-            <a href="funcionarios.html">Funcionários</a>
-            <a href="financeiro.html">Financeiro</a>
-            <a href="comissoes.html">Comissões</a>
-        </nav>
-    </header>
-
-    <main>
-        <section class="form-container">
-            <h2>Cadastro de Cliente</h2>
-            <form id="form-cadastro-cliente">
-                <div class="form-group">
-                    <label for="nome-cliente">Nome Completo:</label>
-                    <input type="text" id="nome-cliente" name="nome-cliente" required>
-                </div>
-                <div class="form-group">
-                    <label for="telefone-cliente">Telefone:</label>
-                    <input type="tel" id="telefone-cliente" name="telefone-cliente" required>
-                </div>
-                <div class="form-group">
-                    <label for="endereco-cliente">Endereço (opcional):</label>
-                    <input type="text" id="endereco-cliente" name="endereco-cliente">
-                </div>
-                <button type="submit" id="cadastrar-cliente-btn">Cadastrar Cliente</button>
-            </form>
-        </section>
-
-        <section class="form-container">
-            <h2>Cadastro de Serviço</h2>
-            <form id="form-cadastro-servico">
-                <div class="form-group">
-                    <label for="nome-servico">Nome do Serviço:</label>
-                    <input type="text" id="nome-servico" name="nome-servico" required>
-                </div>
-                <div class="form-group">
-                    <label for="duracao-servico">Duração (minutos):</label>
-                    <input type="number" id="duracao-servico" name="duracao-servico" required>
-                </div>
-                <div class="form-group">
-                    <label for="valor-servico">Valor (R$):</label>
-                    <input type="number" id="valor-servico" name="valor-servico" step="0.01" required>
-                </div>
-                <button type="submit" id="cadastrar-servico-btn">Cadastrar Serviço</button>
-            </form>
-        </section>
-
-        <section class="form-container">
-            <h2>Cadastro de Funcionário</h2>
-            <form id="form-cadastro-funcionario">
-                <div class="form-group">
-                    <label for="nome-funcionario">Nome do Funcionário:</label>
-                    <input type="text" id="nome-funcionario" name="nome-funcionario" required>
-                </div>
-                <div class="form-group">
-                    <label for="comissao-funcionario">Comissão (%)</label>
-                    <input type="number" id="comissao-funcionario" name="comissao-funcionario" required>
-                </div>
-                <button type="submit" id="cadastrar-funcionario-btn">Cadastrar Funcionário</button>
-            </form>
-        </section>
-    </main>
-
-  <script type="module" src="script.js"></script>
-</body>
+<html lang="pt-br" dir="ltr">
+ <head>
+  <meta charset="utf-8">
+  <link rel="shortcut icon" href="/favicon-6.0.ico">
+  <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="/manifest.json">
+  
+  <meta property="og:image" content="/images/logos/logo-agenda-6.0.png">
+  <meta property="og:title" content="Minha Agenda 6.0">
+  <meta property="og:description" content="Sistema de agendamento 6.0: agora com comissionamento para múltiplas pessoas.">
+  
+  <link href="https://fonts.googleapis.com/css?family=Roboto+Mono|Roboto+Slab|Roboto:300,400,500,700" rel="stylesheet">
+  
+  <title>Minha Agenda 6.0</title> 
+  
+  <link href="/static/css/main.80390cb1.css" rel="stylesheet">
+  <style data-emotion="css" data-s=""></style>
+ </head>
+ <body>
+  <noscript>
+   You need to enable JavaScript to run this app.
+  </noscript>
+  <div id="root">
+   <div class="css-ff6oez-loaderContainer">
+    <span class="MuiCircularProgress-root MuiCircularProgress-indeterminate MuiCircularProgress-colorPrimary css-4etwp8-colorPrimary-loader" role="progressbar" style="width: 40px; height: 40px;">
+     <svg class="MuiCircularProgress-svg css-13o7eu2" viewbox="22 22 44 44">
+      <circle class="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate css-14891ef" cx="44" cy="44" r="20" fill="none" stroke-width="4"></circle>
+     </svg></span>
+    
+    <p class="MuiTypography-root MuiTypography-body1 MuiTypography-gutterBottom css-1139psp-loaderTypography">Carregando Minha Agenda 6.0...</p>
+   </div>
+  </div>
+ </body>
 </html>
