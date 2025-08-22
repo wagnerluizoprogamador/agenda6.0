@@ -10,3 +10,21 @@ public class Agendamento
 
     public ICollection<Comissao> Comissoes { get; set; } = new List<Comissao>();
 }
+public class Profissional
+{
+    public int Id { get; set; }
+    public string Nome { get; set; }
+}
+public class Comissao
+{
+    public int Id { get; set; }
+
+    public int AgendamentoId { get; set; }
+    public Agendamento Agendamento { get; set; }
+
+    public int ProfissionalId { get; set; }
+    public Profissional Profissional { get; set; }
+
+    public decimal Porcentagem { get; set; }
+    public decimal ValorComissao { get; set; }
+}
