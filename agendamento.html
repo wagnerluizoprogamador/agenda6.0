@@ -1,186 +1,199 @@
-<div class="form-row">
-<div class="form-group">
-<label>Data</label>
-                    <input type="text" value="Segunda, 11/08/2025">
-                    <input type="text" id="input-data" value="Segunda, 11/08/2025">
-</div>
-<div class="form-group">
-<label>Horário</label>
-                    <input type="text" value="07:30">
-                    <input type="text" id="input-horario" value="07:30">
-</div>
-</div>
-<div class="form-row">
-<div class="form-group">
-<label>Profissional</label>
-                    <input type="text" value="Aylon">
-                    <input type="text" id="input-profissional" value="Aylon">
-</div>
-<div class="form-group">
-<label>Sala</label>
-                    <input type="text" value="selecionar...">
-                    <input type="text" id="input-sala" value="selecionar...">
-</div>
-</div>
-
-<div class="form-group">
-<label>Cliente</label>
-<div style="display: flex; align-items: center;">
-                    <input type="text" value="Chaiane De Carvalho Traços" style="flex-grow: 1;">
-                    <input type="text" id="input-cliente" value="Chaiane De Carvalho Traços" style="flex-grow: 1;">
-<button>Nova Comanda</button>
-</div>
-</div>
-
-<div class="form-group">
-<label>Serviços</label>
-                <div class="servicos-list">
-                <div class="servicos-list" id="servicos-list">
-<div class="servico-item">
-<input type="text" value="Posicionamentos">
-<input type="text" value="R$100,00" style="width: 100px;">
-@@ -227,17 +227,17 @@ <h2>Editando Atendimento</h2>
-
-<div class="form-group">
-<label>Duração</label>
-                <input type="text" value="1 h 30 min">
-                <input type="text" id="input-duracao" value="1 h 30 min">
-</div>
-
-<div class="form-group">
-<label>Observação</label>
-                <input type="text" value="Bel rio Sul">
-                <input type="text" id="input-observacao" value="Bel rio Sul">
-</div>
-
-<div class="form-group">
-<label>Custos de Serviço</label>
-                <input type="text">
-                <input type="text" id="input-custos">
-</div>
-
-<a href="#" class="aplicar-desconto">Aplicar desconto</a>
-@@ -259,11 +259,9 @@ <h2>Editando Atendimento</h2>
-</script>
-
-<script type="module">
-        // Importe as funções do Firebase que você precisa
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-        import { getFirestore, collection, addDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
-        // Suas configurações do Firebase
-const firebaseConfig = {
-apiKey: "AIzaSyBW54cVtXEjXcbF_ADxS-HXz3b4xvZBM9o",
-authDomain: "agenda6-7ba82.firebaseapp.com",
-@@ -274,43 +272,84 @@ <h2>Editando Atendimento</h2>
-measurementId: "G-Y92QYKMYRT"
-};
-
-        // Inicialize o Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-        // Função para salvar o agendamento
-        async function salvarAgendamento() {
-            const data = document.querySelector('input[value="Segunda, 11/08/2025"]').value;
-            const horario = document.querySelector('input[value="07:30"]').value;
-            const profissional = document.querySelector('input[value="Aylon"]').value;
-            const cliente = document.querySelector('input[value="Chaiane De Carvalho Traços"]').value;
-        // Função para preencher o formulário com dados existentes
-        async function preencherFormulario(agendamentoId) {
-            const agendamentoRef = doc(db, "agendamentos", agendamentoId);
-            const agendamentoSnap = await getDoc(agendamentoRef);
-
-            if (agendamentoSnap.exists()) {
-                const dados = agendamentoSnap.data();
-                document.getElementById('input-data').value = dados.data;
-                document.getElementById('input-horario').value = dados.horario;
-                document.getElementById('input-profissional').value = dados.profissional;
-                document.getElementById('input-cliente').value = dados.cliente;
-                document.getElementById('input-duracao').value = dados.duracao;
-                document.getElementById('input-observacao').value = dados.observacao;
-                
-                // Limpa a lista de serviços e adiciona os itens do banco de dados
-                const servicosList = document.getElementById('servicos-list');
-                servicosList.innerHTML = '';
-                dados.servicos.forEach(servico => {
-                    const servicoItem = document.createElement('div');
-                    servicoItem.classList.add('servico-item');
-                    servicoItem.innerHTML = `
-                        <input type="text" value="${servico}">
-                        <input type="text" value="R$XX,XX" style="width: 100px;">
-                        <button class="remover-btn">&times;</button>
-                    `;
-                    servicosList.prepend(servicoItem);
-                });
-
-                document.querySelector('.total-valor').textContent = `Total: ${dados.total}`;
-                
-            } else {
-                console.log("Nenhum agendamento encontrado com este ID.");
-            }
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono|Roboto+Slab|Roboto:300,400,500,700" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/main.80390cb1.css">
+    <title>Novo Agendamento</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
+        .modal-agendamento {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        .modal-agendamento h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .campo {
+            margin-bottom: 20px;
+        }
+        .campo label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .campo input, .campo select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .comissao-grupo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .comissao-grupo input {
+            width: 80px;
+            margin-left: 10px;
+        }
+        .btn-adicionar {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-adicionar:hover {
+            background-color: #0056b3;
+        }
+        .painel-resumo {
+            background-color: #e9f5ff;
+            border-left: 5px solid #007bff;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
 
-        // Função para salvar ou atualizar o agendamento
-        async function salvarAgendamento(agendamentoId) {
-            const data = document.getElementById('input-data').value;
-            const horario = document.getElementById('input-horario').value;
-            const profissional = document.getElementById('input-profissional').value;
-            const cliente = document.getElementById('input-cliente').value;
-const servicos = Array.from(document.querySelectorAll('.servico-item input:first-child')).map(input => input.value);
-const total = document.querySelector('.total-valor').textContent.replace('Total: ', '');
-            const duracao = document.querySelector('input[value="1 h 30 min"]').value;
-            const observacao = document.querySelector('input[value="Bel rio Sul"]').value;
-            const duracao = document.getElementById('input-duracao').value;
-            const observacao = document.getElementById('input-observacao').value;
+    <div class="modal-agendamento">
+        <h3>Criando Atendimento</h3>
+
+        <div class="campo">
+            <label for="data">Data</label>
+            <input type="date" id="data" value="2025-08-22">
+        </div>
+
+        <div class="campo">
+            <label for="profissional">Profissional Principal</label>
+            <div class="comissao-grupo">
+                <select id="profissional-principal">
+                    <option value="1">Arthur Brayan</option>
+                    <option value="2">Profissional B</option>
+                    <option value="3">Profissional C</option>
+                </select>
+                <input type="number" id="comissao-principal" placeholder="%" value="100">
+            </div>
+        </div>
+
+        <div id="ajudantes-container">
+            </div>
+
+        <button class="btn-adicionar" id="btn-adicionar-ajudante">+ Adicionar Ajudante</button>
+
+        <div class="campo">
+            <label for="cliente">Cliente</label>
+            <input type="text" id="cliente" placeholder="Digite para buscar...">
+        </div>
+        
+        <div class="campo">
+            <label for="servico">Serviço</label>
+            <input type="text" id="servico" placeholder="Digite para buscar ou selecione...">
+        </div>
+
+        <div class="campo">
+            <label for="valor">Valor Total</label>
+            <input type="number" id="valor-total" value="150.00">
+        </div>
+
+        <div class="painel-resumo">
+            <h4>Resumo de Comissões</h4>
+            <p>Soma das Comissões: <span id="soma-porcentagem">100</span>%</p>
+            <p>Comissão do Profissional Principal: R$ <span id="valor-comissao-principal">150.00</span></p>
+            <p id="resumo-ajudante1" style="display:none;"></p>
+            <p id="resumo-ajudante2" style="display:none;"></p>
+        </div>
+
+        <button>Salvar</button>
+        <button>Fechar</button>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnAdicionarAjudante = document.getElementById('btn-adicionar-ajudante');
+            const ajudantesContainer = document.getElementById('ajudantes-container');
+            const valorTotalInput = document.getElementById('valor-total');
+            const comissaoPrincipalInput = document.getElementById('comissao-principal');
+            const somaPorcentagemSpan = document.getElementById('soma-porcentagem');
+            const valorComissaoPrincipalSpan = document.getElementById('valor-comissao-principal');
             
-            const agendamentoData = { data, horario, profissional, cliente, servicos, total, duracao, observacao };
+            let ajudantesCount = 0;
 
-try {
-                // Crie uma nova coleção "agendamentos" e adicione os dados
-                const docRef = await addDoc(collection(db, "agendamentos"), {
-                    data,
-                    horario,
-                    profissional,
-                    cliente,
-                    servicos,
-                    total,
-                    duracao,
-                    observacao
+            function updateResumo() {
+                const valorTotal = parseFloat(valorTotalInput.value) || 0;
+                let somaPorcentagens = parseFloat(comissaoPrincipalInput.value) || 0;
+
+                const comissaoPrincipal = (parseFloat(comissaoPrincipalInput.value) / 100) * valorTotal;
+                valorComissaoPrincipalSpan.textContent = comissaoPrincipal.toFixed(2);
+
+                document.querySelectorAll('.comissao-ajudante').forEach((input, index) => {
+                    const porcentagem = parseFloat(input.value) || 0;
+                    somaPorcentagens += porcentagem;
+                    const valorComissao = (porcentagem / 100) * valorTotal;
+                    
+                    const resumoAjudante = document.getElementById(`resumo-ajudante${index + 1}`);
+                    resumoAjudante.textContent = `Comissão do Ajudante ${index + 1}: R$ ${valorComissao.toFixed(2)}`;
+                    resumoAjudante.style.display = 'block';
                 });
-                console.log("Documento escrito com o ID: ", docRef.id);
-                alert("Agendamento salvo com sucesso!");
-                if (agendamentoId) {
-                    const agendamentoRef = doc(db, "agendamentos", agendamentoId);
-                    await updateDoc(agendamentoRef, agendamentoData);
-                    alert("Agendamento atualizado com sucesso!");
-                } else {
-                    const docRef = await addDoc(collection(db, "agendamentos"), agendamentoData);
-                    alert("Novo agendamento salvo com sucesso!");
+                
+                somaPorcentagemSpan.textContent = somaPorcentagens.toFixed(0);
+            }
+
+            function adicionarAjudante() {
+                if (ajudantesCount >= 2) return;
+
+                ajudantesCount++;
+                const novoCampo = document.createElement('div');
+                novoCampo.classList.add('campo');
+                
+                const ajudanteHTML = `
+                    <label>Ajudante ${ajudantesCount}</label>
+                    <div class="comissao-grupo">
+                        <select>
+                            <option value="">Selecione um ajudante</option>
+                            <option value="1">Arthur Brayan</option>
+                            <option value="2">Profissional B</option>
+                            <option value="3">Profissional C</option>
+                        </select>
+                        <input type="number" class="comissao-ajudante" placeholder="%">
+                    </div>
+                `;
+                novoCampo.innerHTML = ajudanteHTML;
+                ajudantesContainer.appendChild(novoCampo);
+                
+                // Adiciona o evento de input para o novo campo
+                novoCampo.querySelector('.comissao-ajudante').addEventListener('input', updateResumo);
+
+                // Oculta o botão se atingir o limite
+                if (ajudantesCount >= 2) {
+                    btnAdicionarAjudante.style.display = 'none';
                 }
-} catch (e) {
-                console.error("Erro ao adicionar documento: ", e);
-                alert("Erro ao salvar agendamento.");
-                console.error("Erro ao salvar/atualizar agendamento: ", e);
-                alert("Erro ao salvar/atualizar agendamento.");
-}
-}
+            }
 
-        // Adicione um "ouvinte" ao botão para chamar a função de salvar
-        document.getElementById('botao-salvar').addEventListener('click', salvarAgendamento);
-        // Lógica principal
-        const params = new URLSearchParams(window.location.search);
-        const agendamentoId = params.get('id');
-
-        if (agendamentoId) {
-            preencherFormulario(agendamentoId);
-            document.querySelector('h2').textContent = 'Editando Agendamento';
-        } else {
-            document.querySelector('h2').textContent = 'Novo Agendamento';
-        }
-
-        document.getElementById('botao-salvar').addEventListener('click', () => salvarAgendamento(agendamentoId));
-</script>
+            btnAdicionarAjudante.addEventListener('click', adicionarAjudante);
+            valorTotalInput.addEventListener('input', updateResumo);
+            comissaoPrincipalInput.addEventListener('input', updateResumo);
+            updateResumo(); // Chama na primeira carga para popular os valores
+        });
+    </script>
 </body>
 </html>
