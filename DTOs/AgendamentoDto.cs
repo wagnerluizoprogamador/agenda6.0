@@ -10,3 +10,8 @@ public class AgendamentoDto
 
     public List<ProfissionalComissaoDto> profissionais { get; set; }
 }
+public class ProfissionalComissaoDto
+{
+    public int id { get; set; }
+    public decimal comissao_porcentagem { get; set; }
+}
