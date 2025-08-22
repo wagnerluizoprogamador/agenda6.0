@@ -3,197 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento - Minha Agenda 6.0</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono|Roboto+Slab|Roboto:300,400,500,700" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/main.80390cb1.css">
-    <title>Novo Agendamento</title>
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .modal-agendamento {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 100%;
-        }
-        .modal-agendamento h3 {
-            margin-top: 0;
-            color: #333;
-        }
-        .campo {
-            margin-bottom: 20px;
-        }
-        .campo label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-        .campo input, .campo select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        .comissao-grupo {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .comissao-grupo input {
-            width: 80px;
-            margin-left: 10px;
-        }
-        .btn-adicionar {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .btn-adicionar:hover {
-            background-color: #0056b3;
-        }
-        .painel-resumo {
-            background-color: #e9f5ff;
-            border-left: 5px solid #007bff;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="modal-agendamento">
-        <h3>Criando Atendimento</h3>
-
-        <div class="campo">
-            <label for="data">Data</label>
-            <input type="date" id="data" value="2025-08-22">
-        </div>
-
-        <div class="campo">
-            <label for="profissional">Profissional Principal</label>
-            <div class="comissao-grupo">
-                <select id="profissional-principal">
-                    <option value="1">Arthur Brayan</option>
-                    <option value="2">Profissional B</option>
-                    <option value="3">Profissional C</option>
-                </select>
-                <input type="number" id="comissao-principal" placeholder="%" value="100">
-            </div>
-        </div>
-
-        <div id="ajudantes-container">
-            </div>
-
-        <button class="btn-adicionar" id="btn-adicionar-ajudante">+ Adicionar Ajudante</button>
-
-        <div class="campo">
-            <label for="cliente">Cliente</label>
-            <input type="text" id="cliente" placeholder="Digite para buscar...">
+        <div class="modal-header">
+            <h3>Criando Atendimento</h3>
         </div>
         
-        <div class="campo">
-            <label for="servico">Serviço</label>
-            <input type="text" id="servico" placeholder="Digite para buscar ou selecione...">
-        </div>
+        <form id="form-agendamento">
+            <div class="form-group">
+                <label for="data">Data</label>
+                <input type="date" id="data" value="2025-08-22">
+            </div>
 
-        <div class="campo">
-            <label for="valor">Valor Total</label>
-            <input type="number" id="valor-total" value="150.00">
-        </div>
+            <div class="form-group">
+                <label for="hora-inicio">Hora Início</label>
+                <input type="time" id="hora-inicio" value="09:00">
+            </div>
 
-        <div class="painel-resumo">
-            <h4>Resumo de Comissões</h4>
-            <p>Soma das Comissões: <span id="soma-porcentagem">100</span>%</p>
-            <p>Comissão do Profissional Principal: R$ <span id="valor-comissao-principal">150.00</span></p>
-            <p id="resumo-ajudante1" style="display:none;"></p>
-            <p id="resumo-ajudante2" style="display:none;"></p>
-        </div>
+            <div class="form-group">
+                <label for="profissional-principal">Profissional Principal</label>
+                <div class="comissao-wrapper">
+                    <select id="profissional-principal">
+                        <option value="">Selecione um profissional</option>
+                        <option value="1">Arthur Brayan</option>
+                        <option value="2">Profissional B</option>
+                        <option value="3">Profissional C</option>
+                    </select>
+                    <input type="number" id="comissao-principal" placeholder="%" value="100">
+                </div>
+            </div>
 
-        <button>Salvar</button>
-        <button>Fechar</button>
+            <div id="ajudantes-container">
+                </div>
 
+            <button type="button" class="btn-adicionar-ajudante" id="btn-adicionar-ajudante">+ Adicionar Ajudante</button>
+
+            <div class="form-group">
+                <label for="cliente">Cliente</label>
+                <input type="text" id="cliente" placeholder="Digite para buscar...">
+            </div>
+
+            <div class="form-group">
+                <label for="servico">Serviço</label>
+                <input type="text" id="servico" placeholder="Digite para buscar ou selecione...">
+            </div>
+
+            <div class="form-group">
+                <label for="valor-total">Valor Total</label>
+                <input type="number" id="valor-total" value="150.00">
+            </div>
+            
+            <div class="resumo-comissao">
+                <h4>Resumo de Comissões</h4>
+                <p>Soma das Comissões: <span id="soma-porcentagem">100</span>%</p>
+                <p>Comissão do Profissional Principal: R$ <span id="valor-comissao-principal">150.00</span></p>
+                <p id="resumo-ajudante1" class="resumo-ajudante" style="display:none;"></p>
+                <p id="resumo-ajudante2" class="resumo-ajudante" style="display:none;"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-fechar">Fechar</button>
+                <button type="submit" class="btn-salvar">Salvar</button>
+            </div>
+        </form>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnAdicionarAjudante = document.getElementById('btn-adicionar-ajudante');
-            const ajudantesContainer = document.getElementById('ajudantes-container');
-            const valorTotalInput = document.getElementById('valor-total');
-            const comissaoPrincipalInput = document.getElementById('comissao-principal');
-            const somaPorcentagemSpan = document.getElementById('soma-porcentagem');
-            const valorComissaoPrincipalSpan = document.getElementById('valor-comissao-principal');
-            
-            let ajudantesCount = 0;
-
-            function updateResumo() {
-                const valorTotal = parseFloat(valorTotalInput.value) || 0;
-                let somaPorcentagens = parseFloat(comissaoPrincipalInput.value) || 0;
-
-                const comissaoPrincipal = (parseFloat(comissaoPrincipalInput.value) / 100) * valorTotal;
-                valorComissaoPrincipalSpan.textContent = comissaoPrincipal.toFixed(2);
-
-                document.querySelectorAll('.comissao-ajudante').forEach((input, index) => {
-                    const porcentagem = parseFloat(input.value) || 0;
-                    somaPorcentagens += porcentagem;
-                    const valorComissao = (porcentagem / 100) * valorTotal;
-                    
-                    const resumoAjudante = document.getElementById(`resumo-ajudante${index + 1}`);
-                    resumoAjudante.textContent = `Comissão do Ajudante ${index + 1}: R$ ${valorComissao.toFixed(2)}`;
-                    resumoAjudante.style.display = 'block';
-                });
-                
-                somaPorcentagemSpan.textContent = somaPorcentagens.toFixed(0);
-            }
-
-            function adicionarAjudante() {
-                if (ajudantesCount >= 2) return;
-
-                ajudantesCount++;
-                const novoCampo = document.createElement('div');
-                novoCampo.classList.add('campo');
-                
-                const ajudanteHTML = `
-                    <label>Ajudante ${ajudantesCount}</label>
-                    <div class="comissao-grupo">
-                        <select>
-                            <option value="">Selecione um ajudante</option>
-                            <option value="1">Arthur Brayan</option>
-                            <option value="2">Profissional B</option>
-                            <option value="3">Profissional C</option>
-                        </select>
-                        <input type="number" class="comissao-ajudante" placeholder="%">
-                    </div>
-                `;
-                novoCampo.innerHTML = ajudanteHTML;
-                ajudantesContainer.appendChild(novoCampo);
-                
-                // Adiciona o evento de input para o novo campo
-                novoCampo.querySelector('.comissao-ajudante').addEventListener('input', updateResumo);
-
-                // Oculta o botão se atingir o limite
-                if (ajudantesCount >= 2) {
-                    btnAdicionarAjudante.style.display = 'none';
-                }
-            }
-
-            btnAdicionarAjudante.addEventListener('click', adicionarAjudante);
-            valorTotalInput.addEventListener('input', updateResumo);
-            comissaoPrincipalInput.addEventListener('input', updateResumo);
-            updateResumo(); // Chama na primeira carga para popular os valores
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
