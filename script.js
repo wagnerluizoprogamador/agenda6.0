@@ -1,5 +1,5 @@
 /* ======================================================
-   SCRIPT FINAL DEFINITIVO – AGENDA COMPLETA E ESTÁVEL
+   SCRIPT FINAL DEFINITIVO – AGENDA COMPLETA, ESTÁVEL
    ====================================================== */
 
 /* ================= UTIL ================= */
@@ -12,19 +12,46 @@ function lerLocal(chave) {
 
 /* ================= VARIÁVEIS ================= */
 let dataAtual = new Date();
+let timerInterval = null;
 
-/* ================= ELEMENTOS MODAIS ================= */
+/* ================= ELEMENTOS ================= */
 const modalAgendamento = document.getElementById('modal-agendamento');
 const modalEditarAgendamento = document.getElementById('modal-editar-agendamento');
 const fecharModal = document.getElementById('fechar-modal');
 const fecharModalEdicao = document.getElementById('fechar-modal-edicao');
 
 /* ======================================================
+   TIMER
+   ====================================================== */
+function iniciarTimer(horaInicio) {
+    const timerDiv = document.getElementById('timer-servico');
+    const timerSpan = document.getElementById('valor-timer');
+
+    if (!timerDiv || !timerSpan) return;
+
+    clearInterval(timerInterval);
+    timerDiv.style.display = 'block';
+
+    timerInterval = setInterval(() => {
+        const diff = Math.floor((Date.now() - new Date(horaInicio)) / 1000);
+        const h = String(Math.floor(diff / 3600)).padStart(2, '0');
+        const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+        const s = String(diff % 60).padStart(2, '0');
+        timerSpan.textContent = `${h}:${m}:${s}`;
+    }, 1000);
+}
+
+function pararTimer() {
+    clearInterval(timerInterval);
+    const timerDiv = document.getElementById('timer-servico');
+    if (timerDiv) timerDiv.style.display = 'none';
+}
+
+/* ======================================================
    CADASTROS
    ====================================================== */
 function inicializarCadastros() {
 
-    // CLIENTE
     const formCliente = document.getElementById('form-cadastro-cliente');
     if (formCliente) {
         formCliente.addEventListener('submit', e => {
@@ -48,7 +75,6 @@ function inicializarCadastros() {
         });
     }
 
-    // SERVIÇO
     const formServico = document.getElementById('form-cadastro-servico');
     if (formServico) {
         formServico.addEventListener('submit', e => {
@@ -72,7 +98,6 @@ function inicializarCadastros() {
         });
     }
 
-    // FUNCIONÁRIO
     const formFuncionario = document.getElementById('form-cadastro-funcionario');
     if (formFuncionario) {
         formFuncionario.addEventListener('submit', e => {
@@ -97,7 +122,7 @@ function inicializarCadastros() {
 }
 
 /* ======================================================
-   PREENCHER SELECTS DA AGENDA
+   SELECTS DA AGENDA
    ====================================================== */
 function preencherSelectsAgenda() {
     const clientes = lerLocal('clientes');
@@ -110,32 +135,17 @@ function preencherSelectsAgenda() {
 
     if (selCliente) {
         selCliente.innerHTML = '<option value="">Selecione um cliente</option>';
-        clientes.forEach(c => {
-            const op = document.createElement('option');
-            op.value = c.nome;
-            op.textContent = c.nome;
-            selCliente.appendChild(op);
-        });
+        clientes.forEach(c => selCliente.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
     }
 
     if (selServico) {
         selServico.innerHTML = '<option value="">Selecione um serviço</option>';
-        servicos.forEach(s => {
-            const op = document.createElement('option');
-            op.value = s.nome;
-            op.textContent = s.nome;
-            selServico.appendChild(op);
-        });
+        servicos.forEach(s => selServico.innerHTML += `<option value="${s.nome}">${s.nome}</option>`);
     }
 
     if (selFuncionario) {
         selFuncionario.innerHTML = '';
-        funcionarios.forEach(f => {
-            const op = document.createElement('option');
-            op.value = f.nome;
-            op.textContent = f.nome;
-            selFuncionario.appendChild(op);
-        });
+        funcionarios.forEach(f => selFuncionario.innerHTML += `<option value="${f.nome}">${f.nome}</option>`);
     }
 }
 
@@ -266,11 +276,17 @@ function abrirModalEdicao(ag) {
     document.getElementById('detalhes-status').textContent = ag.status;
     document.getElementById('agendamento-id').value = ag.id;
 
+    pararTimer();
+
     document.getElementById('botao-iniciar').style.display =
         ag.status === 'agendado' ? 'block' : 'none';
 
     document.getElementById('bloco-finalizar').style.display =
         ag.status === 'em andamento' ? 'block' : 'none';
+
+    if (ag.status === 'em andamento' && ag.horaInicio) {
+        iniciarTimer(ag.horaInicio);
+    }
 
     configurarAcoesRapidas(ag.cliente);
     modalEditarAgendamento.classList.add('ativo');
@@ -307,6 +323,7 @@ document.getElementById('botao-iniciar')?.addEventListener('click', () => {
     if (!ag) return;
 
     ag.status = 'em andamento';
+    ag.horaInicio = new Date().toISOString();
     salvarLocal('agendamentos', ags);
 
     alert('▶ Serviço iniciado');
@@ -321,6 +338,7 @@ document.getElementById('botao-finalizar')?.addEventListener('click', () => {
     if (!ag) return;
 
     ag.status = 'finalizado';
+    ag.horaFim = new Date().toISOString();
     salvarLocal('agendamentos', ags);
 
     alert('✔ Serviço finalizado');
@@ -345,7 +363,10 @@ document.getElementById('botao-cancelar')?.addEventListener('click', () => {
    FECHAR MODAIS
    ====================================================== */
 fecharModal?.addEventListener('click', () => modalAgendamento.classList.remove('ativo'));
-fecharModalEdicao?.addEventListener('click', () => modalEditarAgendamento.classList.remove('ativo'));
+fecharModalEdicao?.addEventListener('click', () => {
+    pararTimer();
+    modalEditarAgendamento.classList.remove('ativo');
+});
 
 /* ======================================================
    INICIALIZAÇÃO
