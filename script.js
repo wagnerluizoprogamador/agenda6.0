@@ -1,10 +1,19 @@
 /* ======================================================
-   SCRIPT FINAL – ESTÁVEL E ORGANIZADO
+   SCRIPT FINAL – COMPLETO, ESTÁVEL E FUNCIONAL
    ====================================================== */
 
 /* ================= VARIÁVEIS GERAIS ================= */
 let dataAtual = new Date();
 let timerInterval;
+
+/* ================= FUNÇÕES DE STORAGE ================= */
+function salvarLocal(chave, dados) {
+    localStorage.setItem(chave, JSON.stringify(dados));
+}
+
+function lerLocal(chave) {
+    return JSON.parse(localStorage.getItem(chave)) || [];
+}
 
 /* ================= ELEMENTOS GERAIS ================= */
 const calendarioDiarioDiv = document.getElementById('calendario-diario');
@@ -15,35 +24,6 @@ const modalAgendamento = document.getElementById('modal-agendamento');
 const fecharModalBtn = document.getElementById('fechar-modal');
 const modalEditarAgendamento = document.getElementById('modal-editar-agendamento');
 const fecharModalEdicaoBtn = document.getElementById('fechar-modal-edicao');
-
-const detalhesAgendamentoDiv = document.getElementById('detalhes-agendamento');
-const formFluxoDiv = document.getElementById('form-fluxo');
-const blocoFinalizarDiv = document.getElementById('bloco-finalizar');
-const botoesEdicaoDiv = document.getElementById('botoes-edicao');
-const formAlterarDados = document.getElementById('form-alterar-dados');
-
-const botaoIniciar = document.getElementById('botao-iniciar');
-const botaoFinalizar = document.getElementById('botao-finalizar');
-const botaoCancelar = document.getElementById('botao-cancelar');
-
-const fotoServicoInput = document.getElementById('foto-servico');
-const timerServicoDiv = document.getElementById('timer-servico');
-const valorTimerSpan = document.getElementById('valor-timer');
-
-const botaoWhatsapp = document.getElementById('botao-whatsapp');
-const botaoMaps = document.getElementById('botao-maps');
-const botoesAcaoRapidaDiv = document.querySelector('.botoes-acao-rapida');
-
-/* ======================================================
-   FUNÇÕES AUXILIARES
-   ====================================================== */
-function salvarLocal(chave, dados) {
-    localStorage.setItem(chave, JSON.stringify(dados));
-}
-
-function lerLocal(chave) {
-    return JSON.parse(localStorage.getItem(chave)) || [];
-}
 
 /* ======================================================
    CADASTROS
@@ -120,7 +100,7 @@ function inicializarCadastros() {
 }
 
 /* ======================================================
-   AGENDA
+   AGENDA – NAVEGAÇÃO SEMANAL
    ====================================================== */
 function gerarNavegacaoSemanal() {
     if (!diasDaSemanaDiv) return;
@@ -150,13 +130,19 @@ function gerarNavegacaoSemanal() {
     }
 }
 
+/* ======================================================
+   AGENDA – CALENDÁRIO 24H
+   ====================================================== */
 function gerarCalendarioDoDia(data) {
     if (!calendarioDiarioDiv) return;
 
     const dataString = data.toISOString().split('T')[0];
-    dataSelecionadaSpan.textContent = `Agendamentos de ${data.toLocaleDateString('pt-BR')}`;
+    dataSelecionadaSpan.textContent =
+        `Agendamentos de ${data.toLocaleDateString('pt-BR')}`;
 
-    const agendamentos = lerLocal('agendamentos').filter(a => a.data === dataString);
+    const agendamentos = lerLocal('agendamentos')
+        .filter(a => a.data === dataString);
+
     calendarioDiarioDiv.innerHTML = '';
 
     for (let h = 0; h < 24; h++) {
@@ -177,7 +163,7 @@ function gerarCalendarioDoDia(data) {
                 div.onclick = () => {
                     document.getElementById('data-agendamento').value = dataString;
                     document.getElementById('hora-agendamento').value = hora;
-                    modalAgendamento?.classList.add('ativo');
+                    modalAgendamento.classList.add('ativo');
                 };
             }
             calendarioDiarioDiv.appendChild(div);
@@ -186,30 +172,93 @@ function gerarCalendarioDoDia(data) {
 }
 
 /* ======================================================
-   MODAL E TIMER
+   SELECTS DA AGENDA
    ====================================================== */
-function iniciarTimer(horaInicio) {
-    pararTimer();
-    const inicio = new Date(horaInicio).getTime();
-    timerServicoDiv.style.display = 'block';
+function preencherSelectsAgenda() {
+    const clientes = lerLocal('clientes');
+    const servicos = lerLocal('servicos');
+    const funcionarios = lerLocal('funcionarios');
 
-    timerInterval = setInterval(() => {
-        const s = Math.floor((Date.now() - inicio) / 1000);
-        valorTimerSpan.textContent =
-            `${String(Math.floor(s/3600)).padStart(2,'0')}:` +
-            `${String(Math.floor((s%3600)/60)).padStart(2,'0')}:` +
-            `${String(s%60).padStart(2,'0')}`;
-    }, 1000);
+    const selCliente = document.getElementById('cliente-agendamento');
+    const selServico = document.getElementById('servico-agendamento');
+    const selFuncionario = document.getElementById('funcionario-agendamento');
+
+    if (selCliente) {
+        selCliente.innerHTML = '<option value="">Selecione um cliente</option>';
+        clientes.forEach(c => {
+            const op = document.createElement('option');
+            op.value = c.nome;
+            op.textContent = c.nome;
+            selCliente.appendChild(op);
+        });
+    }
+
+    if (selServico) {
+        selServico.innerHTML = '<option value="">Selecione um serviço</option>';
+        servicos.forEach(s => {
+            const op = document.createElement('option');
+            op.value = s.nome;
+            op.textContent = s.nome;
+            selServico.appendChild(op);
+        });
+    }
+
+    if (selFuncionario) {
+        selFuncionario.innerHTML = '';
+        funcionarios.forEach(f => {
+            const op = document.createElement('option');
+            op.value = f.nome;
+            op.textContent = f.nome;
+            selFuncionario.appendChild(op);
+        });
+    }
 }
 
-function pararTimer() {
-    clearInterval(timerInterval);
-    if (timerServicoDiv) timerServicoDiv.style.display = 'none';
+/* ======================================================
+   NOVO AGENDAMENTO
+   ====================================================== */
+const formNovoAgendamento = document.getElementById('form-novo-agendamento');
+
+if (formNovoAgendamento) {
+    formNovoAgendamento.addEventListener('submit', e => {
+        e.preventDefault();
+
+        const data = document.getElementById('data-agendamento').value;
+        const hora = document.getElementById('hora-agendamento').value;
+        const cliente = document.getElementById('cliente-agendamento').value;
+        const servico = document.getElementById('servico-agendamento').value;
+        const funcionarios = Array.from(
+            document.getElementById('funcionario-agendamento').selectedOptions
+        ).map(o => o.value);
+
+        if (!data || !hora || !cliente || !servico || funcionarios.length === 0) {
+            alert('Preencha todos os campos do agendamento');
+            return;
+        }
+
+        const agendamentos = lerLocal('agendamentos');
+        agendamentos.push({
+            id: Date.now(),
+            data,
+            hora,
+            cliente,
+            servico,
+            funcionarios,
+            status: 'agendado'
+        });
+
+        salvarLocal('agendamentos', agendamentos);
+
+        alert('✅ Agendamento realizado com sucesso!');
+        modalAgendamento.classList.remove('ativo');
+        gerarCalendarioDoDia(dataAtual);
+    });
 }
 
+/* ======================================================
+   MODAL DE EDIÇÃO
+   ====================================================== */
 function abrirModalEdicao(ag) {
-    pararTimer();
-
     document.getElementById('detalhes-cliente').textContent = ag.cliente;
     document.getElementById('detalhes-servico').textContent = ag.servico;
     document.getElementById('detalhes-funcionarios').textContent = ag.funcionarios.join(', ');
@@ -222,10 +271,12 @@ function abrirModalEdicao(ag) {
 /* ======================================================
    FECHAR MODAIS
    ====================================================== */
-fecharModalBtn?.addEventListener('click', () => modalAgendamento.classList.remove('ativo'));
+fecharModalBtn?.addEventListener('click', () => {
+    modalAgendamento.classList.remove('ativo');
+});
+
 fecharModalEdicaoBtn?.addEventListener('click', () => {
     modalEditarAgendamento.classList.remove('ativo');
-    pararTimer();
 });
 
 /* ======================================================
@@ -240,5 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.body.classList.contains('pagina-agenda')) {
         gerarNavegacaoSemanal();
         gerarCalendarioDoDia(dataAtual);
+        preencherSelectsAgenda();
     }
 });
