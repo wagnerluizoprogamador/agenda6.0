@@ -1,5 +1,5 @@
 /* ======================================================
-   SCRIPT FINAL DEFINITIVO – AGENDA + FINANCEIRO COMPLETO
+   SCRIPT FINAL ESTÁVEL – AGENDA + FINANCEIRO
    ====================================================== */
 
 /* ================= STORAGE ================= */
@@ -17,93 +17,74 @@ function moeda(v) {
 let dataAtual = new Date();
 let timerInterval = null;
 
-/* ================= MODAIS ================= */
+/* ================= DOM ================= */
+// Agenda
+const calendarioDiario = document.getElementById('calendarioDiario');
+const dataSelecionada = document.getElementById('dataSelecionada');
+
+// Modais
 const modalAgendamento = document.getElementById('modal-agendamento');
 const modalEditarAgendamento = document.getElementById('modal-editar-agendamento');
+
+// Novo agendamento
+const formNovoAgendamento = document.getElementById('form-novo-agendamento');
+const dataAgendamento = document.getElementById('data-agendamento');
+const horaAgendamento = document.getElementById('hora-agendamento');
+const clienteAgendamento = document.getElementById('cliente-agendamento');
+const servicoAgendamento = document.getElementById('servico-agendamento');
+const funcionarioAgendamento = document.getElementById('funcionario-agendamento');
+
+// Edição
+const detalhesCliente = document.getElementById('detalhes-cliente');
+const detalhesServico = document.getElementById('detalhes-servico');
+const detalhesFuncionarios = document.getElementById('detalhes-funcionarios');
+const detalhesStatus = document.getElementById('detalhes-status');
+const agendamentoId = document.getElementById('agendamento-id');
+
+// Botões
+const botaoIniciar = document.getElementById('botao-iniciar');
+const botaoFinalizar = document.getElementById('botao-finalizar');
+const botaoCancelar = document.getElementById('botao-cancelar');
+
+// Timer
+const timerBox = document.getElementById('timer-servico');
+const timerSpan = document.getElementById('valor-timer');
+
+// Financeiro
+const totalRecebido = document.getElementById('totalRecebido');
+const totalComissao = document.getElementById('totalComissao');
+const lucroLiquido = document.getElementById('lucroLiquido');
 
 /* ======================================================
    TIMER
    ====================================================== */
 function iniciarTimer(horaInicio) {
-    const box = document.getElementById('timer-servico');
-    const span = document.getElementById('valor-timer');
-    if (!box || !span) return;
+    if (!timerBox || !timerSpan) return;
 
     clearInterval(timerInterval);
-    box.style.display = 'block';
+    timerBox.style.display = 'block';
 
     timerInterval = setInterval(() => {
         const diff = Math.floor((Date.now() - new Date(horaInicio)) / 1000);
         const h = String(Math.floor(diff / 3600)).padStart(2,'0');
         const m = String(Math.floor((diff % 3600) / 60)).padStart(2,'0');
         const s = String(diff % 60).padStart(2,'0');
-        span.textContent = `${h}:${m}:${s}`;
+        timerSpan.textContent = `${h}:${m}:${s}`;
     }, 1000);
 }
 
 function pararTimer() {
     clearInterval(timerInterval);
-    const box = document.getElementById('timer-servico');
-    if (box) box.style.display = 'none';
+    if (timerBox) timerBox.style.display = 'none';
 }
 
 /* ======================================================
-   CADASTROS
-   ====================================================== */
-function inicializarCadastros() {
-
-    const cliente = document.getElementById('form-cadastro-cliente');
-    if (cliente) cliente.onsubmit = e => {
-        e.preventDefault();
-        const nome = nomeCliente.value.trim();
-        const telefone = telefoneCliente.value.trim();
-        const endereco = enderecoCliente.value.trim();
-        if (!nome || !telefone) return alert('Preencha nome e telefone');
-
-        const dados = lerLocal('clientes');
-        dados.push({ nome, telefone, endereco });
-        salvarLocal('clientes', dados);
-        alert('Cliente cadastrado');
-        cliente.reset();
-    };
-
-    const servico = document.getElementById('form-cadastro-servico');
-    if (servico) servico.onsubmit = e => {
-        e.preventDefault();
-        const nome = nomeServico.value.trim();
-        const duracao = Number(duracaoServico.value);
-        const valor = Number(valorServico.value);
-        if (!nome || !duracao || !valor) return alert('Preencha tudo');
-
-        const dados = lerLocal('servicos');
-        dados.push({ nome, duracao, valor });
-        salvarLocal('servicos', dados);
-        alert('Serviço cadastrado');
-        servico.reset();
-    };
-
-    const funcionario = document.getElementById('form-cadastro-funcionario');
-    if (funcionario) funcionario.onsubmit = e => {
-        e.preventDefault();
-        const nome = nomeFuncionario.value.trim();
-        const comissao = Number(comissaoFuncionario.value);
-        if (!nome || !comissao) return alert('Preencha tudo');
-
-        const dados = lerLocal('funcionarios');
-        dados.push({ nome, comissao });
-        salvarLocal('funcionarios', dados);
-        alert('Funcionário cadastrado');
-        funcionario.reset();
-    };
-}
-
-/* ======================================================
-   SELECTS AGENDA
+   SELECTS
    ====================================================== */
 function preencherSelects() {
     const clientes = lerLocal('clientes');
     const servicos = lerLocal('servicos');
-    const funcs = lerLocal('funcionarios');
+    const funcionarios = lerLocal('funcionarios');
 
     clienteAgendamento.innerHTML = '<option value="">Cliente</option>';
     clientes.forEach(c => clienteAgendamento.innerHTML += `<option>${c.nome}</option>`);
@@ -112,21 +93,28 @@ function preencherSelects() {
     servicos.forEach(s => servicoAgendamento.innerHTML += `<option>${s.nome}</option>`);
 
     funcionarioAgendamento.innerHTML = '';
-    funcs.forEach(f => funcionarioAgendamento.innerHTML += `<option>${f.nome}</option>`);
+    funcionarios.forEach(f => funcionarioAgendamento.innerHTML += `<option>${f.nome}</option>`);
 }
 
 /* ======================================================
    AGENDA
    ====================================================== */
 function gerarAgenda() {
+    if (!calendarioDiario) return;
+
     calendarioDiario.innerHTML = '';
     const dataStr = dataAtual.toISOString().split('T')[0];
+    if (dataSelecionada) {
+        dataSelecionada.textContent = dataAtual.toLocaleDateString('pt-BR');
+    }
+
     const ags = lerLocal('agendamentos').filter(a => a.data === dataStr);
 
     for (let h=0; h<24; h++) {
         for (let m=0; m<60; m+=30) {
             const hora = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
             const ag = ags.find(a => a.hora === hora);
+
             const div = document.createElement('div');
             div.className = 'horario';
 
@@ -162,9 +150,9 @@ formNovoAgendamento?.addEventListener('submit', e => {
         cliente: clienteAgendamento.value,
         servico: servicoAgendamento.value,
         funcionarios: [...funcionarioAgendamento.selectedOptions].map(o=>o.value),
-        status: 'agendado',
-        custo: 0
+        status: 'agendado'
     });
+
     salvarLocal('agendamentos', ags);
     modalAgendamento.classList.remove('ativo');
     gerarAgenda();
@@ -181,39 +169,46 @@ function abrirEdicao(ag) {
     agendamentoId.value = ag.id;
 
     pararTimer();
-    if (ag.status === 'em andamento' && ag.horaInicio) iniciarTimer(ag.horaInicio);
+    if (ag.status === 'em andamento' && ag.horaInicio) {
+        iniciarTimer(ag.horaInicio);
+    }
 
     modalEditarAgendamento.classList.add('ativo');
 }
 
 /* ======================================================
-   BOTÕES EDIÇÃO
+   BOTÕES
    ====================================================== */
 botaoIniciar?.addEventListener('click', () => {
-    const id = agendamentoId.value;
     const ags = lerLocal('agendamentos');
-    const ag = ags.find(a=>a.id==id);
+    const ag = ags.find(a => a.id == agendamentoId.value);
+    if (!ag) return;
+
     ag.status = 'em andamento';
     ag.horaInicio = new Date().toISOString();
     salvarLocal('agendamentos', ags);
+
     modalEditarAgendamento.classList.remove('ativo');
     gerarAgenda();
 });
 
 botaoFinalizar?.addEventListener('click', () => {
-    const id = agendamentoId.value;
     const ags = lerLocal('agendamentos');
-    const ag = ags.find(a=>a.id==id);
+    const ag = ags.find(a => a.id == agendamentoId.value);
+    if (!ag) return;
+
     ag.status = 'finalizado';
     salvarLocal('agendamentos', ags);
+
     modalEditarAgendamento.classList.remove('ativo');
     gerarAgenda();
 });
 
 botaoCancelar?.addEventListener('click', () => {
     let ags = lerLocal('agendamentos');
-    ags = ags.filter(a=>a.id!=agendamentoId.value);
+    ags = ags.filter(a => a.id != agendamentoId.value);
     salvarLocal('agendamentos', ags);
+
     modalEditarAgendamento.classList.remove('ativo');
     gerarAgenda();
 });
@@ -225,7 +220,7 @@ function carregarFinanceiro() {
     if (!document.body.classList.contains('pagina-financeiro')) return;
 
     const hoje = new Date().toISOString().split('T')[0];
-    const ags = lerLocal('agendamentos').filter(a=>a.data===hoje && a.status==='finalizado');
+    const ags = lerLocal('agendamentos').filter(a => a.data===hoje && a.status==='finalizado');
     const servicos = lerLocal('servicos');
     const funcs = lerLocal('funcionarios');
 
@@ -250,7 +245,6 @@ function carregarFinanceiro() {
    INIT
    ====================================================== */
 document.addEventListener('DOMContentLoaded', ()=>{
-    if (document.body.classList.contains('pagina-cadastro')) inicializarCadastros();
-    if (document.body.classList.contains('pagina-agenda')) gerarAgenda();
-    if (document.body.classList.contains('pagina-financeiro')) carregarFinanceiro();
+    gerarAgenda();
+    carregarFinanceiro();
 });
