@@ -1,10 +1,10 @@
 /* ======================================================
-   MODAL DE EDIÇÃO – COMPLETO E FUNCIONAL
+   MODAL DE EDIÇÃO – FINAL E FUNCIONAL
    ====================================================== */
 
 function abrirModalEdicao(ag) {
 
-    // Preenche dados
+    // Preenche dados básicos
     document.getElementById('detalhes-cliente').textContent = ag.cliente;
     document.getElementById('detalhes-servico').textContent = ag.servico;
     document.getElementById('detalhes-funcionarios').textContent = ag.funcionarios.join(', ');
@@ -17,7 +17,7 @@ function abrirModalEdicao(ag) {
     document.getElementById('form-fluxo').style.display = 'block';
     document.getElementById('botoes-edicao').style.display = 'flex';
 
-    // Ajuste por status
+    // Controle por status
     document.getElementById('botao-iniciar').style.display =
         ag.status === 'agendado' ? 'block' : 'none';
 
@@ -26,6 +26,9 @@ function abrirModalEdicao(ag) {
 
     // WhatsApp e Maps
     configurarAcoesRapidas(ag.cliente);
+
+    // Preenche selects de edição
+    preencherSelectsEdicao(ag);
 
     modalEditarAgendamento.classList.add('ativo');
 }
@@ -57,6 +60,46 @@ function configurarAcoesRapidas(clienteNome) {
     } else {
         botaoMaps.style.display = 'none';
     }
+}
+
+/* ======================================================
+   SELECTS DE EDIÇÃO
+   ====================================================== */
+function preencherSelectsEdicao(ag) {
+    const clientes = lerLocal('clientes');
+    const servicos = lerLocal('servicos');
+    const funcionarios = lerLocal('funcionarios');
+
+    const selCliente = document.getElementById('cliente-edicao');
+    const selServico = document.getElementById('servico-edicao');
+    const selFuncionario = document.getElementById('funcionario-edicao');
+
+    selCliente.innerHTML = '';
+    clientes.forEach(c => {
+        const op = document.createElement('option');
+        op.value = c.nome;
+        op.textContent = c.nome;
+        if (c.nome === ag.cliente) op.selected = true;
+        selCliente.appendChild(op);
+    });
+
+    selServico.innerHTML = '';
+    servicos.forEach(s => {
+        const op = document.createElement('option');
+        op.value = s.nome;
+        op.textContent = s.nome;
+        if (s.nome === ag.servico) op.selected = true;
+        selServico.appendChild(op);
+    });
+
+    selFuncionario.innerHTML = '';
+    funcionarios.forEach(f => {
+        const op = document.createElement('option');
+        op.value = f.nome;
+        op.textContent = f.nome;
+        if (ag.funcionarios.includes(f.nome)) op.selected = true;
+        selFuncionario.appendChild(op);
+    });
 }
 
 /* ======================================================
