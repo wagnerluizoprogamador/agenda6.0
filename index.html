@@ -6,89 +6,89 @@
     <title>Minha Agenda de Serviços</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
-    <header>
-       <header>
-    <nav>
-        <a href="index.html">Cadastro</a>
-        <a href="clientes.html">Clientes</a>
-        <a href="servicos.html">Serviços</a>
-    </nav>
-</header>
-    <nav>
-        <a href="index.html">Cadastro</a>
-        <a href="clientes.html">Clientes</a>
-        <a href="servicos.html">Serviços</a>
-        <a href="funcionarios.html">Funcionários</a>
-    </nav>
-</header>
+<body class="pagina-cadastro">
 
-    <header>
+<header>
     <nav>
         <a href="agenda.html">Agenda</a>
-        <a href="index.html">Cadastros</a>
+        <a href="index.html" class="ativo">Cadastro</a>
         <a href="clientes.html">Clientes</a>
         <a href="servicos.html">Serviços</a>
         <a href="funcionarios.html">Funcionários</a>
-        <a href="financeiro.html"class="ativo">Financeiro</a>
-         <a href="comissoes.html"class="ativo">Comissões</a>
+        <a href="financeiro.html">Financeiro</a>
+        <a href="comissoes.html">Comissões</a>
     </nav>
-    <main>
-        <section class="form-container">
-            <h2>Cadastro de Cliente</h2>
-            <form id="form-cadastro-cliente">
-                <div class="form-group">
-                    <label for="nome-cliente">Nome Completo:</label>
-                    <input type="text" id="nome-cliente" name="nome-cliente" required>
-                </div>
-                <div class="form-group">
-                    <label for="telefone-cliente">Telefone:</label>
-                    <input type="tel" id="telefone-cliente" name="telefone-cliente" required>
-                </div>
-                <div class="form-group">
-                    <label for="endereco-cliente">Endereço (opcional):</label>
-                    <input type="text" id="endereco-cliente" name="endereco-cliente">
-                </div>
-                <button type="submit">Cadastrar Cliente</button>
-            </form>
-        </section>
+</header>
 
-        <section class="form-container">
-            <h2>Cadastro de Serviço</h2>
-            <form id="form-cadastro-servico">
-                <div class="form-group">
-                    <label for="nome-servico">Nome do Serviço:</label>
-                    <input type="text" id="nome-servico" name="nome-servico" required>
-                </div>
-                <div class="form-group">
-                    <label for="duracao-servico">Duração (minutos):</label>
-                    <input type="number" id="duracao-servico" name="duracao-servico" required>
-                </div>
-                <div class="form-group">
-                    <label for="valor-servico">Valor (R$):</label>
-                    <input type="number" id="valor-servico" name="valor-servico" step="0.01" required>
-                </div>
-                <button type="submit">Cadastrar Serviço</button>
-            </form>
-        </section>
+<main>
 
-        <section class="form-container">
-    <h2>Cadastro de Funcionário</h2>
-    <form id="form-cadastro-funcionario">
-        <div class="form-group">
-            <label for="nome-funcionario">Nome do Funcionário:</label>
-            <input type="text" id="nome-funcionario" name="nome-funcionario" required>
-        </div>
-        <div class="form-group">
-            <label for="comissao-funcionario">Comissão (%)</label>
-            <input type="number" id="comissao-funcionario" name="comissao-funcionario" required>
-        </div>
-        <button type="submit">Cadastrar Funcionário</button>
-    </form>
-</section>
-    </main>
- <script src="script.js"></script>
+    <!-- CADASTRO DE CLIENTE -->
+    <section class="form-container">
+        <h2>Cadastro de Cliente</h2>
+        <form id="form-cadastro-cliente">
+            <div class="form-group">
+                <label for="nome-cliente">Nome Completo:</label>
+                <input type="text" id="nome-cliente" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefone-cliente">Telefone:</label>
+                <input type="tel" id="telefone-cliente" required>
+            </div>
+
+            <div class="form-group">
+                <label for="endereco-cliente">Endereço (opcional):</label>
+                <input type="text" id="endereco-cliente">
+            </div>
+
+            <button type="submit">Cadastrar Cliente</button>
+        </form>
+    </section>
+
+    <!-- CADASTRO DE SERVIÇO -->
+    <section class="form-container">
+        <h2>Cadastro de Serviço</h2>
+        <form id="form-cadastro-servico">
+            <div class="form-group">
+                <label for="nome-servico">Nome do Serviço:</label>
+                <input type="text" id="nome-servico" required>
+            </div>
+
+            <div class="form-group">
+                <label for="duracao-servico">Duração (minutos):</label>
+                <input type="number" id="duracao-servico" required>
+            </div>
+
+            <div class="form-group">
+                <label for="valor-servico">Valor (R$):</label>
+                <input type="number" id="valor-servico" step="0.01" required>
+            </div>
+
+            <button type="submit">Cadastrar Serviço</button>
+        </form>
+    </section>
+
+    <!-- CADASTRO DE FUNCIONÁRIO -->
+    <section class="form-container">
+        <h2>Cadastro de Funcionário</h2>
+        <form id="form-cadastro-funcionario">
+            <div class="form-group">
+                <label for="nome-funcionario">Nome do Funcionário:</label>
+                <input type="text" id="nome-funcionario" required>
+            </div>
+
+            <div class="form-group">
+                <label for="comissao-funcionario">Comissão (%)</label>
+                <input type="number" id="comissao-funcionario" required>
+            </div>
+
+            <button type="submit">Cadastrar Funcionário</button>
+        </form>
+    </section>
+
+</main>
+
+<script src="script.js"></script>
 </body>
-<body class="pagina-cadastro"></body>
 </html>
