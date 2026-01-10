@@ -1,5 +1,5 @@
 /* ======================================================
-   SCRIPT FINAL FECHADO – AGENDA + FINANCEIRO (ESTÁVEL)
+   SCRIPT FINAL LIMPO – AGENDA ESTÁVEL
    ====================================================== */
 
 /* ================= STORAGE ================= */
@@ -9,24 +9,16 @@ function salvarLocal(chave, dados) {
 function lerLocal(chave) {
     return JSON.parse(localStorage.getItem(chave)) || [];
 }
-function moeda(v) {
-    return Number(v || 0).toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    });
-}
 
 /* ================= VARIÁVEIS ================= */
 let dataAtual = new Date();
 let timerInterval = null;
 
-/* ======================================================
-   TIMER
-   ====================================================== */
+/* ================= TIMER ================= */
 function iniciarTimer(horaInicio) {
     const box = document.getElementById('timer-servico');
     const span = document.getElementById('valor-timer');
-    if (!box || !span || !horaInicio) return;
+    if (!box || !span) return;
 
     clearInterval(timerInterval);
     box.style.display = 'block';
@@ -49,22 +41,23 @@ function pararTimer() {
 /* ======================================================
    AGENDA
    ====================================================== */
-function inicializarAgenda() {
+document.addEventListener('DOMContentLoaded', () => {
 
     const calendario = document.getElementById('calendario-diario');
-    if (!calendario) return;
-
     const tituloData = document.getElementById('data-selecionada');
     const diasSemana = document.getElementById('dias-da-semana');
+
     const modalNovo = document.getElementById('modal-agendamento');
     const modalEditar = document.getElementById('modal-editar-agendamento');
 
+    if (!calendario) return;
+
     /* ===== FECHAR MODAIS ===== */
-    document.getElementById('fechar-modal')?.onclick = () => {
+    document.getElementById('fechar-modal').onclick = () => {
         modalNovo.classList.remove('ativo');
     };
 
-    document.getElementById('fechar-modal-edicao')?.onclick = () => {
+    document.getElementById('fechar-modal-edicao').onclick = () => {
         pararTimer();
         modalEditar.classList.remove('ativo');
     };
@@ -82,7 +75,9 @@ function inicializarAgenda() {
 
             const div = document.createElement('div');
             div.className = 'dia-semana';
-            if (d.toDateString() === dataAtual.toDateString()) div.classList.add('ativo');
+            if (d.toDateString() === dataAtual.toDateString()) {
+                div.classList.add('ativo');
+            }
 
             div.innerHTML = `${nomes[d.getDay()]}<br>${d.getDate()}`;
             div.onclick = () => {
@@ -90,6 +85,7 @@ function inicializarAgenda() {
                 gerarAgenda();
                 gerarSemana();
             };
+
             diasSemana.appendChild(div);
         }
     }
@@ -101,31 +97,34 @@ function inicializarAgenda() {
         const selFuncionario = document.getElementById('funcionario-agendamento');
 
         selCliente.innerHTML = '<option value="">Selecione um cliente</option>';
-        lerLocal('clientes').forEach(c =>
-            selCliente.innerHTML += `<option value="${c.nome}">${c.nome}</option>`
-        );
+        lerLocal('clientes').forEach(c => {
+            selCliente.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
+        });
 
         selServico.innerHTML = '<option value="">Selecione um serviço</option>';
-        lerLocal('servicos').forEach(s =>
-            selServico.innerHTML += `<option value="${s.nome}">${s.nome}</option>`
-        );
+        lerLocal('servicos').forEach(s => {
+            selServico.innerHTML += `<option value="${s.nome}">${s.nome}</option>`;
+        });
 
         selFuncionario.innerHTML = '';
-        lerLocal('funcionarios').forEach(f =>
-            selFuncionario.innerHTML += `<option value="${f.nome}">${f.nome}</option>`
-        );
+        lerLocal('funcionarios').forEach(f => {
+            selFuncionario.innerHTML += `<option value="${f.nome}">${f.nome}</option>`;
+        });
     }
 
     /* ===== GERAR AGENDA ===== */
     function gerarAgenda() {
         calendario.innerHTML = '';
         const dataStr = dataAtual.toISOString().split('T')[0];
-        tituloData.textContent = `Agendamentos de ${dataAtual.toLocaleDateString('pt-BR')}`;
+
+        tituloData.textContent =
+            `Agendamentos de ${dataAtual.toLocaleDateString('pt-BR')}`;
 
         const ags = lerLocal('agendamentos').filter(a => a.data === dataStr);
 
         for (let h = 0; h < 24; h++) {
             for (let m = 0; m < 60; m += 30) {
+
                 const hora = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
                 const ag = ags.find(a => a.hora === hora);
 
@@ -146,6 +145,7 @@ function inicializarAgenda() {
                         modalNovo.classList.add('ativo');
                     };
                 }
+
                 calendario.appendChild(div);
             }
         }
@@ -153,7 +153,6 @@ function inicializarAgenda() {
 
     /* ===== MODAL EDIÇÃO ===== */
     function abrirEdicao(ag) {
-
         document.getElementById('detalhes-cliente').textContent = ag.cliente;
         document.getElementById('detalhes-servico').textContent = ag.servico;
         document.getElementById('detalhes-funcionarios').textContent = ag.funcionarios.join(', ');
@@ -174,12 +173,32 @@ function inicializarAgenda() {
         modalEditar.classList.add('ativo');
     }
 
+    /* ===== NOVO AGENDAMENTO ===== */
+    document.getElementById('form-novo-agendamento').onsubmit = e => {
+        e.preventDefault();
+
+        const ags = lerLocal('agendamentos');
+        ags.push({
+            id: Date.now(),
+            data: document.getElementById('data-agendamento').value,
+            hora: document.getElementById('hora-agendamento').value,
+            cliente: document.getElementById('cliente-agendamento').value,
+            servico: document.getElementById('servico-agendamento').value,
+            funcionarios: [...document.getElementById('funcionario-agendamento').selectedOptions]
+                .map(o => o.value),
+            status: 'agendado'
+        });
+
+        salvarLocal('agendamentos', ags);
+        modalNovo.classList.remove('ativo');
+        gerarAgenda();
+    };
+
     /* ===== BOTÕES ===== */
     document.getElementById('botao-iniciar').onclick = () => {
         const id = document.getElementById('agendamento-id').value;
         const ags = lerLocal('agendamentos');
         const ag = ags.find(a => a.id == id);
-        if (!ag) return;
 
         ag.status = 'em andamento';
         ag.horaInicio = new Date().toISOString();
@@ -191,12 +210,10 @@ function inicializarAgenda() {
 
     document.getElementById('botao-finalizar').onclick = () => {
         const id = document.getElementById('agendamento-id').value;
-        const ags = lerLocal('agendamentos');
+        let ags = lerLocal('agendamentos');
         const ag = ags.find(a => a.id == id);
-        if (!ag) return;
 
         ag.status = 'finalizado';
-        ag.horaFim = new Date().toISOString();
         salvarLocal('agendamentos', ags);
 
         pararTimer();
@@ -212,60 +229,6 @@ function inicializarAgenda() {
         gerarAgenda();
     };
 
-    document.getElementById('form-novo-agendamento').onsubmit = e => {
-        e.preventDefault();
-        const ags = lerLocal('agendamentos');
-        ags.push({
-            id: Date.now(),
-            data: document.getElementById('data-agendamento').value,
-            hora: document.getElementById('hora-agendamento').value,
-            cliente: document.getElementById('cliente-agendamento').value,
-            servico: document.getElementById('servico-agendamento').value,
-            funcionarios: [...document.getElementById('funcionario-agendamento').selectedOptions].map(o=>o.value),
-            status: 'agendado'
-        });
-        salvarLocal('agendamentos', ags);
-        modalNovo.classList.remove('ativo');
-        gerarAgenda();
-    };
-
     gerarSemana();
     gerarAgenda();
-}
-
-/* ======================================================
-   FINANCEIRO (ISOLADO)
-   ====================================================== */
-function inicializarFinanceiro() {
-    if (!document.body.classList.contains('pagina-financeiro')) return;
-
-    const hoje = new Date().toISOString().split('T')[0];
-    const ags = lerLocal('agendamentos').filter(a => a.data === hoje && a.status === 'finalizado');
-    const servicos = lerLocal('servicos');
-    const funcs = lerLocal('funcionarios');
-
-    let recebido = 0;
-    let comissao = 0;
-
-    ags.forEach(a => {
-        const s = servicos.find(x => x.nome === a.servico);
-        if (!s) return;
-        recebido += Number(s.valor || 0);
-        a.funcionarios.forEach(f => {
-            const fu = funcs.find(x => x.nome === f);
-            if (fu) comissao += (s.valor * fu.comissao) / 100;
-        });
-    });
-
-    document.getElementById('total-recebido').textContent = moeda(recebido);
-    document.getElementById('total-comissao').textContent = moeda(comissao);
-    document.getElementById('lucro-liquido').textContent = moeda(recebido - comissao);
-}
-
-/* ======================================================
-   INIT
-   ====================================================== */
-document.addEventListener('DOMContentLoaded', () => {
-    inicializarAgenda();
-    inicializarFinanceiro();
 });
