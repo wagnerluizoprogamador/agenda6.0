@@ -1,5 +1,5 @@
 /* ======================================================
-   SCRIPT FINAL REALMENTE ESTÁVEL – AGENDA + FINANCEIRO
+   SCRIPT FINAL DEFINITIVO – AGENDA + FINANCEIRO (ESTÁVEL)
    ====================================================== */
 
 /* ================= STORAGE ================= */
@@ -33,9 +33,9 @@ function iniciarTimer(horaInicio) {
 
     timerInterval = setInterval(() => {
         const diff = Math.floor((Date.now() - new Date(horaInicio)) / 1000);
-        const h = String(Math.floor(diff / 3600)).padStart(2,'0');
-        const m = String(Math.floor((diff % 3600) / 60)).padStart(2,'0');
-        const s = String(diff % 60).padStart(2,'0');
+        const h = String(Math.floor(diff / 3600)).padStart(2, '0');
+        const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+        const s = String(diff % 60).padStart(2, '0');
         span.textContent = `${h}:${m}:${s}`;
     }, 1000);
 }
@@ -55,8 +55,21 @@ function inicializarAgenda() {
     const modalNovo = document.getElementById('modal-agendamento');
     const modalEditar = document.getElementById('modal-editar-agendamento');
 
-    if (!calendario) return; // NÃO É PÁGINA AGENDA
+    if (!calendario) return;
 
+    /* ---------- FECHAR MODAIS ---------- */
+    document.getElementById('fechar-modal')
+        ?.addEventListener('click', () => {
+            modalNovo.classList.remove('ativo');
+        });
+
+    document.getElementById('fechar-modal-edicao')
+        ?.addEventListener('click', () => {
+            pararTimer();
+            modalEditar.classList.remove('ativo');
+        });
+
+    /* ---------- SELECTS ---------- */
     function preencherSelects() {
         const selCliente = document.getElementById('cliente-agendamento');
         const selServico = document.getElementById('servico-agendamento');
@@ -64,25 +77,27 @@ function inicializarAgenda() {
 
         if (!selCliente || !selServico || !selFuncionario) return;
 
-        selCliente.innerHTML = '<option value="">Cliente</option>';
+        selCliente.innerHTML = '<option value="">Selecione um cliente</option>';
         lerLocal('clientes').forEach(c =>
-            selCliente.innerHTML += `<option>${c.nome}</option>`
+            selCliente.innerHTML += `<option value="${c.nome}">${c.nome}</option>`
         );
 
-        selServico.innerHTML = '<option value="">Serviço</option>';
+        selServico.innerHTML = '<option value="">Selecione um serviço</option>';
         lerLocal('servicos').forEach(s =>
-            selServico.innerHTML += `<option>${s.nome}</option>`
+            selServico.innerHTML += `<option value="${s.nome}">${s.nome}</option>`
         );
 
         selFuncionario.innerHTML = '';
         lerLocal('funcionarios').forEach(f =>
-            selFuncionario.innerHTML += `<option>${f.nome}</option>`
+            selFuncionario.innerHTML += `<option value="${f.nome}">${f.nome}</option>`
         );
     }
 
+    /* ---------- GERAR AGENDA ---------- */
     function gerarAgenda() {
         calendario.innerHTML = '';
         const dataStr = dataAtual.toISOString().split('T')[0];
+
         if (tituloData) {
             tituloData.textContent =
                 `Agendamentos de ${dataAtual.toLocaleDateString('pt-BR')}`;
@@ -104,7 +119,7 @@ function inicializarAgenda() {
                     div.onclick = () => abrirEdicao(ag);
                 } else {
                     div.classList.add('livre');
-                    div.innerHTML = `<strong>${hora}</strong> Livre`;
+                    div.innerHTML = `<strong>${hora}</strong> - Livre`;
                     div.onclick = () => {
                         document.getElementById('data-agendamento').value = dataStr;
                         document.getElementById('hora-agendamento').value = hora;
@@ -112,16 +127,17 @@ function inicializarAgenda() {
                         modalNovo.classList.add('ativo');
                     };
                 }
+
                 calendario.appendChild(div);
             }
         }
     }
 
+    /* ---------- MODAL EDIÇÃO ---------- */
     function abrirEdicao(ag) {
         document.getElementById('detalhes-cliente').textContent = ag.cliente;
         document.getElementById('detalhes-servico').textContent = ag.servico;
-        document.getElementById('detalhes-funcionarios').textContent =
-            ag.funcionarios.join(', ');
+        document.getElementById('detalhes-funcionarios').textContent = ag.funcionarios.join(', ');
         document.getElementById('detalhes-status').textContent = ag.status;
         document.getElementById('agendamento-id').value = ag.id;
 
@@ -133,6 +149,7 @@ function inicializarAgenda() {
         modalEditar.classList.add('ativo');
     }
 
+    /* ---------- NOVO AGENDAMENTO ---------- */
     document.getElementById('form-novo-agendamento')
         ?.addEventListener('submit', e => {
             e.preventDefault();
@@ -154,6 +171,7 @@ function inicializarAgenda() {
             gerarAgenda();
         });
 
+    /* ---------- BOTÕES ---------- */
     document.getElementById('botao-iniciar')
         ?.addEventListener('click', () => {
             const id = document.getElementById('agendamento-id').value;
@@ -164,6 +182,8 @@ function inicializarAgenda() {
             ag.status = 'em andamento';
             ag.horaInicio = new Date().toISOString();
             salvarLocal('agendamentos', ags);
+
+            document.getElementById('detalhes-status').textContent = ag.status;
             modalEditar.classList.remove('ativo');
             gerarAgenda();
         });
@@ -177,6 +197,8 @@ function inicializarAgenda() {
 
             ag.status = 'finalizado';
             salvarLocal('agendamentos', ags);
+
+            document.getElementById('detalhes-status').textContent = ag.status;
             modalEditar.classList.remove('ativo');
             gerarAgenda();
         });
@@ -186,6 +208,7 @@ function inicializarAgenda() {
             let ags = lerLocal('agendamentos');
             ags = ags.filter(a => a.id != document.getElementById('agendamento-id').value);
             salvarLocal('agendamentos', ags);
+
             modalEditar.classList.remove('ativo');
             gerarAgenda();
         });
@@ -194,7 +217,7 @@ function inicializarAgenda() {
 }
 
 /* ======================================================
-   FINANCEIRO (ISOLADO)
+   FINANCEIRO (TOTALMENTE ISOLADO)
    ====================================================== */
 function inicializarFinanceiro() {
     if (!document.body.classList.contains('pagina-financeiro')) return;
@@ -220,6 +243,7 @@ function inicializarFinanceiro() {
         if (!s) return;
 
         recebido += Number(s.valor || 0);
+
         a.funcionarios.forEach(f => {
             const fu = funcs.find(x => x.nome === f);
             if (fu) comissao += (s.valor * fu.comissao) / 100;
