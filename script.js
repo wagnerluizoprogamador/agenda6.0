@@ -277,3 +277,49 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarAgenda();
     inicializarFinanceiro();
 });
+/* ======================================================
+   DESPESAS – MÓDULO PROFISSIONAL
+   ====================================================== */
+function inicializarDespesas() {
+    if (!document.body.classList.contains('pagina-despesas')) return;
+
+    const form = document.getElementById('form-despesa');
+    const lista = document.getElementById('lista-despesas');
+    const totalSpan = document.getElementById('total-despesas');
+
+    function renderizar() {
+        const hoje = new Date().toISOString().split('T')[0];
+        const despesas = lerLocal('despesas').filter(d => d.data === hoje);
+
+        lista.innerHTML = '';
+        let total = 0;
+
+        despesas.forEach(d => {
+            total += Number(d.valor);
+            const li = document.createElement('li');
+            li.textContent = `${d.descricao} — ${moeda(d.valor)} (${d.tipo})`;
+            lista.appendChild(li);
+        });
+
+        totalSpan.textContent = moeda(total);
+    }
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+
+        const despesas = lerLocal('despesas');
+        despesas.push({
+            id: Date.now(),
+            data: new Date().toISOString().split('T')[0],
+            descricao: document.getElementById('descricao-despesa').value,
+            valor: Number(document.getElementById('valor-despesa').value),
+            tipo: document.getElementById('tipo-despesa').value
+        });
+
+        salvarLocal('despesas', despesas);
+        form.reset();
+        renderizar();
+    });
+
+    renderizar();
+}
