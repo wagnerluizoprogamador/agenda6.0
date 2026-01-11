@@ -1,5 +1,6 @@
 /* ======================================================
-   SCRIPT FINAL ESTÁVEL – AGENDA + FINANCEIRO (CORRIGIDO)
+   SCRIPT FINAL DEFINITIVO – AGENDA + MODAL + FINANCEIRO
+   TESTADO POR ANÁLISE DE FLUXO (HTML ↔ JS)
    ====================================================== */
 
 /* ================= STORAGE ================= */
@@ -26,7 +27,7 @@ let timerInterval = null;
 function iniciarTimer(horaInicio) {
     const box = document.getElementById('timer-servico');
     const span = document.getElementById('valor-timer');
-    if (!box || !span) return;
+    if (!box || !span || !horaInicio) return;
 
     clearInterval(timerInterval);
     box.style.display = 'block';
@@ -55,9 +56,9 @@ function inicializarAgenda() {
     const diasDiv = document.getElementById('dias-da-semana');
     const tituloData = document.getElementById('data-selecionada');
 
-    if (!calendario) return;
+    if (!calendario || !diasDiv) return;
 
-    /* ===== Navegação semanal ===== */
+    /* ---------- NAVEGAÇÃO SEMANAL ---------- */
     function gerarNavegacaoSemanal() {
         diasDiv.innerHTML = '';
         const inicio = new Date(dataAtual);
@@ -86,23 +87,23 @@ function inicializarAgenda() {
         }
     }
 
-    /* ===== Selects ===== */
+    /* ---------- SELECTS ---------- */
     function preencherSelects() {
         const c = document.getElementById('cliente-agendamento');
         const s = document.getElementById('servico-agendamento');
         const f = document.getElementById('funcionario-agendamento');
 
-        c.innerHTML = '<option value="">Cliente</option>';
+        c.innerHTML = '<option value="">Selecione um cliente</option>';
         lerLocal('clientes').forEach(x => c.innerHTML += `<option>${x.nome}</option>`);
 
-        s.innerHTML = '<option value="">Serviço</option>';
+        s.innerHTML = '<option value="">Selecione um serviço</option>';
         lerLocal('servicos').forEach(x => s.innerHTML += `<option>${x.nome}</option>`);
 
         f.innerHTML = '';
         lerLocal('funcionarios').forEach(x => f.innerHTML += `<option>${x.nome}</option>`);
     }
 
-    /* ===== Agenda ===== */
+    /* ---------- AGENDA DIÁRIA ---------- */
     function gerarAgenda() {
         calendario.innerHTML = '';
         const dataStr = dataAtual.toISOString().split('T')[0];
@@ -137,7 +138,7 @@ function inicializarAgenda() {
         }
     }
 
-    /* ===== Edição ===== */
+    /* ---------- MODAL EDIÇÃO ---------- */
     function abrirEdicao(ag) {
         document.getElementById('detalhes-cliente').textContent = ag.cliente;
         document.getElementById('detalhes-servico').textContent = ag.servico;
@@ -145,11 +146,80 @@ function inicializarAgenda() {
         document.getElementById('detalhes-status').textContent = ag.status;
         document.getElementById('agendamento-id').value = ag.id;
 
+        document.getElementById('botao-iniciar').style.display =
+            ag.status === 'agendado' ? 'block' : 'none';
+        document.getElementById('bloco-finalizar').style.display =
+            ag.status === 'em andamento' ? 'block' : 'none';
+
         pararTimer();
         if (ag.status === 'em andamento' && ag.horaInicio) iniciarTimer(ag.horaInicio);
 
         document.getElementById('modal-editar-agendamento').classList.add('ativo');
     }
+
+    /* ---------- EVENTOS ---------- */
+    document.getElementById('form-novo-agendamento')
+        .addEventListener('submit', e => {
+            e.preventDefault();
+
+            const ags = lerLocal('agendamentos');
+            ags.push({
+                id: Date.now(),
+                data: document.getElementById('data-agendamento').value,
+                hora: document.getElementById('hora-agendamento').value,
+                cliente: document.getElementById('cliente-agendamento').value,
+                servico: document.getElementById('servico-agendamento').value,
+                funcionarios: [...document.getElementById('funcionario-agendamento').selectedOptions].map(o=>o.value),
+                status: 'agendado'
+            });
+
+            salvarLocal('agendamentos', ags);
+            document.getElementById('modal-agendamento').classList.remove('ativo');
+            gerarAgenda();
+        });
+
+    document.getElementById('botao-iniciar')
+        .addEventListener('click', () => {
+            const id = document.getElementById('agendamento-id').value;
+            const ags = lerLocal('agendamentos');
+            const ag = ags.find(a => a.id == id);
+            if (!ag) return;
+
+            ag.status = 'em andamento';
+            ag.horaInicio = new Date().toISOString();
+            salvarLocal('agendamentos', ags);
+
+            document.getElementById('detalhes-status').textContent = ag.status;
+            document.getElementById('botao-iniciar').style.display = 'none';
+            document.getElementById('bloco-finalizar').style.display = 'block';
+
+            iniciarTimer(ag.horaInicio);
+            gerarAgenda();
+        });
+
+    document.getElementById('botao-finalizar')
+        .addEventListener('click', () => {
+            const id = document.getElementById('agendamento-id').value;
+            const ags = lerLocal('agendamentos');
+            const ag = ags.find(a => a.id == id);
+            if (!ag) return;
+
+            ag.status = 'finalizado';
+            salvarLocal('agendamentos', ags);
+
+            pararTimer();
+            document.getElementById('modal-editar-agendamento').classList.remove('ativo');
+            gerarAgenda();
+        });
+
+    document.getElementById('botao-cancelar')
+        .addEventListener('click', () => {
+            let ags = lerLocal('agendamentos');
+            ags = ags.filter(a => a.id != document.getElementById('agendamento-id').value);
+            salvarLocal('agendamentos', ags);
+            document.getElementById('modal-editar-agendamento').classList.remove('ativo');
+            gerarAgenda();
+        });
 
     gerarNavegacaoSemanal();
     gerarAgenda();
@@ -173,7 +243,7 @@ function inicializarFinanceiro() {
         const s = servicos.find(x => x.nome === a.servico);
         if (!s) return;
 
-        recebido += Number(s.valor);
+        recebido += Number(s.valor || 0);
         a.funcionarios.forEach(f => {
             const fu = funcs.find(x => x.nome === f);
             if (fu) comissao += (s.valor * fu.comissao) / 100;
