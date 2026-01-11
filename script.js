@@ -1,5 +1,5 @@
 /* ======================================================
-   SCRIPT FINAL DEFINITIVO – AGENDA + FINANCEIRO ESTÁVEL
+   SCRIPT FINAL ESTÁVEL – AGENDA + FINANCEIRO
    ====================================================== */
 
 /* ================= STORAGE ================= */
@@ -20,7 +20,9 @@ function moeda(v) {
 let dataAtual = new Date();
 let timerInterval = null;
 
-/* ================= TIMER ================= */
+/* ======================================================
+   TIMER
+   ====================================================== */
 function iniciarTimer(horaInicio) {
     const box = document.getElementById('timer-servico');
     const span = document.getElementById('valor-timer');
@@ -31,9 +33,9 @@ function iniciarTimer(horaInicio) {
 
     timerInterval = setInterval(() => {
         const diff = Math.floor((Date.now() - new Date(horaInicio)) / 1000);
-        const h = String(Math.floor(diff / 3600)).padStart(2, '0');
-        const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
-        const s = String(diff % 60).padStart(2, '0');
+        const h = String(Math.floor(diff / 3600)).padStart(2,'0');
+        const m = String(Math.floor((diff % 3600) / 60)).padStart(2,'0');
+        const s = String(diff % 60).padStart(2,'0');
         span.textContent = `${h}:${m}:${s}`;
     }, 1000);
 }
@@ -44,17 +46,19 @@ function pararTimer() {
     if (box) box.style.display = 'none';
 }
 
-/* ================= AGENDA ================= */
+/* ======================================================
+   AGENDA (ISOLADA – NÃO QUEBRA OUTRAS PÁGINAS)
+   ====================================================== */
 function inicializarAgenda() {
 
     const calendario = document.getElementById('calendario-diario');
+    if (!calendario) return; // não é página agenda
+
     const tituloData = document.getElementById('data-selecionada');
     const modalNovo = document.getElementById('modal-agendamento');
     const modalEditar = document.getElementById('modal-editar-agendamento');
 
-    if (!calendario) return;
-
-    /* FECHAR MODAIS */
+    /* ---------- FECHAR MODAIS ---------- */
     document.getElementById('fechar-modal')?.addEventListener('click', () => {
         modalNovo.classList.remove('ativo');
     });
@@ -64,42 +68,44 @@ function inicializarAgenda() {
         modalEditar.classList.remove('ativo');
     });
 
-    /* SELECTS */
+    /* ---------- SELECTS ---------- */
     function preencherSelects() {
         const selCliente = document.getElementById('cliente-agendamento');
         const selServico = document.getElementById('servico-agendamento');
         const selFuncionario = document.getElementById('funcionario-agendamento');
 
         selCliente.innerHTML = '<option value="">Selecione um cliente</option>';
-        lerLocal('clientes').forEach(c => {
-            selCliente.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
-        });
+        lerLocal('clientes').forEach(c =>
+            selCliente.innerHTML += `<option value="${c.nome}">${c.nome}</option>`
+        );
 
         selServico.innerHTML = '<option value="">Selecione um serviço</option>';
-        lerLocal('servicos').forEach(s => {
-            selServico.innerHTML += `<option value="${s.nome}">${s.nome}</option>`;
-        });
+        lerLocal('servicos').forEach(s =>
+            selServico.innerHTML += `<option value="${s.nome}">${s.nome}</option>`
+        );
 
         selFuncionario.innerHTML = '';
-        lerLocal('funcionarios').forEach(f => {
-            selFuncionario.innerHTML += `<option value="${f.nome}">${f.nome}</option>`;
-        });
+        lerLocal('funcionarios').forEach(f =>
+            selFuncionario.innerHTML += `<option value="${f.nome}">${f.nome}</option>`
+        );
     }
 
-    /* GERAR AGENDA */
+    /* ---------- GERAR AGENDA ---------- */
     function gerarAgenda() {
         calendario.innerHTML = '';
         const dataStr = dataAtual.toISOString().split('T')[0];
 
-        tituloData.textContent =
-            `Agendamentos de ${dataAtual.toLocaleDateString('pt-BR')}`;
+        if (tituloData) {
+            tituloData.textContent =
+                `Agendamentos de ${dataAtual.toLocaleDateString('pt-BR')}`;
+        }
 
         const ags = lerLocal('agendamentos').filter(a => a.data === dataStr);
 
         for (let h = 0; h < 24; h++) {
             for (let m = 0; m < 60; m += 30) {
 
-                const hora = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                const hora = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
                 const ag = ags.find(a => a.hora === hora);
 
                 const div = document.createElement('div');
@@ -125,30 +131,30 @@ function inicializarAgenda() {
         }
     }
 
-    /* WHATSAPP + MAPS */
-    function configurarAcoesRapidas(clienteNome) {
+    /* ---------- WHATSAPP / MAPS ---------- */
+    function configurarAcoes(clienteNome) {
         const cliente = lerLocal('clientes').find(c => c.nome === clienteNome);
         if (!cliente) return;
 
         const wpp = document.getElementById('botao-whatsapp');
         const maps = document.getElementById('botao-maps');
 
-        if (cliente.telefone && wpp) {
-            wpp.href = `https://wa.me/55${cliente.telefone.replace(/\D/g, '')}`;
-            wpp.style.display = 'inline-block';
-        } else if (wpp) {
-            wpp.style.display = 'none';
+        if (wpp) {
+            if (cliente.telefone) {
+                wpp.href = `https://wa.me/55${cliente.telefone.replace(/\D/g,'')}`;
+                wpp.style.display = 'inline-block';
+            } else wpp.style.display = 'none';
         }
 
-        if (cliente.endereco && maps) {
-            maps.href = `https://maps.google.com/maps?daddr=${encodeURIComponent(cliente.endereco)}`;
-            maps.style.display = 'inline-block';
-        } else if (maps) {
-            maps.style.display = 'none';
+        if (maps) {
+            if (cliente.endereco) {
+                maps.href = `https://maps.google.com/maps?daddr=${encodeURIComponent(cliente.endereco)}`;
+                maps.style.display = 'inline-block';
+            } else maps.style.display = 'none';
         }
     }
 
-    /* MODAL EDIÇÃO */
+    /* ---------- MODAL EDIÇÃO ---------- */
     function abrirEdicao(ag) {
 
         document.getElementById('detalhes-cliente').textContent = ag.cliente;
@@ -168,32 +174,33 @@ function inicializarAgenda() {
             iniciarTimer(ag.horaInicio);
         }
 
-        configurarAcoesRapidas(ag.cliente);
+        configurarAcoes(ag.cliente);
         modalEditar.classList.add('ativo');
     }
 
-    /* NOVO AGENDAMENTO */
-    document.getElementById('form-novo-agendamento')?.addEventListener('submit', e => {
-        e.preventDefault();
+    /* ---------- NOVO AGENDAMENTO ---------- */
+    document.getElementById('form-novo-agendamento')
+        ?.addEventListener('submit', e => {
+            e.preventDefault();
 
-        const ags = lerLocal('agendamentos');
-        ags.push({
-            id: Date.now(),
-            data: document.getElementById('data-agendamento').value,
-            hora: document.getElementById('hora-agendamento').value,
-            cliente: document.getElementById('cliente-agendamento').value,
-            servico: document.getElementById('servico-agendamento').value,
-            funcionarios: [...document.getElementById('funcionario-agendamento').selectedOptions]
-                .map(o => o.value),
-            status: 'agendado'
+            const ags = lerLocal('agendamentos');
+            ags.push({
+                id: Date.now(),
+                data: document.getElementById('data-agendamento').value,
+                hora: document.getElementById('hora-agendamento').value,
+                cliente: document.getElementById('cliente-agendamento').value,
+                servico: document.getElementById('servico-agendamento').value,
+                funcionarios: [...document.getElementById('funcionario-agendamento').selectedOptions]
+                    .map(o => o.value),
+                status: 'agendado'
+            });
+
+            salvarLocal('agendamentos', ags);
+            modalNovo.classList.remove('ativo');
+            gerarAgenda();
         });
 
-        salvarLocal('agendamentos', ags);
-        modalNovo.classList.remove('ativo');
-        gerarAgenda();
-    });
-
-    /* BOTÕES */
+    /* ---------- BOTÕES ---------- */
     document.getElementById('botao-iniciar')?.addEventListener('click', () => {
         const id = document.getElementById('agendamento-id').value;
         const ags = lerLocal('agendamentos');
@@ -203,10 +210,6 @@ function inicializarAgenda() {
         ag.status = 'em andamento';
         ag.horaInicio = new Date().toISOString();
         salvarLocal('agendamentos', ags);
-
-        document.getElementById('detalhes-status').textContent = ag.status;
-        document.getElementById('botao-iniciar').style.display = 'none';
-        document.getElementById('bloco-finalizar').style.display = 'block';
 
         iniciarTimer(ag.horaInicio);
         gerarAgenda();
@@ -238,7 +241,9 @@ function inicializarAgenda() {
     gerarAgenda();
 }
 
-/* ================= FINANCEIRO ================= */
+/* ======================================================
+   FINANCEIRO (SEGURO – NÃO QUEBRA AGENDA)
+   ====================================================== */
 function inicializarFinanceiro() {
     if (!document.body.classList.contains('pagina-financeiro')) return;
 
@@ -272,54 +277,10 @@ function inicializarFinanceiro() {
     lucroLiquido.textContent = moeda(recebido - comissao);
 }
 
-/* ================= INIT ================= */
+/* ======================================================
+   INIT GLOBAL
+   ====================================================== */
 document.addEventListener('DOMContentLoaded', () => {
     inicializarAgenda();
     inicializarFinanceiro();
 });
-/* ======================================================
-   DESPESAS – MÓDULO PROFISSIONAL
-   ====================================================== */
-function inicializarDespesas() {
-    if (!document.body.classList.contains('pagina-despesas')) return;
-
-    const form = document.getElementById('form-despesa');
-    const lista = document.getElementById('lista-despesas');
-    const totalSpan = document.getElementById('total-despesas');
-
-    function renderizar() {
-        const hoje = new Date().toISOString().split('T')[0];
-        const despesas = lerLocal('despesas').filter(d => d.data === hoje);
-
-        lista.innerHTML = '';
-        let total = 0;
-
-        despesas.forEach(d => {
-            total += Number(d.valor);
-            const li = document.createElement('li');
-            li.textContent = `${d.descricao} — ${moeda(d.valor)} (${d.tipo})`;
-            lista.appendChild(li);
-        });
-
-        totalSpan.textContent = moeda(total);
-    }
-
-    form.addEventListener('submit', e => {
-        e.preventDefault();
-
-        const despesas = lerLocal('despesas');
-        despesas.push({
-            id: Date.now(),
-            data: new Date().toISOString().split('T')[0],
-            descricao: document.getElementById('descricao-despesa').value,
-            valor: Number(document.getElementById('valor-despesa').value),
-            tipo: document.getElementById('tipo-despesa').value
-        });
-
-        salvarLocal('despesas', despesas);
-        form.reset();
-        renderizar();
-    });
-
-    renderizar();
-}
