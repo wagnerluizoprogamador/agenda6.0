@@ -3,189 +3,284 @@
    ====================================================== */
 
 /* ================= STORAGE ================= */
-function salvarLocal(k, d){localStorage.setItem(k,JSON.stringify(d))}
-function lerLocal(k){return JSON.parse(localStorage.getItem(k))||[]}
-const moeda=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
-
-let dataAtual=new Date(),timer=null
-
-/* ================= TIMER ================= */
-function iniciarTimer(i){
- const b=document.getElementById('timer-servico')
- const s=document.getElementById('valor-timer')
- if(!b||!s)return
- clearInterval(timer);b.style.display='block'
- timer=setInterval(()=>{
-  const d=Math.floor((Date.now()-new Date(i))/1000)
-  s.textContent=
-   String(Math.floor(d/3600)).padStart(2,'0')+':' +
-   String(Math.floor((d%3600)/60)).padStart(2,'0')+':' +
-   String(d%60).padStart(2,'0')
- },1000)
+function salvarLocal(chave, dados) {
+    localStorage.setItem(chave, JSON.stringify(dados));
 }
-function pararTimer(){
- clearInterval(timer)
- const b=document.getElementById('timer-servico')
- if(b)b.style.display='none'
+
+function lerLocal(chave) {
+    return JSON.parse(localStorage.getItem(chave)) || [];
+}
+
+function moeda(v) {
+    return Number(v || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    });
+}
+
+/* ================= VARIÁVEIS ================= */
+let dataAtual = new Date();
+let timerInterval = null;
+
+/* ======================================================
+   TIMER
+   ====================================================== */
+function iniciarTimer(horaInicio) {
+    const box = document.getElementById('timer-servico');
+    const span = document.getElementById('valor-timer');
+    if (!box || !span || !horaInicio) return;
+
+    clearInterval(timerInterval);
+    box.style.display = 'block';
+
+    timerInterval = setInterval(() => {
+        const diff = Math.floor((Date.now() - new Date(horaInicio)) / 1000);
+        const h = String(Math.floor(diff / 3600)).padStart(2,'0');
+        const m = String(Math.floor((diff % 3600) / 60)).padStart(2,'0');
+        const s = String(diff % 60).padStart(2,'0');
+        span.textContent = `${h}:${m}:${s}`;
+    }, 1000);
+}
+
+function pararTimer() {
+    clearInterval(timerInterval);
+    const box = document.getElementById('timer-servico');
+    if (box) box.style.display = 'none';
 }
 
 /* ======================================================
    AGENDA
    ====================================================== */
-document.addEventListener('DOMContentLoaded',()=>{
- const cal=document.getElementById('calendario-diario')
- if(!cal)return
+function inicializarAgenda() {
 
- const modalN=document.getElementById('modal-agendamento')
- const modalE=document.getElementById('modal-editar-agendamento')
+    const calendario = document.getElementById('calendario-diario');
+    if (!calendario) return;
 
- document.getElementById('fechar-modal').onclick=()=>modalN.classList.remove('ativo')
- document.getElementById('fechar-modal-edicao').onclick=()=>{
-  pararTimer();modalE.classList.remove('ativo')
- }
+    const tituloData = document.getElementById('data-selecionada');
+    const modalNovo = document.getElementById('modal-agendamento');
+    const modalEditar = document.getElementById('modal-editar-agendamento');
 
- function preencherSelects(){
-  const c=document.getElementById('cliente-agendamento')
-  const s=document.getElementById('servico-agendamento')
-  const f=document.getElementById('funcionario-agendamento')
+    /* FECHAR MODAIS */
+    document.getElementById('fechar-modal')?.addEventListener('click', () => {
+        modalNovo.classList.remove('ativo');
+    });
 
-  c.innerHTML='<option value="">Cliente</option>'
-  lerLocal('clientes').forEach(x=>c.innerHTML+=`<option>${x.nome}</option>`)
+    document.getElementById('fechar-modal-edicao')?.addEventListener('click', () => {
+        pararTimer();
+        modalEditar.classList.remove('ativo');
+    });
 
-  s.innerHTML='<option value="">Serviço</option>'
-  lerLocal('servicos').forEach(x=>s.innerHTML+=`<option>${x.nome}</option>`)
+    /* SELECTS */
+    function preencherSelects() {
+        const selCliente = document.getElementById('cliente-agendamento');
+        const selServico = document.getElementById('servico-agendamento');
+        const selFuncionario = document.getElementById('funcionario-agendamento');
 
-  f.innerHTML=''
-  lerLocal('funcionarios').forEach(x=>f.innerHTML+=`<option>${x.nome}</option>`)
- }
+        selCliente.innerHTML = '<option value="">Selecione um cliente</option>';
+        lerLocal('clientes').forEach(c =>
+            selCliente.innerHTML += `<option value="${c.nome}">${c.nome}</option>`
+        );
 
- function gerarAgenda(){
-  cal.innerHTML=''
-  const d=dataAtual.toISOString().split('T')[0]
-  document.getElementById('data-selecionada').textContent=
-   'Agendamentos de '+dataAtual.toLocaleDateString('pt-BR')
+        selServico.innerHTML = '<option value="">Selecione um serviço</option>';
+        lerLocal('servicos').forEach(s =>
+            selServico.innerHTML += `<option value="${s.nome}">${s.nome}</option>`
+        );
 
-  const ags=lerLocal('agendamentos').filter(a=>a.data===d)
-
-  for(let h=0;h<24;h++)for(let m=0;m<60;m+=30){
-   const hr=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
-   const ag=ags.find(a=>a.hora===hr)
-   const div=document.createElement('div')
-   div.className='horario'
-   if(ag){
-    div.classList.add('ocupado')
-    div.innerHTML=`<b>${hr}</b><br>${ag.cliente}`
-    div.onclick=()=>abrirEdicao(ag)
-   }else{
-    div.innerHTML=`<b>${hr}</b> Livre`
-    div.onclick=()=>{
-     document.getElementById('data-agendamento').value=d
-     document.getElementById('hora-agendamento').value=hr
-     preencherSelects()
-     modalN.classList.add('ativo')
+        selFuncionario.innerHTML = '';
+        lerLocal('funcionarios').forEach(f =>
+            selFuncionario.innerHTML += `<option value="${f.nome}">${f.nome}</option>`
+        );
     }
-   }
-   cal.appendChild(div)
-  }
- }
 
- function abrirEdicao(ag){
-  const clientes=lerLocal('clientes')
-  const cli=clientes.find(c=>c.nome===ag.cliente)
+    /* GERAR AGENDA */
+    function gerarAgenda() {
+        calendario.innerHTML = '';
+        const dataStr = dataAtual.toISOString().split('T')[0];
 
-  document.getElementById('detalhes-cliente').textContent=ag.cliente
-  document.getElementById('detalhes-servico').textContent=ag.servico
-  document.getElementById('detalhes-funcionarios').textContent=ag.funcionarios.join(', ')
-  document.getElementById('detalhes-status').textContent=ag.status
-  document.getElementById('agendamento-id').value=ag.id
+        if (tituloData) {
+            tituloData.textContent =
+                `Agendamentos de ${dataAtual.toLocaleDateString('pt-BR')}`;
+        }
 
-  // WHATSAPP / MAPS
-  if(cli){
-   const w=document.getElementById('botao-whatsapp')
-   const m=document.getElementById('botao-maps')
-   w.href=cli.telefone?`https://wa.me/55${cli.telefone.replace(/\D/g,'')}`:'#'
-   m.href=cli.endereco?`https://maps.google.com/?q=${encodeURIComponent(cli.endereco)}`:'#'
-  }
+        const ags = lerLocal('agendamentos').filter(a => a.data === dataStr);
 
-  document.getElementById('botao-iniciar').style.display=
-   ag.status==='agendado'?'block':'none'
-  document.getElementById('bloco-finalizar').style.display=
-   ag.status==='em andamento'?'block':'none'
+        for (let h = 0; h < 24; h++) {
+            for (let m = 0; m < 60; m += 30) {
 
-  pararTimer()
-  if(ag.status==='em andamento'&&ag.horaInicio)iniciarTimer(ag.horaInicio)
+                const hora = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+                const ag = ags.find(a => a.hora === hora);
 
-  modalE.classList.add('ativo')
- }
+                const div = document.createElement('div');
+                div.className = 'horario';
 
- document.getElementById('form-novo-agendamento').onsubmit=e=>{
-  e.preventDefault()
-  const ags=lerLocal('agendamentos')
-  ags.push({
-   id:Date.now(),
-   data:dataAgendamento.value,
-   hora:horaAgendamento.value,
-   cliente:clienteAgendamento.value,
-   servico:servicoAgendamento.value,
-   funcionarios:[...funcionarioAgendamento.selectedOptions].map(o=>o.value),
-   status:'agendado'
-  })
-  salvarLocal('agendamentos',ags)
-  modalN.classList.remove('ativo')
-  gerarAgenda()
- }
+                if (ag) {
+                    div.classList.add('ocupado');
+                    div.innerHTML = `<strong>${hora}</strong><br>${ag.cliente}`;
+                    div.onclick = () => abrirEdicao(ag);
+                } else {
+                    div.classList.add('livre');
+                    div.innerHTML = `<strong>${hora}</strong> - Livre`;
+                    div.onclick = () => {
+                        document.getElementById('data-agendamento').value = dataStr;
+                        document.getElementById('hora-agendamento').value = hora;
+                        preencherSelects();
+                        modalNovo.classList.add('ativo');
+                    };
+                }
 
- document.getElementById('botao-iniciar').onclick=()=>{
-  const ags=lerLocal('agendamentos')
-  const ag=ags.find(a=>a.id==agendamentoId.value)
-  ag.status='em andamento'
-  ag.horaInicio=new Date().toISOString()
-  salvarLocal('agendamentos',ags)
-  abrirEdicao(ag);gerarAgenda()
- }
+                calendario.appendChild(div);
+            }
+        }
+    }
 
- document.getElementById('botao-finalizar').onclick=()=>{
-  const ags=lerLocal('agendamentos')
-  const ag=ags.find(a=>a.id==agendamentoId.value)
+    /* MODAL EDIÇÃO */
+    function abrirEdicao(ag) {
+        document.getElementById('detalhes-cliente').textContent = ag.cliente;
+        document.getElementById('detalhes-servico').textContent = ag.servico;
+        document.getElementById('detalhes-funcionarios').textContent = ag.funcionarios.join(', ');
+        document.getElementById('detalhes-status').textContent = ag.status;
+        document.getElementById('agendamento-id').value = ag.id;
 
-  const serv=lerLocal('servicos').find(s=>s.nome===ag.servico)
-  const funcs=lerLocal('funcionarios')
+        const cliente = lerLocal('clientes').find(c => c.nome === ag.cliente);
+        document.getElementById('detalhes-telefone').textContent = cliente?.telefone || '';
+        document.getElementById('detalhes-endereco').textContent = cliente?.endereco || '';
 
-  ag.status='finalizado'
-  ag.valor=serv?serv.valor:0
-  ag.comissao=0
+        const btnWhats = document.getElementById('botao-whatsapp');
+        const btnMaps = document.getElementById('botao-maps');
 
-  ag.funcionarios.forEach(f=>{
-   const fu=funcs.find(x=>x.nome===f)
-   if(fu)ag.comissao+=(ag.valor*fu.comissao)/100
-  })
+        if (cliente?.telefone) {
+            btnWhats.href = `https://wa.me/55${cliente.telefone.replace(/\D/g,'')}`;
+        }
 
-  salvarLocal('agendamentos',ags)
-  pararTimer();modalE.classList.remove('ativo');gerarAgenda()
- }
+        if (cliente?.endereco) {
+            btnMaps.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cliente.endereco)}`;
+        }
 
- document.getElementById('botao-cancelar').onclick=()=>{
-  salvarLocal('agendamentos',
-   lerLocal('agendamentos').filter(a=>a.id!=agendamentoId.value))
-  modalE.classList.remove('ativo');gerarAgenda()
- }
+        const btnIniciar = document.getElementById('botao-iniciar');
+        const blocoFinalizar = document.getElementById('bloco-finalizar');
 
- gerarAgenda()
-})
+        btnIniciar.style.display = ag.status === 'agendado' ? 'block' : 'none';
+        blocoFinalizar.style.display = ag.status === 'em andamento' ? 'block' : 'none';
+
+        pararTimer();
+        if (ag.status === 'em andamento' && ag.horaInicio) {
+            iniciarTimer(ag.horaInicio);
+        }
+
+        modalEditar.classList.add('ativo');
+    }
+
+    /* NOVO AGENDAMENTO */
+    document.getElementById('form-novo-agendamento')
+        ?.addEventListener('submit', e => {
+            e.preventDefault();
+
+            const data = document.getElementById('data-agendamento').value;
+            const hora = document.getElementById('hora-agendamento').value;
+            const cliente = document.getElementById('cliente-agendamento').value;
+            const servico = document.getElementById('servico-agendamento').value;
+            const funcionarios = [...document.getElementById('funcionario-agendamento').selectedOptions]
+                .map(o => o.value);
+
+            if (!data || !hora || !cliente || !servico || funcionarios.length === 0) {
+                alert('Preencha todos os campos');
+                return;
+            }
+
+            const ags = lerLocal('agendamentos');
+            ags.push({
+                id: Date.now(),
+                data,
+                hora,
+                cliente,
+                servico,
+                funcionarios,
+                status: 'agendado'
+            });
+
+            salvarLocal('agendamentos', ags);
+            modalNovo.classList.remove('ativo');
+            gerarAgenda();
+        });
+
+    /* BOTÕES */
+    document.getElementById('botao-iniciar')?.addEventListener('click', () => {
+        const id = document.getElementById('agendamento-id').value;
+        const ags = lerLocal('agendamentos');
+        const ag = ags.find(a => a.id == id);
+        if (!ag) return;
+
+        ag.status = 'em andamento';
+        ag.horaInicio = new Date().toISOString();
+        salvarLocal('agendamentos', ags);
+
+        iniciarTimer(ag.horaInicio);
+        gerarAgenda();
+    });
+
+    document.getElementById('botao-finalizar')?.addEventListener('click', () => {
+        const id = document.getElementById('agendamento-id').value;
+        const ags = lerLocal('agendamentos');
+        const ag = ags.find(a => a.id == id);
+        if (!ag) return;
+
+        ag.status = 'finalizado';
+        salvarLocal('agendamentos', ags);
+
+        pararTimer();
+        modalEditar.classList.remove('ativo');
+        gerarAgenda();
+    });
+
+    document.getElementById('botao-cancelar')?.addEventListener('click', () => {
+        let ags = lerLocal('agendamentos');
+        ags = ags.filter(a => a.id != document.getElementById('agendamento-id').value);
+        salvarLocal('agendamentos', ags);
+        modalEditar.classList.remove('ativo');
+        gerarAgenda();
+    });
+
+    gerarAgenda();
+}
 
 /* ======================================================
    FINANCEIRO
    ====================================================== */
-document.addEventListener('DOMContentLoaded',()=>{
- if(!document.body.classList.contains('pagina-financeiro'))return
+function inicializarFinanceiro() {
+    if (!document.body.classList.contains('pagina-financeiro')) return;
 
- const hoje=new Date().toISOString().split('T')[0]
- const ags=lerLocal('agendamentos').filter(a=>a.data===hoje&&a.status==='finalizado')
+    const totalRecebido = document.getElementById('total-recebido');
+    const totalComissao = document.getElementById('total-comissao');
+    const lucroLiquido = document.getElementById('lucro-liquido');
 
- let r=0,c=0
- ags.forEach(a=>{r+=a.valor||0;c+=a.comissao||0})
+    const hoje = new Date().toISOString().split('T')[0];
+    const ags = lerLocal('agendamentos').filter(a => a.data === hoje && a.status === 'finalizado');
+    const servicos = lerLocal('servicos');
+    const funcs = lerLocal('funcionarios');
 
- document.getElementById('total-recebido').textContent=moeda(r)
- document.getElementById('total-comissao').textContent=moeda(c)
- document.getElementById('lucro-liquido').textContent=moeda(r-c)
-})
+    let recebido = 0;
+    let comissao = 0;
+
+    ags.forEach(a => {
+        const s = servicos.find(x => x.nome === a.servico);
+        if (!s) return;
+
+        recebido += Number(s.valor || 0);
+        a.funcionarios.forEach(f => {
+            const fu = funcs.find(x => x.nome === f);
+            if (fu) comissao += (s.valor * fu.comissao) / 100;
+        });
+    });
+
+    totalRecebido.textContent = moeda(recebido);
+    totalComissao.textContent = moeda(comissao);
+    lucroLiquido.textContent = moeda(recebido - comissao);
+}
+
+/* ======================================================
+   INIT
+   ====================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarAgenda();
+    inicializarFinanceiro();
+});
