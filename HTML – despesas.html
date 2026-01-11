@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Despesas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="pagina-despesas">
+
+<header>
+    <nav>
+        <a href="agenda.html">Agenda</a>
+        <a href="index.html">Cadastros</a>
+        <a href="clientes.html">Clientes</a>
+        <a href="servicos.html">Serviços</a>
+        <a href="funcionarios.html">Funcionários</a>
+        <a href="financeiro.html">Financeiro</a>
+        <a href="despesas.html" class="ativo">Despesas</a>
+    </nav>
+</header>
+
+<main class="container">
+    <h1>Controle de Despesas</h1>
+
+    <form id="form-despesa" class="card">
+        <input type="text" id="descricao-despesa" placeholder="Descrição" required>
+        <input type="number" id="valor-despesa" placeholder="Valor (R$)" required>
+        <select id="tipo-despesa">
+            <option value="variavel">Variável</option>
+            <option value="fixa">Fixa</option>
+        </select>
+        <button type="submit">Adicionar Despesa</button>
+    </form>
+
+    <div class="card">
+        <h3>Despesas do Dia</h3>
+        <ul id="lista-despesas"></ul>
+        <p><strong>Total:</strong> <span id="total-despesas">R$ 0,00</span></p>
+    </div>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
