@@ -1,5 +1,5 @@
 /* ======================================================
-   SCRIPT FINAL 100% FUNCIONAL – CADASTROS + AGENDA + MODAL
+   SCRIPT FINAL ESTÁVEL – AGENDA COMPLETA (MODAL OK)
    ====================================================== */
 
 /* ================= STORAGE ================= */
@@ -8,12 +8,6 @@ function salvarLocal(chave, dados) {
 }
 function lerLocal(chave) {
     return JSON.parse(localStorage.getItem(chave)) || [];
-}
-function moeda(v) {
-    return Number(v || 0).toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    });
 }
 
 /* ================= VARIÁVEIS ================= */
@@ -58,18 +52,29 @@ function inicializarAgenda() {
 
     if (!calendario) return;
 
+    /* ---------- FECHAR MODAIS ---------- */
+    document.getElementById('fechar-modal')?.addEventListener('click', () => {
+        modalNovo.classList.remove('ativo');
+    });
+
+    document.getElementById('fechar-modal-edicao')?.addEventListener('click', () => {
+        pararTimer();
+        agendamentoAtivo = null;
+        modalEditar.classList.remove('ativo');
+    });
+
     /* ---------- SELECTS ---------- */
     function preencherSelects() {
         const selCliente = document.getElementById('cliente-agendamento');
         const selServico = document.getElementById('servico-agendamento');
         const selFuncionario = document.getElementById('funcionario-agendamento');
 
-        selCliente.innerHTML = '<option value="">Cliente</option>';
+        selCliente.innerHTML = '<option value="">Selecione um cliente</option>';
         lerLocal('clientes').forEach(c =>
             selCliente.innerHTML += `<option value="${c.nome}">${c.nome}</option>`
         );
 
-        selServico.innerHTML = '<option value="">Serviço</option>';
+        selServico.innerHTML = '<option value="">Selecione um serviço</option>';
         lerLocal('servicos').forEach(s =>
             selServico.innerHTML += `<option value="${s.nome}">${s.nome}</option>`
         );
@@ -97,9 +102,10 @@ function inicializarAgenda() {
                 if (ag) {
                     div.classList.add('ocupado');
                     div.innerHTML = `<strong>${hora}</strong><br>${ag.cliente}`;
-                    div.onclick = () => abrirEdicao(ag.id);
+                    div.onclick = () => abrirModalEdicao(ag.id);
                 } else {
-                    div.innerHTML = `<strong>${hora}</strong> Livre`;
+                    div.classList.add('livre');
+                    div.innerHTML = `<strong>${hora}</strong> - Livre`;
                     div.onclick = () => {
                         document.getElementById('data-agendamento').value = dataStr;
                         document.getElementById('hora-agendamento').value = hora;
@@ -112,8 +118,8 @@ function inicializarAgenda() {
         }
     }
 
-    /* ---------- MODAL EDIÇÃO ---------- */
-    function abrirEdicao(id) {
+    /* ---------- ABRIR MODAL EDIÇÃO ---------- */
+    function abrirModalEdicao(id) {
         const ags = lerLocal('agendamentos');
         agendamentoAtivo = ags.find(a => a.id === id);
         if (!agendamentoAtivo) return;
@@ -163,27 +169,33 @@ function inicializarAgenda() {
     document.getElementById('botao-iniciar')?.addEventListener('click', () => {
         if (!agendamentoAtivo) return;
 
-        agendamentoAtivo.status = 'em andamento';
-        agendamentoAtivo.horaInicio = new Date().toISOString();
+        const ags = lerLocal('agendamentos');
+        const ag = ags.find(a => a.id === agendamentoAtivo.id);
 
-        salvarLocal('agendamentos', lerLocal('agendamentos'));
+        ag.status = 'em andamento';
+        ag.horaInicio = new Date().toISOString();
+        salvarLocal('agendamentos', ags);
+
         document.getElementById('detalhes-status').textContent = 'em andamento';
-
         document.getElementById('botao-iniciar').style.display = 'none';
         document.getElementById('bloco-finalizar').style.display = 'block';
 
-        iniciarTimer(agendamentoAtivo.horaInicio);
+        iniciarTimer(ag.horaInicio);
         gerarAgenda();
     });
 
     document.getElementById('botao-finalizar')?.addEventListener('click', () => {
         if (!agendamentoAtivo) return;
 
-        agendamentoAtivo.status = 'finalizado';
-        agendamentoAtivo.horaFim = new Date().toISOString();
+        const ags = lerLocal('agendamentos');
+        const ag = ags.find(a => a.id === agendamentoAtivo.id);
 
-        salvarLocal('agendamentos', lerLocal('agendamentos'));
+        ag.status = 'finalizado';
+        ag.horaFim = new Date().toISOString();
+        salvarLocal('agendamentos', ags);
+
         pararTimer();
+        agendamentoAtivo = null;
         modalEditar.classList.remove('ativo');
         gerarAgenda();
     });
@@ -195,6 +207,7 @@ function inicializarAgenda() {
         ags = ags.filter(a => a.id !== agendamentoAtivo.id);
         salvarLocal('agendamentos', ags);
 
+        agendamentoAtivo = null;
         modalEditar.classList.remove('ativo');
         gerarAgenda();
     });
