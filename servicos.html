@@ -1,8 +1,48 @@
-<body class="pagina-servicos">
-<header><nav>...</nav></header>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Serviços</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+<nav>
+    <a href="agenda.html">Agenda</a>
+    <a href="index.html">Cadastros</a>
+    <a href="clientes.html">Clientes</a>
+    <a href="servicos.html" class="ativo">Serviços</a>
+    <a href="funcionarios.html">Funcionários</a>
+    <a href="financeiro.html">Financeiro</a>
+    <a href="comissoes.html">Comissões</a>
+</nav>
+</header>
+
 <main>
-    <h1>Serviços</h1>
-    <div id="listaServicos"></div>
+<h2 style="text-align:center;">Serviços</h2>
+<div class="lista" id="lista-servicos"></div>
 </main>
+
 <script src="script.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const lista = document.getElementById('lista-servicos');
+    const servicos = JSON.parse(localStorage.getItem('servicos')) || [];
+
+    lista.innerHTML = '';
+    servicos.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'lista-item';
+        div.innerHTML = `
+            <strong>${s.nome}</strong><br>
+            ⏱ ${s.tempo} min<br>
+            💰 R$ ${s.valor}
+        `;
+        lista.appendChild(div);
+    });
+});
+</script>
+
 </body>
+</html>
