@@ -1,34 +1,70 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Agenda</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Agenda</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body class="pagina-agenda">
 
 <header>
-<nav>
-    <a href="agenda.html" class="ativo">Agenda</a>
-    <a href="index.html">Cadastros</a>
-    <a href="clientes.html">Clientes</a>
-    <a href="servicos.html">Serviços</a>
-    <a href="funcionarios.html">Funcionários</a>
-    <a href="financeiro.html">Financeiro</a>
-    <a href="comissoes.html">Comissões</a>
-</nav>
+    <nav>
+        <a href="agenda.html" class="ativo">Agenda</a>
+        <a href="clientes.html">Clientes</a>
+        <a href="servicos.html">Serviços</a>
+        <a href="funcionarios.html">Funcionários</a>
+        <a href="financeiro.html">Financeiro</a>
+        <a href="comissoes.html">Comissões</a>
+    </nav>
 </header>
 
-<main class="agenda-container">
+<main>
     <h2 id="data-selecionada"></h2>
-
-    <!-- ESSA DIV É CRÍTICA -->
-    <div id="calendario-diario" class="calendario-diario"></div>
+    <div id="calendario-diario"></div>
 </main>
 
-<!-- MODAIS JÁ EXISTENTES NO SEU PROJETO -->
-<script src="script.js"></script>
+<!-- MODAL NOVO AGENDAMENTO -->
+<div id="modal-agendamento" class="modal">
+    <div class="modal-conteudo">
+        <button id="fechar-modal">✖</button>
 
+        <form id="form-novo-agendamento">
+            <input type="date" id="data-agendamento" readonly>
+            <input type="time" id="hora-agendamento" readonly>
+
+            <select id="cliente-agendamento"></select>
+            <select id="servico-agendamento"></select>
+            <select id="funcionario-agendamento" multiple></select>
+
+            <button type="submit">Salvar Agendamento</button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL EDIÇÃO -->
+<div id="modal-editar-agendamento" class="modal">
+    <div class="modal-conteudo">
+        <button id="fechar-modal-edicao">✖</button>
+
+        <p><b>Cliente:</b> <span id="detalhes-cliente"></span></p>
+        <p><b>Serviço:</b> <span id="detalhes-servico"></span></p>
+        <p><b>Funcionários:</b> <span id="detalhes-funcionarios"></span></p>
+        <p><b>Status:</b> <span id="detalhes-status"></span></p>
+
+        <a id="botao-whatsapp" target="_blank">WhatsApp</a>
+        <a id="botao-maps" target="_blank">Maps</a>
+
+        <button id="botao-iniciar">Iniciar Serviço</button>
+        <div id="bloco-finalizar" style="display:none">
+            <button id="botao-finalizar">Finalizar Serviço</button>
+        </div>
+
+        <button id="botao-cancelar">Cancelar</button>
+        <input type="hidden" id="agendamento-id">
+    </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
