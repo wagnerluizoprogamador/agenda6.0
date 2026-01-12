@@ -1,6 +1,4 @@
-/* =====================================================
-   RESET E BASE
-   ===================================================== */
+/* ================= RESET ================= */
 * {
     margin: 0;
     padding: 0;
@@ -11,273 +9,247 @@
 body {
     background: #f4f6f8;
     color: #333;
-    min-height: 100vh;
 }
 
-/* =====================================================
-   HEADER / MENU
-   ===================================================== */
+/* ================= HEADER / NAV ================= */
 header {
     background: #1f2937;
-    padding: 10px;
+    padding: 12px;
 }
 
 nav {
     display: flex;
+    gap: 12px;
     flex-wrap: wrap;
-    gap: 10px;
     justify-content: center;
 }
 
 nav a {
-    color: #e5e7eb;
+    color: #cbd5e1;
     text-decoration: none;
     padding: 8px 14px;
     border-radius: 6px;
     font-size: 14px;
 }
 
+nav a.ativo,
 nav a:hover {
-    background: #374151;
-}
-
-nav a.ativo {
     background: #2563eb;
     color: #fff;
 }
 
-/* =====================================================
-   CONTEÚDO PRINCIPAL
-   ===================================================== */
+/* ================= CONTAINERS ================= */
 main {
-    padding: 20px;
+    padding: 16px;
 }
 
-/* =====================================================
-   FORMULÁRIOS
-   ===================================================== */
-.form-container {
+.form-container,
+.financeiro-container,
+.agenda-container {
     background: #fff;
-    max-width: 500px;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 16px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    margin-bottom: 20px;
 }
 
-.form-container h2 {
-    margin-bottom: 15px;
-    text-align: center;
-}
-
+/* ================= FORM ================= */
 .form-group {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
-label {
+.form-group label {
     display: block;
-    font-size: 14px;
-    margin-bottom: 4px;
+    font-size: 13px;
+    margin-bottom: 6px;
+    font-weight: bold;
 }
 
-input,
-select,
-button {
+.form-group input,
+.form-group select {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     border-radius: 6px;
-    border: 1px solid #ccc;
+    border: 1px solid #d1d5db;
     font-size: 14px;
-}
-
-select[multiple] {
-    height: 90px;
 }
 
 button {
     background: #2563eb;
     color: #fff;
     border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
     cursor: pointer;
-    margin-top: 10px;
+    font-size: 14px;
 }
 
 button:hover {
-    background: #1e40af;
+    background: #1d4ed8;
 }
 
-/* =====================================================
-   AGENDA
-   ===================================================== */
-.agenda-container {
-    max-width: 1100px;
-    margin: auto;
+/* ================= AGENDA ================= */
+.navegacao-semanal {
+    margin-bottom: 12px;
 }
 
 #data-selecionada {
     text-align: center;
-    margin-bottom: 15px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+#dias-da-semana {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.dia-semana {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 6px;
+    background: #e5e7eb;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.dia-semana.ativo {
+    background: #2563eb;
+    color: #fff;
 }
 
 #calendario-diario {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
 }
 
 .horario {
-    background: #e5e7eb;
-    padding: 12px;
-    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 10px;
     text-align: center;
     cursor: pointer;
     font-size: 13px;
 }
 
-.horario:hover {
-    background: #d1d5db;
+.horario.livre {
+    background: #ecfeff;
 }
 
 .horario.ocupado {
-    background: #fecaca;
+    background: #fee2e2;
+    border-color: #ef4444;
 }
 
-.horario.ocupado:hover {
-    background: #fca5a5;
-}
-
-/* =====================================================
-   MODAIS
-   ===================================================== */
+/* ================= MODAIS ================= */
 .modal {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 999;
+    background: rgba(0,0,0,.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 .modal.ativo {
     display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-.modal-conteudo,
 .modal .form-container {
-    width: 95%;
-    max-width: 500px;
+    width: 100%;
+    max-width: 420px;
     position: relative;
 }
 
-.fechar-modal-btn,
-#fechar-modal,
-#fechar-modal-edicao {
+.fechar-modal-btn {
     position: absolute;
-    right: 10px;
+    right: 12px;
     top: 10px;
     background: none;
     border: none;
-    font-size: 20px;
+    font-size: 22px;
     cursor: pointer;
 }
 
-/* =====================================================
-   BOTÕES MODAL / FLUXO
-   ===================================================== */
+/* ================= MODAL DETALHES ================= */
+#detalhes-agendamento p {
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+/* ================= BOTÕES MODAL ================= */
+.botoes-edicao,
+.botoes-acao-rapida,
+#form-fluxo {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.botoes-edicao button {
+    flex: 1;
+}
+
 .btn-fluxo {
     background: #16a34a;
-    margin-top: 10px;
 }
 
 .btn-fluxo:hover {
     background: #15803d;
 }
 
-#bloco-finalizar button {
+#botao-cancelar {
     background: #dc2626;
 }
 
-#bloco-finalizar button:hover {
-    background: #991b1b;
+#botao-cancelar:hover {
+    background: #b91c1c;
 }
 
-.botoes-edicao {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.botoes-edicao button {
-    background: #374151;
-}
-
-.botoes-edicao button:hover {
-    background: #111827;
-}
-
-/* =====================================================
-   BOTÕES AÇÃO RÁPIDA
-   ===================================================== */
-.botoes-acao-rapida {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
+/* ================= AÇÕES RÁPIDAS ================= */
 .btn-acao-rapida {
-    flex: 1;
-    text-align: center;
-    padding: 8px;
-    background: #2563eb;
+    background: #059669;
     color: #fff;
+    padding: 8px 12px;
     border-radius: 6px;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .btn-acao-rapida:hover {
-    background: #1e40af;
+    background: #047857;
 }
 
-/* =====================================================
-   TIMER
-   ===================================================== */
+/* ================= TIMER ================= */
 #timer-servico {
     margin-top: 10px;
-    background: #fef3c7;
-    padding: 10px;
-    border-radius: 6px;
-    text-align: center;
     font-weight: bold;
+    color: #111827;
 }
 
-/* =====================================================
-   FINANCEIRO
-   ===================================================== */
-.financeiro-container {
-    max-width: 1000px;
-    margin: auto;
-}
-
+/* ================= FINANCEIRO ================= */
 .resumo-financeiro {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin: 20px 0;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .card-resumo {
-    background: #fff;
-    padding: 15px;
+    background: #f1f5f9;
+    padding: 14px;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     text-align: center;
 }
 
 .card-resumo h3 {
-    font-size: 15px;
-    margin-bottom: 8px;
+    font-size: 14px;
+    margin-bottom: 6px;
 }
 
 .card-resumo p {
@@ -285,78 +257,28 @@ button:hover {
     font-weight: bold;
 }
 
-/* =====================================================
-   LISTAS (CLIENTES / SERVIÇOS / FUNCIONÁRIOS)
-   ===================================================== */
-.lista {
-    max-width: 800px;
-    margin: 20px auto;
+/* ================= LISTAS ================= */
+.lista-simples {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.lista-item {
-    background: #fff;
+.item-lista {
+    background: #f8fafc;
     padding: 12px;
     border-radius: 6px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-}
-
-/* =====================================================
-   RESPONSIVO
-   ===================================================== */
-@media (max-width: 600px) {
-    nav {
-        justify-content: flex-start;
-        overflow-x: auto;
-    }
-
-    .botoes-edicao {
-        flex-direction: column;
-    }
-
-    .botoes-acao-rapida {
-        flex-direction: column;
-    }
-    }
-/* ================= AGENDA ================= */
-
-.agenda-container {
-    padding: 15px;
-}
-
-#data-selecionada {
-    text-align: center;
-    margin-bottom: 15px;
-    font-weight: bold;
-}
-
-.calendario-diario {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    min-height: 300px; /* ESSENCIAL */
-}
-
-.horario {
-    border-radius: 8px;
-    padding: 12px;
-    text-align: center;
+    border: 1px solid #e5e7eb;
     font-size: 14px;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    background: #f5f5f5;
 }
 
-.horario.livre {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
+/* ================= RESPONSIVO ================= */
+@media (max-width: 480px) {
+    nav {
+        gap: 6px;
+    }
 
-.horario.ocupado {
-    background: #ffebee;
-    color: #c62828;
-}
-
-.horario:hover {
-    opacity: 0.85;
+    #calendario-diario {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
