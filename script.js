@@ -1,134 +1,292 @@
-/* STORAGE */
+/* ======================================================
+   STORAGE BASE
+===================================================== */
 function salvarLocal(chave, dados) {
     localStorage.setItem(chave, JSON.stringify(dados));
 }
 function lerLocal(chave) {
     return JSON.parse(localStorage.getItem(chave)) || [];
 }
+function moeda(v) {
+    return Number(v || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    });
+}
 
-/* AGENDA */
-function inicializarAgenda() {
-    if (!document.body.classList.contains('pagina-agenda')) return;
+/* ======================================================
+   CLIENTES
+===================================================== */
+function carregarClientes() {
+    const lista = document.getElementById('lista-clientes');
+    if (!lista) return;
 
+    lista.innerHTML = '';
+    lerLocal('clientes').forEach(c => {
+        lista.innerHTML += `
+            <div class="item-lista">
+                <strong>${c.nome}</strong><br>
+                ${c.telefone}<br>
+                ${c.endereco || ''}
+            </div>
+        `;
+    });
+}
+
+document.getElementById('form-cadastro-cliente')?.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const clientes = lerLocal('clientes');
+    clientes.push({
+        nome: nomeCliente.value,
+        telefone: telefoneCliente.value,
+        endereco: enderecoCliente.value
+    });
+
+    salvarLocal('clientes', clientes);
+    e.target.reset();
+    carregarClientes();
+});
+
+/* ======================================================
+   SERVIÇOS
+===================================================== */
+function carregarServicos() {
+    const lista = document.getElementById('lista-servicos');
+    if (!lista) return;
+
+    lista.innerHTML = '';
+    lerLocal('servicos').forEach(s => {
+        lista.innerHTML += `
+            <div class="item-lista">
+                <strong>${s.nome}</strong><br>
+                Duração: ${s.duracao} min<br>
+                Valor: ${moeda(s.valor)}
+            </div>
+        `;
+    });
+}
+
+document.getElementById('form-cadastro-servico')?.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const servicos = lerLocal('servicos');
+    servicos.push({
+        nome: nomeServico.value,
+        duracao: duracaoServico.value,
+        valor: valorServico.value
+    });
+
+    salvarLocal('servicos', servicos);
+    e.target.reset();
+    carregarServicos();
+});
+
+/* ======================================================
+   FUNCIONÁRIOS
+===================================================== */
+function carregarFuncionarios() {
+    const lista = document.getElementById('lista-funcionarios');
+    if (!lista) return;
+
+    lista.innerHTML = '';
+    lerLocal('funcionarios').forEach(f => {
+        lista.innerHTML += `
+            <div class="item-lista">
+                <strong>${f.nome}</strong><br>
+                Comissão: ${f.comissao}%
+            </div>
+        `;
+    });
+}
+
+document.getElementById('form-cadastro-funcionario')?.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const funcionarios = lerLocal('funcionarios');
+    funcionarios.push({
+        nome: nomeFuncionario.value,
+        comissao: comissaoFuncionario.value
+    });
+
+    salvarLocal('funcionarios', funcionarios);
+    e.target.reset();
+    carregarFuncionarios();
+});
+
+/* ======================================================
+   AGENDA
+===================================================== */
+let dataAtual = new Date();
+
+function preencherSelectsAgenda() {
+    const selCliente = document.getElementById('cliente-agendamento');
+    const selServico = document.getElementById('servico-agendamento');
+    const selFuncionario = document.getElementById('funcionario-agendamento');
+    if (!selCliente) return;
+
+    selCliente.innerHTML = '<option value="">Cliente</option>';
+    lerLocal('clientes').forEach(c =>
+        selCliente.innerHTML += `<option value="${c.nome}">${c.nome}</option>`
+    );
+
+    selServico.innerHTML = '<option value="">Serviço</option>';
+    lerLocal('servicos').forEach(s =>
+        selServico.innerHTML += `<option value="${s.nome}">${s.nome}</option>`
+    );
+
+    selFuncionario.innerHTML = '';
+    lerLocal('funcionarios').forEach(f =>
+        selFuncionario.innerHTML += `<option value="${f.nome}">${f.nome}</option>`
+    );
+}
+
+function gerarAgenda() {
     const calendario = document.getElementById('calendario-diario');
     const titulo = document.getElementById('data-selecionada');
-    const modalNovo = document.getElementById('modal-agendamento');
-    const modalEditar = document.getElementById('modal-editar-agendamento');
+    if (!calendario) return;
 
-    const hoje = new Date().toISOString().split('T')[0];
-    titulo.textContent = new Date().toLocaleDateString('pt-BR');
+    calendario.innerHTML = '';
+    const dataStr = dataAtual.toISOString().split('T')[0];
+    titulo.textContent = `Agendamentos de ${dataAtual.toLocaleDateString('pt-BR')}`;
 
-    function gerarAgenda() {
-        calendario.innerHTML = '';
-        const ags = lerLocal('agendamentos').filter(a => a.data === hoje);
+    const ags = lerLocal('agendamentos').filter(a => a.data === dataStr);
 
-        for (let h = 8; h <= 18; h++) {
-            ['00','30'].forEach(m => {
-                const hora = `${String(h).padStart(2,'0')}:${m}`;
-                const ag = ags.find(a => a.hora === hora);
+    for (let h = 8; h < 20; h++) {
+        for (let m = 0; m < 60; m += 30) {
+            const hora = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            const ag = ags.find(a => a.hora === hora);
 
-                const div = document.createElement('div');
-                div.className = 'horario';
+            const div = document.createElement('div');
+            div.className = 'horario';
 
-                if (ag) {
-                    div.textContent = `${hora} - ${ag.cliente}`;
-                    div.onclick = () => abrirEdicao(ag);
-                } else {
-                    div.textContent = `${hora} - Livre`;
-                    div.onclick = () => {
-                        document.getElementById('data-agendamento').value = hoje;
-                        document.getElementById('hora-agendamento').value = hora;
-                        preencherSelects();
-                        modalNovo.style.display = 'block';
-                    };
-                }
-                calendario.appendChild(div);
-            });
+            if (ag) {
+                div.classList.add('ocupado');
+                div.innerHTML = `<strong>${hora}</strong><br>${ag.cliente}`;
+                div.onclick = () => abrirEdicao(ag);
+            } else {
+                div.classList.add('livre');
+                div.innerHTML = `<strong>${hora}</strong> Livre`;
+                div.onclick = () => {
+                    dataAgendamento.value = dataStr;
+                    horaAgendamento.value = hora;
+                    preencherSelectsAgenda();
+                    modalAgendamento.classList.add('ativo');
+                };
+            }
+            calendario.appendChild(div);
         }
     }
+}
 
-    function preencherSelects() {
-        const c = document.getElementById('cliente-agendamento');
-        const s = document.getElementById('servico-agendamento');
-        const f = document.getElementById('funcionario-agendamento');
+/* ======================================================
+   MODAIS AGENDA
+===================================================== */
+const modalAgendamento = document.getElementById('modal-agendamento');
+const modalEditar = document.getElementById('modal-editar-agendamento');
 
-        c.innerHTML = lerLocal('clientes').map(x=>`<option>${x.nome}</option>`).join('');
-        s.innerHTML = lerLocal('servicos').map(x=>`<option>${x.nome}</option>`).join('');
-        f.innerHTML = lerLocal('funcionarios').map(x=>`<option>${x.nome}</option>`).join('');
-    }
+document.getElementById('fechar-modal')?.addEventListener('click', () =>
+    modalAgendamento.classList.remove('ativo')
+);
+document.getElementById('fechar-modal-edicao')?.addEventListener('click', () =>
+    modalEditar.classList.remove('ativo')
+);
 
-    function abrirEdicao(ag) {
-        document.getElementById('detalhes-cliente').textContent = ag.cliente;
-        document.getElementById('detalhes-servico').textContent = ag.servico;
-        document.getElementById('detalhes-funcionarios').textContent = ag.funcionarios.join(', ');
-        document.getElementById('detalhes-status').textContent = ag.status;
-        document.getElementById('agendamento-id').value = ag.id;
+document.getElementById('form-novo-agendamento')?.addEventListener('submit', e => {
+    e.preventDefault();
 
-        document.getElementById('botao-iniciar').style.display = ag.status === 'agendado' ? 'block' : 'none';
-        document.getElementById('bloco-finalizar').style.display = ag.status === 'em andamento' ? 'block' : 'none';
+    const ags = lerLocal('agendamentos');
+    ags.push({
+        id: Date.now(),
+        data: dataAgendamento.value,
+        hora: horaAgendamento.value,
+        cliente: clienteAgendamento.value,
+        servico: servicoAgendamento.value,
+        funcionarios: [...funcionarioAgendamento.selectedOptions].map(o => o.value),
+        status: 'agendado'
+    });
 
-        modalEditar.style.display = 'block';
-    }
-
-    document.getElementById('form-novo-agendamento').onsubmit = e => {
-        e.preventDefault();
-        const ags = lerLocal('agendamentos');
-        ags.push({
-            id: Date.now(),
-            data: hoje,
-            hora: document.getElementById('hora-agendamento').value,
-            cliente: document.getElementById('cliente-agendamento').value,
-            servico: document.getElementById('servico-agendamento').value,
-            funcionarios: [...document.getElementById('funcionario-agendamento').selectedOptions].map(o=>o.value),
-            status: 'agendado'
-        });
-        salvarLocal('agendamentos', ags);
-        modalNovo.style.display = 'none';
-        gerarAgenda();
-    };
-
-    document.getElementById('botao-iniciar').onclick = () => {
-        const id = document.getElementById('agendamento-id').value;
-        const ags = lerLocal('agendamentos');
-        ags.find(a=>a.id==id).status='em andamento';
-        salvarLocal('agendamentos', ags);
-        modalEditar.style.display='none';
-        gerarAgenda();
-    };
-
-    document.getElementById('botao-finalizar').onclick = () => {
-        const id = document.getElementById('agendamento-id').value;
-        const ags = lerLocal('agendamentos');
-        ags.find(a=>a.id==id).status='finalizado';
-        salvarLocal('agendamentos', ags);
-        modalEditar.style.display='none';
-        gerarAgenda();
-    };
-
-    document.getElementById('botao-cancelar').onclick = () => {
-        let ags = lerLocal('agendamentos');
-        ags = ags.filter(a=>a.id!=document.getElementById('agendamento-id').value);
-        salvarLocal('agendamentos', ags);
-        modalEditar.style.display='none';
-        gerarAgenda();
-    };
-
-    document.getElementById('fechar-modal').onclick = ()=>modalNovo.style.display='none';
-    document.getElementById('fechar-modal-edicao').onclick = ()=>modalEditar.style.display='none';
-
+    salvarLocal('agendamentos', ags);
+    modalAgendamento.classList.remove('ativo');
     gerarAgenda();
+});
+
+/* ======================================================
+   MODAL EDIÇÃO
+===================================================== */
+function abrirEdicao(ag) {
+    detalhesCliente.textContent = ag.cliente;
+    detalhesServico.textContent = ag.servico;
+    detalhesFuncionarios.textContent = ag.funcionarios.join(', ');
+    detalhesStatus.textContent = ag.status;
+    agendamentoId.value = ag.id;
+
+    document.getElementById('botao-iniciar').style.display =
+        ag.status === 'agendado' ? 'block' : 'none';
+
+    document.getElementById('bloco-finalizar').style.display =
+        ag.status === 'em andamento' ? 'block' : 'none';
+
+    modalEditar.classList.add('ativo');
 }
 
-/* FUNCIONÁRIOS */
-function inicializarFuncionarios() {
-    if (!document.body.classList.contains('pagina-funcionarios')) return;
-    const lista = document.getElementById('lista-funcionarios');
-    lista.innerHTML = lerLocal('funcionarios').map(f =>
-        `<div>${f.nome} - ${f.comissao}%</div>`
-    ).join('');
+botaoIniciar?.addEventListener('click', () => {
+    const ags = lerLocal('agendamentos');
+    const ag = ags.find(a => a.id == agendamentoId.value);
+    if (!ag) return;
+
+    ag.status = 'em andamento';
+    salvarLocal('agendamentos', ags);
+    gerarAgenda();
+    modalEditar.classList.remove('ativo');
+});
+
+botaoFinalizar?.addEventListener('click', () => {
+    const ags = lerLocal('agendamentos');
+    const ag = ags.find(a => a.id == agendamentoId.value);
+    if (!ag) return;
+
+    ag.status = 'finalizado';
+    salvarLocal('agendamentos', ags);
+    gerarAgenda();
+    modalEditar.classList.remove('ativo');
+});
+
+botaoCancelar?.addEventListener('click', () => {
+    let ags = lerLocal('agendamentos');
+    ags = ags.filter(a => a.id != agendamentoId.value);
+    salvarLocal('agendamentos', ags);
+    gerarAgenda();
+    modalEditar.classList.remove('ativo');
+});
+
+/* ======================================================
+   FINANCEIRO
+===================================================== */
+function carregarFinanceiro() {
+    if (!document.body.classList.contains('pagina-financeiro')) return;
+
+    const hoje = new Date().toISOString().split('T')[0];
+    const ags = lerLocal('agendamentos').filter(a =>
+        a.data === hoje && a.status === 'finalizado'
+    );
+
+    let total = 0;
+    ags.forEach(a => {
+        const s = lerLocal('servicos').find(x => x.nome === a.servico);
+        if (s) total += Number(s.valor);
+    });
+
+    document.getElementById('total-recebido').textContent = moeda(total);
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{
-    inicializarAgenda();
-    inicializarFuncionarios();
+/* ======================================================
+   INIT
+===================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    carregarClientes();
+    carregarServicos();
+    carregarFuncionarios();
+    gerarAgenda();
+    carregarFinanceiro();
 });
