@@ -1,47 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Funcionários</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Funcionários</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
+
+<body class="pagina-funcionarios">
 
 <header>
-<nav>
-    <a href="agenda.html">Agenda</a>
-    <a href="index.html">Cadastros</a>
-    <a href="clientes.html">Clientes</a>
-    <a href="servicos.html">Serviços</a>
-    <a href="funcionarios.html" class="ativo">Funcionários</a>
-    <a href="financeiro.html">Financeiro</a>
-    <a href="comissoes.html">Comissões</a>
-</nav>
+    <nav>
+        <a href="agenda.html">Agenda</a>
+        <a href="clientes.html">Clientes</a>
+        <a href="servicos.html">Serviços</a>
+        <a href="funcionarios.html" class="ativo">Funcionários</a>
+        <a href="financeiro.html">Financeiro</a>
+        <a href="comissoes.html">Comissões</a>
+    </nav>
 </header>
 
 <main>
-<h2 style="text-align:center;">Funcionários</h2>
-<div class="lista" id="lista-funcionarios"></div>
+    <h2>Funcionários</h2>
+    <div id="lista-funcionarios"></div>
 </main>
 
 <script src="script.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const lista = document.getElementById('lista-funcionarios');
-    const funcionarios = JSON.parse(localStorage.getItem('funcionarios')) || [];
-
-    lista.innerHTML = '';
-    funcionarios.forEach(f => {
-        const div = document.createElement('div');
-        div.className = 'lista-item';
-        div.innerHTML = `
-            <strong>${f.nome}</strong><br>
-            Comissão: ${f.comissao}%
-        `;
-        lista.appendChild(div);
-    });
-});
-</script>
-
 </body>
-</html>l
+</html>
