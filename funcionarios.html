@@ -11,17 +11,37 @@
 <header>
     <nav>
         <a href="agenda.html">Agenda</a>
+        <a href="index.html">Cadastros</a>
         <a href="clientes.html">Clientes</a>
         <a href="servicos.html">Serviços</a>
         <a href="funcionarios.html" class="ativo">Funcionários</a>
         <a href="financeiro.html">Financeiro</a>
-        <a href="comissoes.html">Comissões</a>
     </nav>
 </header>
 
 <main>
-    <h2>Funcionários</h2>
-    <div id="lista-funcionarios"></div>
+    <section class="form-container">
+        <h2>Cadastrar Funcionário</h2>
+
+        <form id="form-cadastro-funcionario">
+            <div class="form-group">
+                <label>Nome</label>
+                <input id="nome-funcionario" required>
+            </div>
+
+            <div class="form-group">
+                <label>Comissão (%)</label>
+                <input type="number" id="comissao-funcionario" required>
+            </div>
+
+            <button type="submit">Salvar Funcionário</button>
+        </form>
+    </section>
+
+    <section class="list-container">
+        <h2>Funcionários Cadastrados</h2>
+        <div id="lista-funcionarios" class="lista"></div>
+    </section>
 </main>
 
 <script src="script.js"></script>
