@@ -1,48 +1,54 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Serviços</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Serviços</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
+
+<body class="pagina-servicos">
 
 <header>
-<nav>
-    <a href="agenda.html">Agenda</a>
-    <a href="index.html">Cadastros</a>
-    <a href="clientes.html">Clientes</a>
-    <a href="servicos.html" class="ativo">Serviços</a>
-    <a href="funcionarios.html">Funcionários</a>
-    <a href="financeiro.html">Financeiro</a>
-    <a href="comissoes.html">Comissões</a>
-</nav>
+    <nav>
+        <a href="agenda.html">Agenda</a>
+        <a href="index.html">Cadastros</a>
+        <a href="clientes.html">Clientes</a>
+        <a href="servicos.html" class="ativo">Serviços</a>
+        <a href="funcionarios.html">Funcionários</a>
+        <a href="financeiro.html">Financeiro</a>
+    </nav>
 </header>
 
 <main>
-<h2 style="text-align:center;">Serviços</h2>
-<div class="lista" id="lista-servicos"></div>
+    <section class="form-container">
+        <h2>Cadastrar Serviço</h2>
+
+        <form id="form-cadastro-servico">
+            <div class="form-group">
+                <label>Nome</label>
+                <input id="nome-servico" required>
+            </div>
+
+            <div class="form-group">
+                <label>Duração (min)</label>
+                <input type="number" id="duracao-servico" required>
+            </div>
+
+            <div class="form-group">
+                <label>Valor (R$)</label>
+                <input type="number" id="valor-servico" required>
+            </div>
+
+            <button type="submit">Salvar Serviço</button>
+        </form>
+    </section>
+
+    <section class="list-container">
+        <h2>Serviços Cadastrados</h2>
+        <div id="lista-servicos" class="lista"></div>
+    </section>
 </main>
 
 <script src="script.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const lista = document.getElementById('lista-servicos');
-    const servicos = JSON.parse(localStorage.getItem('servicos')) || [];
-
-    lista.innerHTML = '';
-    servicos.forEach(s => {
-        const div = document.createElement('div');
-        div.className = 'lista-item';
-        div.innerHTML = `
-            <strong>${s.nome}</strong><br>
-            ⏱ ${s.tempo} min<br>
-            💰 R$ ${s.valor}
-        `;
-        lista.appendChild(div);
-    });
-});
-</script>
-
 </body>
 </html>
