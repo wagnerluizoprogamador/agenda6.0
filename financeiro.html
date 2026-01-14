@@ -6,58 +6,59 @@
     <title>Financeiro - Serviços</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <header>
-        <nav>
-            <a href="agenda.html">Agenda</a>
-            <a href="index.html">Cadastros</a>
-            <a href="clientes.html">Clientes</a>
-            <a href="servicos.html">Serviços</a>
-            <a href="funcionarios.html">Funcionários</a>
-            <a href="financeiro.html" class="ativo">Financeiro</a>
-             <a href="comissoes.html"class="ativo">Comissões</a>
-        </nav>
-    </header>
 
-    <main>
-        <section class="financeiro-container">
-            <h1>Relatório Financeiro do Dia</h1>
-            <h2 id="data-financeiro"></h2>
-
-            <div class="resumo-financeiro">
-                <div class="card-resumo">
-                    <h3>Total Recebido</h3>
-                    <p id="total-recebido">R$ 0,00</p>
-                </div>
-                <div class="card-resumo">
-                    <h3>Comissão dos Funcionários</h3>
-                    <p id="total-comissao">R$ 0,00</p>
-                </div>
-                <div class="card-resumo">
-                    <h3>Lucro Líquido</h3>
-                    <p id="lucro-liquido">R$ 0,00</p>
-                </div>
-            </div>
-
-            <div class="detalhes-financeiro">
-                <div class="secao-servicos">
-                    <h3>Serviços Finalizados</h3>
-                    <div id="lista-servicos-finalizados">
-                        <p class="nenhum-dado">Nenhum serviço finalizado hoje.</p>
-                    </div>
-                </div>
-                
-                <div class="secao-comissoes">
-                    <h3>Comissões por Funcionário</h3>
-                    <div id="lista-comissoes-funcionarios">
-                        <p class="nenhum-dado">Nenhum dado de comissão hoje.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <script src="script.js"></script>
-</body>
 <body class="pagina-financeiro">
+
+<header>
+    <nav>
+        <a href="agenda.html">Agenda</a>
+        <a href="index.html">Cadastros</a>
+        <a href="clientes.html">Clientes</a>
+        <a href="servicos.html">Serviços</a>
+        <a href="funcionarios.html">Funcionários</a>
+        <a href="financeiro.html" class="ativo">Financeiro</a>
+        <a href="comissoes.html">Comissões</a>
+    </nav>
+</header>
+
+<main>
+    <section class="financeiro-container">
+        <h1>Relatório Financeiro do Dia</h1>
+        <h2 id="data-financeiro"></h2>
+
+        <div class="resumo-financeiro">
+            <div class="card-resumo">
+                <h3>Total Recebido</h3>
+                <p id="total-recebido">R$ 0,00</p>
+            </div>
+            <div class="card-resumo">
+                <h3>Comissão dos Funcionários</h3>
+                <p id="total-comissao">R$ 0,00</p>
+            </div>
+            <div class="card-resumo">
+                <h3>Lucro Líquido</h3>
+                <p id="lucro-liquido">R$ 0,00</p>
+            </div>
+        </div>
+
+        <div class="detalhes-financeiro">
+            <div class="secao-servicos">
+                <h3>Serviços Finalizados</h3>
+                <div id="lista-servicos-finalizados">
+                    <p class="nenhum-dado">Nenhum serviço finalizado hoje.</p>
+                </div>
+            </div>
+
+            <div class="secao-comissoes">
+                <h3>Comissões por Funcionário</h3>
+                <div id="lista-comissoes-funcionarios">
+                    <p class="nenhum-dado">Nenhum dado de comissão hoje.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="script.js"></script>
+</body>
 </html>
