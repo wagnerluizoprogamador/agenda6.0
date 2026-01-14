@@ -3,29 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <title>Agenda</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="pagina-agenda">
 
 <header>
-<nav>
-<a class="ativo" href="agenda.html">Agenda</a>
-<a href="clientes.html">Clientes</a>
-<a href="servicos.html">Serviços</a>
-<a href="funcionarios.html">Funcionários</a>
-<a href="financeiro.html">Financeiro</a>
-<a href="comissoes.html">Comissões</a>
-</nav>
+  <nav>
+    <a class="ativo" href="agenda.html">Agenda</a>
+    <a href="clientes.html">Clientes</a>
+    <a href="servicos.html">Serviços</a>
+    <a href="funcionarios.html">Funcionários</a>
+    <a href="financeiro.html">Financeiro</a>
+    <a href="comissoes.html">Comissões</a>
+  </nav>
 </header>
 
 <main class="container">
-<h2 id="titulo-dia">Agendamentos do Dia</h2>
-<div id="agenda-lista"></div>
+  <h2 id="titulo-dia">Agendamentos do Dia</h2>
+  <div id="agenda-lista" class="agenda-lista"></div>
 </main>
 
-<!-- MODAL NOVO -->
+<!-- ================= MODAL NOVO AGENDAMENTO ================= -->
 <div id="modal-novo" class="modal">
-<div class="modal-conteudo">
-<button class="fechar" onclick="fecharModalNovo()">×</button>
-<h3>N
+  <div class="modal-conteudo">
+    <button class="fechar" onclick="fecharModalNovo()">×</button>
+    <h3>Novo Agendamento</h3>
+
+    <form id="form-agendamento">
+      <label>Hora</label>
+      <input type="time" id="hora-agendamento" required>
+
+      <label>Cliente</label>
+      <select id="cliente-agendamento" required></select>
+
+      <label>Serviço</label>
+      <select id="servico-agendamento" required></select>
+
+      <label>Funcionário(s)</label>
+      <select id="funcionario-agendamento" multiple required></select>
+
+      <button type="submit" class="btn-primary">Salvar Agendamento</button>
+    </form>
+  </div>
+</div>
+
+<!-- ================= MODAL DETALHES ================= -->
+<div id="modal-detalhes" class="modal">
+  <div class="modal-conteudo">
+    <button class="fechar" onclick="fecharModalDetalhes()">×</button>
+    <h3>Detalhes do Agendamento</h3>
+
+    <p><strong>Cliente:</strong> <span id="det-cliente"></span></p>
+    <p><strong>Serviço:</strong> <span id="det-servico"></span></p>
+    <p><strong>Funcionário(s):</strong> <span id="det-func"></span></p>
+    <p><strong>Status:</strong> <span id="det-status"></span></p>
+
+    <div class="acoes-rapidas">
+      <a id="btn-whatsapp" target="_blank" class="btn-wpp">WhatsApp</a>
+      <a id="btn-maps" target="_blank" class="btn-maps">Maps</a>
+    </div>
+
+    <div class="acoes">
+      <button onclick="iniciarServico()" class="btn-success">Iniciar</button>
+      <button onclick="finalizarServico()" class="btn-primary">Finalizar</button>
+      <button onclick="cancelarAgendamento()" class="btn-danger">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
