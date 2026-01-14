@@ -2,6 +2,7 @@
 function salvarLocal(chave, dados) {
   localStorage.setItem(chave, JSON.stringify(dados));
 }
+
 function lerLocal(chave) {
   return JSON.parse(localStorage.getItem(chave)) || [];
 }
@@ -13,49 +14,53 @@ let agendamentoAtual = null;
 /* ========= AGENDA ========= */
 function carregarAgenda() {
   const agenda = document.getElementById('agenda-lista');
-function carregarAgenda() {
-  const agenda = document.getElementById('agenda-lista');
-  if (!agenda) return;
+  const titulo = document.getElementById('titulo-dia');
+  if (!agenda || !titulo) return;
 
   agenda.innerHTML = '';
-
-  document.getElementById('titulo-dia').innerText =
+  titulo.textContent =
     'Agendamentos de ' + new Date(dataHoje).toLocaleDateString('pt-BR');
 
   const ags = lerLocal('agendamentos').filter(a => a.data === dataHoje);
 
   for (let h = 0; h < 24; h++) {
-    ['00', '30'].forEach(m => {
+    for (let m of ['00', '30']) {
       const hora = `${String(h).padStart(2, '0')}:${m}`;
       const ag = ags.find(a => a.hora === hora);
 
       const div = document.createElement('div');
-      div.className = ag ? 'slot ocupado' : 'slot livre';
+      div.classList.add('horario');
 
       if (ag) {
+        div.classList.add('ocupado');
         div.innerHTML = `
-          <strong>${hora}</strong> - ${ag.servico}<br>
+          <strong>${hora}</strong><br>
+          ${ag.servico}<br>
           ${ag.cliente}
         `;
         div.onclick = () => abrirDetalhes(ag);
       } else {
+        div.classList.add('livre');
         div.innerHTML = `<strong>${hora}</strong> - Livre`;
         div.onclick = () => abrirModalNovo(hora);
       }
 
       agenda.appendChild(div);
-    });
+    }
   }
 }
+
 /* ========= MODAIS ========= */
 function abrirModalNovo(hora) {
   document.getElementById('hora-agendamento').value = hora;
   preencherSelects();
   document.getElementById('modal-novo').classList.add('ativo');
 }
+
 function fecharModalNovo() {
   document.getElementById('modal-novo').classList.remove('ativo');
 }
+
 function fecharModalDetalhes() {
   document.getElementById('modal-detalhes').classList.remove('ativo');
 }
@@ -68,8 +73,8 @@ function preencherSelects() {
 
   if (!c || !s || !f) return;
 
-  c.innerHTML = '<option value="">Cliente</option>';
-  s.innerHTML = '<option value="">Serviço</option>';
+  c.innerHTML = '<option value="">Selecione o cliente</option>';
+  s.innerHTML = '<option value="">Selecione o serviço</option>';
   f.innerHTML = '';
 
   lerLocal('clientes').forEach(x => {
@@ -96,7 +101,6 @@ function preencherSelects() {
 
 /* ========= SALVAR AGENDAMENTO ========= */
 document.addEventListener('DOMContentLoaded', () => {
-
   const form = document.getElementById('form-agendamento');
   if (!form) return;
 
@@ -134,23 +138,28 @@ document.addEventListener('DOMContentLoaded', () => {
 function abrirDetalhes(ag) {
   agendamentoAtual = ag.id;
 
-  document.getElementById('det-cliente').innerText = ag.cliente;
-  document.getElementById('det-servico').innerText = ag.servico;
-  document.getElementById('det-func').innerText = ag.funcionarios.join(', ');
-  document.getElementById('det-status').innerText = ag.status;
+  document.getElementById('det-cliente').textContent = ag.cliente;
+  document.getElementById('det-servico').textContent = ag.servico;
+  document.getElementById('det-func').textContent = ag.funcionarios.join(', ');
+  document.getElementById('det-status').textContent = ag.status;
 
   const cli = lerLocal('clientes').find(c => c.nome === ag.cliente);
+
   const btnWpp = document.getElementById('btn-whatsapp');
   const btnMaps = document.getElementById('btn-maps');
 
-  if (cli && btnWpp && cli.telefone) {
-    btnWpp.href = `https://wa.me/55${cli.telefone.replace(/\D/g,'')}`;
+  if (cli && cli.telefone) {
+    btnWpp.href = `https://wa.me/55${cli.telefone.replace(/\D/g, '')}`;
     btnWpp.style.display = 'inline-block';
+  } else {
+    btnWpp.style.display = 'none';
   }
 
-  if (cli && btnMaps && cli.endereco) {
+  if (cli && cli.endereco) {
     btnMaps.href = `https://maps.google.com/?q=${encodeURIComponent(cli.endereco)}`;
     btnMaps.style.display = 'inline-block';
+  } else {
+    btnMaps.style.display = 'none';
   }
 
   document.getElementById('modal-detalhes').classList.add('ativo');
@@ -160,9 +169,11 @@ function abrirDetalhes(ag) {
 function iniciarServico() {
   atualizarStatus('em andamento');
 }
+
 function finalizarServico() {
   atualizarStatus('finalizado');
 }
+
 function cancelarAgendamento() {
   let ags = lerLocal('agendamentos');
   ags = ags.filter(a => a.id !== agendamentoAtual);
@@ -170,6 +181,7 @@ function cancelarAgendamento() {
   fecharModalDetalhes();
   carregarAgenda();
 }
+
 function atualizarStatus(status) {
   const ags = lerLocal('agendamentos');
   const ag = ags.find(a => a.id === agendamentoAtual);
@@ -179,4 +191,4 @@ function atualizarStatus(status) {
   salvarLocal('agendamentos', ags);
   fecharModalDetalhes();
   carregarAgenda();
-}
+    }
