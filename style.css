@@ -1,156 +1,167 @@
 * {
-    box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 body {
-    margin: 0;
-    background: #f4f6f8;
-    color: #333;
+  margin: 0;
+  background: #f4f6f8;
+  color: #333;
 }
 
+/* ===== MENU ===== */
 header {
-    background: #0d6efd;
-    padding: 12px;
+  background: #0d6efd;
+  padding: 12px;
 }
 
 nav {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 nav a {
-    color: #fff;
-    text-decoration: none;
-    padding: 6px 10px;
-    border-radius: 4px;
+  color: #fff;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 4px;
 }
 
 nav a.ativo {
-    background: #084298;
+  background: #084298;
 }
 
+/* ===== CONTAINER ===== */
 .container {
-    max-width: 1100px;
-    margin: 20px auto;
-    padding: 10px;
+  max-width: 1100px;
+  margin: 20px auto;
+  padding: 10px;
 }
 
-h1 {
-    margin-bottom: 15px;
+h1, h2 {
+  margin-bottom: 15px;
 }
 
 /* ===== CARDS ===== */
 .card {
-    background: #fff;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,.1);
+  background: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,.1);
 }
 
 .item-lista {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
 }
 
 /* ===== FORM ===== */
-form input, form select, form button {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
+form input,
+form select,
+form button {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
 }
 
 button {
-    background: #0d6efd;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
 }
 
 /* ===== AGENDA ===== */
-.agenda-dia {
-    background: #fff;
-    border-radius: 10px;
-    padding: 15px;
+.agenda-lista {
+  background: #fff;
+  border-radius: 10px;
+  padding: 15px;
 }
 
-.horario {
-    padding: 10px;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    cursor: pointer;
+.slot {
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
 }
 
-.livre {
-    background: #d1f1dc;
+.slot.livre {
+  background: #d1f1dc;
 }
 
-.ocupado {
-    background: #ffc107;
+.slot.ocupado {
+  background: #ffc107;
 }
 
 /* ===== MODAL ===== */
 .modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.6);
-    display: none;
-    align-items: center;
-    justify-content: center;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
 }
 
 .modal.ativo {
-    display: flex;
+  display: flex;
 }
 
-.modal-box {
-    background: #fff;
-    width: 320px;
-    padding: 20px;
-    border-radius: 10px;
+.modal-conteudo {
+  background: #fff;
+  width: 340px;
+  padding: 20px;
+  border-radius: 10px;
 }
 
-.modal-box h2 {
-    margin-top: 0;
+.modal-conteudo h3 {
+  margin-top: 0;
 }
 
 .fechar {
-    float: right;
-    cursor: pointer;
-    font-size: 18px;
-}
-function abrirModalNovo(hora) {
-  document.getElementById('hora-agendamento').value = hora;
-  document.getElementById('modal-novo').classList.add('ativo');
+  float: right;
+  cursor: pointer;
+  font-size: 18px;
+  background: none;
+  border: none;
 }
 
-function fecharModalNovo() {
-  document.getElementById('modal-novo').classList.remove('ativo');
+/* ===== BOTÕES ===== */
+.btn-primary {
+  background: #0d6efd;
 }
 
-function fecharModalDetalhes() {
-  document.getElementById('modal-detalhes').classList.remove('ativo');
+.btn-success {
+  background: #198754;
 }
 
-function abrirDetalhes(ag) {
-  document.getElementById('det-cliente').textContent = ag.cliente;
-  document.getElementById('det-servico').textContent = ag.servico;
-  document.getElementById('det-func').textContent = ag.funcionarios.join(', ');
-  document.getElementById('det-status').textContent = ag.status;
+.btn-danger {
+  background: #dc3545;
+}
 
-  const cliente = lerLocal('clientes').find(c => c.nome === ag.cliente);
+.btn-wpp {
+  background: #25d366;
+  color: #fff;
+  padding: 8px;
+  border-radius: 6px;
+  text-decoration: none;
+}
 
-  if (cliente) {
-    document.getElementById('btn-whatsapp').href =
-      `https://wa.me/55${cliente.telefone.replace(/\D/g,'')}`;
+.btn-maps {
+  background: #0dcaf0;
+  color: #fff;
+  padding: 8px;
+  border-radius: 6px;
+  text-decoration: none;
+}
 
-    document.getElementById('btn-maps').href =
-      `https://www.google.com/maps?q=${encodeURIComponent(cliente.endereco)}`;
-  }
-
-  window.agendamentoAtual = ag.id;
-  document.getElementById('modal-detalhes').classList.add('ativo');
-                         }
+.acoes,
+.acoes-rapidas {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
