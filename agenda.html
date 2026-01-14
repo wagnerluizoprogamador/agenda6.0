@@ -5,6 +5,25 @@
 <title>Agenda</title>
 <link rel="stylesheet" href="style.css">
 </head>
+  <!-- MODAL NOVO AGENDAMENTO -->
+<div id="modal-novo" class="modal">
+  <div class="modal-conteudo">
+    <button class="fechar" onclick="fecharModalNovo()">×</button>
+    <h3>Novo Agendamento</h3>
+
+    <form id="form-agendamento">
+      <input type="time" id="hora-agendamento" required>
+
+      <select id="cliente-agendamento" required></select>
+
+      <select id="servico-agendamento" required></select>
+
+      <select id="funcionario-agendamento" multiple required></select>
+
+      <button type="submit" class="btn btn-azul">Salvar Agendamento</button>
+    </form>
+  </div>
+</div>
 <body>
 
 <header>
