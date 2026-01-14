@@ -17,7 +17,7 @@ function moeda(v) {
 /* ======================================================
    CLIENTES
 ===================================================== */
-function carregarClientes() {
+function carregarClientes(
     const lista = document.getElementById('lista-clientes');
     if (!lista) return;
 
