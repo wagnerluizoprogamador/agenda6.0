@@ -6,16 +6,18 @@ function lerLocal(chave) {
   return JSON.parse(localStorage.getItem(chave)) || [];
 }
 
-/* ========= AGENDA ========= */
+/* ========= VARIÁVEIS ========= */
 let dataHoje = new Date().toISOString().split('T')[0];
 let agendamentoAtual = null;
 
+/* ========= AGENDA ========= */
 function carregarAgenda() {
   const agenda = document.getElementById('agenda-lista');
-  if (!agenda) return;
+  const titulo = document.getElementById('titulo-dia');
+  if (!agenda || !titulo) return;
 
   agenda.innerHTML = '';
-  document.getElementById('titulo-dia').innerText =
+  titulo.innerText =
     'Agendamentos de ' + new Date().toLocaleDateString('pt-BR');
 
   const ags = lerLocal('agendamentos').filter(a => a.data === dataHoje);
@@ -60,32 +62,67 @@ function preencherSelects() {
   const s = document.getElementById('servico-agendamento');
   const f = document.getElementById('funcionario-agendamento');
 
+  if (!c || !s || !f) return;
+
   c.innerHTML = '<option value="">Cliente</option>';
   s.innerHTML = '<option value="">Serviço</option>';
   f.innerHTML = '';
 
-  lerLocal('clientes').forEach(x => c.innerHTML += `<option>${x.nome}</option>`);
-  lerLocal('servicos').forEach(x => s.innerHTML += `<option>${x.nome}</option>`);
-  lerLocal('funcionarios').forEach(x => f.innerHTML += `<option>${x.nome}</option>`);
-}
-
-/* ========= SALVAR ========= */
-document.getElementById('form-agendamento')?.addEventListener('submit', e => {
-  e.preventDefault();
-
-  const ags = lerLocal('agendamentos');
-  ags.push({
-    id: Date.now(),
-    data: dataHoje,
-    hora: hora-agendamento.value,
-    cliente: cliente-agendamento.value,
-    servico: servico-agendamento.value,
-    funcionarios: [...funcionario-agendamento.selectedOptions].map(o=>o.value),
-    status: 'agendado'
+  lerLocal('clientes').forEach(x => {
+    const opt = document.createElement('option');
+    opt.value = x.nome;
+    opt.textContent = x.nome;
+    c.appendChild(opt);
   });
 
-  salvarLocal('agendamentos', ags);
-  fecharModalNovo();
+  lerLocal('servicos').forEach(x => {
+    const opt = document.createElement('option');
+    opt.value = x.nome;
+    opt.textContent = x.nome;
+    s.appendChild(opt);
+  });
+
+  lerLocal('funcionarios').forEach(x => {
+    const opt = document.createElement('option');
+    opt.value = x.nome;
+    opt.textContent = x.nome;
+    f.appendChild(opt);
+  });
+}
+
+/* ========= SALVAR AGENDAMENTO ========= */
+document.addEventListener('DOMContentLoaded', () => {
+
+  const form = document.getElementById('form-agendamento');
+  if (!form) return;
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const hora = document.getElementById('hora-agendamento').value;
+    const cliente = document.getElementById('cliente-agendamento').value;
+    const servico = document.getElementById('servico-agendamento').value;
+    const funcionarios = [...document.getElementById('funcionario-agendamento').selectedOptions]
+      .map(o => o.value);
+
+    if (!hora || !cliente || !servico || funcionarios.length === 0) return;
+
+    const ags = lerLocal('agendamentos');
+    ags.push({
+      id: Date.now(),
+      data: dataHoje,
+      hora,
+      cliente,
+      servico,
+      funcionarios,
+      status: 'agendado'
+    });
+
+    salvarLocal('agendamentos', ags);
+    fecharModalNovo();
+    carregarAgenda();
+  });
+
   carregarAgenda();
 });
 
@@ -93,18 +130,26 @@ document.getElementById('form-agendamento')?.addEventListener('submit', e => {
 function abrirDetalhes(ag) {
   agendamentoAtual = ag.id;
 
-  det-cliente.innerText = ag.cliente;
-  det-servico.innerText = ag.servico;
-  det-func.innerText = ag.funcionarios.join(', ');
-  det-status.innerText = ag.status;
+  document.getElementById('det-cliente').innerText = ag.cliente;
+  document.getElementById('det-servico').innerText = ag.servico;
+  document.getElementById('det-func').innerText = ag.funcionarios.join(', ');
+  document.getElementById('det-status').innerText = ag.status;
 
   const cli = lerLocal('clientes').find(c => c.nome === ag.cliente);
-  if (cli) {
-    btn-whatsapp.href = `https://wa.me/55${cli.telefone.replace(/\D/g,'')}`;
-    btn-maps.href = `https://maps.google.com/?q=${encodeURIComponent(cli.endereco)}`;
+  const btnWpp = document.getElementById('btn-whatsapp');
+  const btnMaps = document.getElementById('btn-maps');
+
+  if (cli && btnWpp && cli.telefone) {
+    btnWpp.href = `https://wa.me/55${cli.telefone.replace(/\D/g,'')}`;
+    btnWpp.style.display = 'inline-block';
   }
 
-  modal-detalhes.classList.add('ativo');
+  if (cli && btnMaps && cli.endereco) {
+    btnMaps.href = `https://maps.google.com/?q=${encodeURIComponent(cli.endereco)}`;
+    btnMaps.style.display = 'inline-block';
+  }
+
+  document.getElementById('modal-detalhes').classList.add('ativo');
 }
 
 /* ========= AÇÕES ========= */
@@ -131,6 +176,3 @@ function atualizarStatus(status) {
   fecharModalDetalhes();
   carregarAgenda();
 }
-
-/* ========= INIT ========= */
-document.addEventListener('DOMContentLoaded', carregarAgenda);
