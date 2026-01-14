@@ -1,35 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Agenda</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Agenda</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
-<!-- MODAL DETALHES -->
-<div id="modal-detalhes" class="modal">
-  <div class="modal-conteudo">
-    <button class="fechar" onclick="fecharModalDetalhes()">×</button>
 
-    <h3>Detalhes do Agendamento</h3>
-
-    <p><strong>Cliente:</strong> <span id="det-cliente"></span></p>
-    <p><strong>Serviço:</strong> <span id="det-servico"></span></p>
-    <p><strong>Funcionário(s):</strong> <span id="det-func"></span></p>
-    <p><strong>Status:</strong> <span id="det-status"></span></p>
-
-    <div class="acoes-rapidas">
-      <a id="btn-whatsapp" class="btn-wpp" target="_blank">WhatsApp</a>
-      <a id="btn-maps" class="btn-maps" target="_blank">Mapa</a>
-    </div>
-
-    <div class="acoes">
-      <button class="btn-primary" onclick="iniciarServico()">Iniciar</button>
-      <button class="btn-success" onclick="finalizarServico()">Finalizar</button>
-      <button class="btn-danger" onclick="cancelarAgendamento()">Cancelar</button>
-    </div>
-  </div>
-</div>
 <body class="pagina-agenda">
 
 <header>
@@ -67,7 +44,9 @@
       <label>Funcionário(s)</label>
       <select id="funcionario-agendamento" multiple required></select>
 
-      <button type="submit" class="btn-primary">Salvar Agendamento</button>
+      <button type="submit" class="btn-primary">
+        Salvar Agendamento
+      </button>
     </form>
   </div>
 </div>
@@ -76,6 +55,7 @@
 <div id="modal-detalhes" class="modal">
   <div class="modal-conteudo">
     <button class="fechar" onclick="fecharModalDetalhes()">×</button>
+
     <h3>Detalhes do Agendamento</h3>
 
     <p><strong>Cliente:</strong> <span id="det-cliente"></span></p>
@@ -84,14 +64,14 @@
     <p><strong>Status:</strong> <span id="det-status"></span></p>
 
     <div class="acoes-rapidas">
-      <a id="btn-whatsapp" target="_blank" class="btn-wpp">WhatsApp</a>
-      <a id="btn-maps" target="_blank" class="btn-maps">Maps</a>
+      <a id="btn-whatsapp" class="btn-wpp" target="_blank">WhatsApp</a>
+      <a id="btn-maps" class="btn-maps" target="_blank">Mapa</a>
     </div>
 
     <div class="acoes">
-      <button onclick="iniciarServico()" class="btn-success">Iniciar</button>
-      <button onclick="finalizarServico()" class="btn-primary">Finalizar</button>
-      <button onclick="cancelarAgendamento()" class="btn-danger">Cancelar</button>
+      <button class="btn-success" onclick="iniciarServico()">Iniciar</button>
+      <button class="btn-primary" onclick="finalizarServico()">Finalizar</button>
+      <button class="btn-danger" onclick="cancelarAgendamento()">Cancelar</button>
     </div>
   </div>
 </div>
