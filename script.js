@@ -13,28 +13,33 @@ let agendamentoAtual = null;
 /* ========= AGENDA ========= */
 function carregarAgenda() {
   const agenda = document.getElementById('agenda-lista');
-  const titulo = document.getElementById('titulo-dia');
-  if (!agenda || !titulo) return;
+function carregarAgenda() {
+  const agenda = document.getElementById('agenda-lista');
+  if (!agenda) return;
 
   agenda.innerHTML = '';
-  titulo.innerText =
-    'Agendamentos de ' + new Date().toLocaleDateString('pt-BR');
+
+  document.getElementById('titulo-dia').innerText =
+    'Agendamentos de ' + new Date(dataHoje).toLocaleDateString('pt-BR');
 
   const ags = lerLocal('agendamentos').filter(a => a.data === dataHoje);
 
-  for (let h = 8; h <= 17; h++) {
-    ['00','30'].forEach(m => {
-      const hora = `${String(h).padStart(2,'0')}:${m}`;
+  for (let h = 0; h < 24; h++) {
+    ['00', '30'].forEach(m => {
+      const hora = `${String(h).padStart(2, '0')}:${m}`;
       const ag = ags.find(a => a.hora === hora);
 
       const div = document.createElement('div');
       div.className = ag ? 'slot ocupado' : 'slot livre';
 
       if (ag) {
-        div.innerHTML = `<b>${hora}</b> - ${ag.servico}<br>${ag.cliente}`;
+        div.innerHTML = `
+          <strong>${hora}</strong> - ${ag.servico}<br>
+          ${ag.cliente}
+        `;
         div.onclick = () => abrirDetalhes(ag);
       } else {
-        div.innerHTML = `<b>${hora}</b> - Livre`;
+        div.innerHTML = `<strong>${hora}</strong> - Livre`;
         div.onclick = () => abrirModalNovo(hora);
       }
 
@@ -42,7 +47,6 @@ function carregarAgenda() {
     });
   }
 }
-
 /* ========= MODAIS ========= */
 function abrirModalNovo(hora) {
   document.getElementById('hora-agendamento').value = hora;
