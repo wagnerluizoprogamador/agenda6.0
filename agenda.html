@@ -46,6 +46,30 @@
 <div class="modal-box">
 <span class="fechar" onclick="fecharModal()">×</span>
 <h2>Novo Agendamento</h2>
+  <!-- MODAL DETALHES -->
+<div id="modal-detalhes" class="modal">
+  <div class="modal-conteudo">
+    <button class="fechar" onclick="fecharModalDetalhes()">×</button>
+
+    <h3>Detalhes do Agendamento</h3>
+
+    <p><strong>Cliente:</strong> <span id="det-cliente"></span></p>
+    <p><strong>Serviço:</strong> <span id="det-servico"></span></p>
+    <p><strong>Funcionário(s):</strong> <span id="det-func"></span></p>
+    <p><strong>Status:</strong> <span id="det-status"></span></p>
+
+    <div class="acoes">
+      <a id="btn-whatsapp" target="_blank" class="btn btn-verde">WhatsApp</a>
+      <a id="btn-maps" target="_blank" class="btn btn-azul">Google Maps</a>
+    </div>
+
+    <div class="acoes">
+      <button onclick="iniciarServico()" class="btn btn-verde">Iniciar Serviço</button>
+      <button onclick="finalizarServico()" class="btn btn-laranja">Finalizar</button>
+      <button onclick="cancelarAgendamento()" class="btn btn-vermelho">Cancelar</button>
+    </div>
+  </div>
+</div>
 
 <input id="horaAgendamento" readonly>
 <select id="clienteAg"></select>
