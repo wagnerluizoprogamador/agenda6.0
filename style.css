@@ -122,3 +122,35 @@ button {
     cursor: pointer;
     font-size: 18px;
 }
+function abrirModalNovo(hora) {
+  document.getElementById('hora-agendamento').value = hora;
+  document.getElementById('modal-novo').classList.add('ativo');
+}
+
+function fecharModalNovo() {
+  document.getElementById('modal-novo').classList.remove('ativo');
+}
+
+function fecharModalDetalhes() {
+  document.getElementById('modal-detalhes').classList.remove('ativo');
+}
+
+function abrirDetalhes(ag) {
+  document.getElementById('det-cliente').textContent = ag.cliente;
+  document.getElementById('det-servico').textContent = ag.servico;
+  document.getElementById('det-func').textContent = ag.funcionarios.join(', ');
+  document.getElementById('det-status').textContent = ag.status;
+
+  const cliente = lerLocal('clientes').find(c => c.nome === ag.cliente);
+
+  if (cliente) {
+    document.getElementById('btn-whatsapp').href =
+      `https://wa.me/55${cliente.telefone.replace(/\D/g,'')}`;
+
+    document.getElementById('btn-maps').href =
+      `https://www.google.com/maps?q=${encodeURIComponent(cliente.endereco)}`;
+  }
+
+  window.agendamentoAtual = ag.id;
+  document.getElementById('modal-detalhes').classList.add('ativo');
+                         }
