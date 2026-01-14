@@ -90,4 +90,47 @@ document.getElementById('form-agendamento')?.addEventListener('submit', e => {
 });
 
 /* ========= DETALHES ========= */
-function abrirDetalhes(ag)
+function abrirDetalhes(ag) {
+  agendamentoAtual = ag.id;
+
+  det-cliente.innerText = ag.cliente;
+  det-servico.innerText = ag.servico;
+  det-func.innerText = ag.funcionarios.join(', ');
+  det-status.innerText = ag.status;
+
+  const cli = lerLocal('clientes').find(c => c.nome === ag.cliente);
+  if (cli) {
+    btn-whatsapp.href = `https://wa.me/55${cli.telefone.replace(/\D/g,'')}`;
+    btn-maps.href = `https://maps.google.com/?q=${encodeURIComponent(cli.endereco)}`;
+  }
+
+  modal-detalhes.classList.add('ativo');
+}
+
+/* ========= AÇÕES ========= */
+function iniciarServico() {
+  atualizarStatus('em andamento');
+}
+function finalizarServico() {
+  atualizarStatus('finalizado');
+}
+function cancelarAgendamento() {
+  let ags = lerLocal('agendamentos');
+  ags = ags.filter(a => a.id !== agendamentoAtual);
+  salvarLocal('agendamentos', ags);
+  fecharModalDetalhes();
+  carregarAgenda();
+}
+function atualizarStatus(status) {
+  const ags = lerLocal('agendamentos');
+  const ag = ags.find(a => a.id === agendamentoAtual);
+  if (!ag) return;
+
+  ag.status = status;
+  salvarLocal('agendamentos', ags);
+  fecharModalDetalhes();
+  carregarAgenda();
+}
+
+/* ========= INIT ========= */
+document.addEventListener('DOMContentLoaded', carregarAgenda);
