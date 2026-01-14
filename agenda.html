@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Agenda</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="pagina-agenda">
 
 <header>
-    <nav>
+    <nav class="menu">
         <a href="agenda.html" class="ativo">Agenda</a>
         <a href="clientes.html">Clientes</a>
         <a href="servicos.html">Serviços</a>
@@ -19,22 +20,29 @@
     </nav>
 </header>
 
-<main>
+<main class="agenda-container">
+
+    <!-- TÍTULO DATA -->
     <h2 id="data-selecionada"></h2>
-    <div id="calendario-diario"></div>
+
+    <!-- CALENDÁRIO -->
+    <div id="calendario-diario" class="grade-agenda"></div>
+
 </main>
 
 <!-- MODAL NOVO AGENDAMENTO -->
 <div id="modal-agendamento" class="modal">
     <div class="modal-conteudo">
-        <button id="fechar-modal">✖</button>
+        <button id="fechar-modal" class="fechar">&times;</button>
+        <h3>Novo Agendamento</h3>
 
         <form id="form-novo-agendamento">
-            <input type="date" id="data-agendamento" readonly>
-            <input type="time" id="hora-agendamento" readonly>
+            <input type="date" id="dataAgendamento" required>
+            <input type="time" id="horaAgendamento" required>
 
-            <select id="cliente-agendamento"></select>
-            <select id="servico-agendamento"></select>
+            <select id="cliente-agendamento" required></select>
+            <select id="servico-agendamento" required></select>
+
             <select id="funcionario-agendamento" multiple></select>
 
             <button type="submit">Salvar Agendamento</button>
@@ -45,23 +53,24 @@
 <!-- MODAL EDIÇÃO -->
 <div id="modal-editar-agendamento" class="modal">
     <div class="modal-conteudo">
-        <button id="fechar-modal-edicao">✖</button>
+        <button id="fechar-modal-edicao" class="fechar">&times;</button>
 
-        <p><b>Cliente:</b> <span id="detalhes-cliente"></span></p>
-        <p><b>Serviço:</b> <span id="detalhes-servico"></span></p>
-        <p><b>Funcionários:</b> <span id="detalhes-funcionarios"></span></p>
-        <p><b>Status:</b> <span id="detalhes-status"></span></p>
+        <h3>Detalhes do Agendamento</h3>
 
-        <a id="botao-whatsapp" target="_blank">WhatsApp</a>
-        <a id="botao-maps" target="_blank">Maps</a>
+        <p><strong>Cliente:</strong> <span id="detalhesCliente"></span></p>
+        <p><strong>Serviço:</strong> <span id="detalhesServico"></span></p>
+        <p><strong>Funcionários:</strong> <span id="detalhesFuncionarios"></span></p>
+        <p><strong>Status:</strong> <span id="detalhesStatus"></span></p>
 
-        <button id="botao-iniciar">Iniciar Serviço</button>
-        <div id="bloco-finalizar" style="display:none">
-            <button id="botao-finalizar">Finalizar Serviço</button>
+        <input type="hidden" id="agendamentoId">
+
+        <button id="botaoIniciar">Iniciar Serviço</button>
+
+        <div id="bloco-finalizar" style="display:none;">
+            <button id="botaoFinalizar">Finalizar Serviço</button>
         </div>
 
-        <button id="botao-cancelar">Cancelar</button>
-        <input type="hidden" id="agendamento-id">
+        <button id="botaoCancelar" class="btn-cancelar">Cancelar</button>
     </div>
 </div>
 
