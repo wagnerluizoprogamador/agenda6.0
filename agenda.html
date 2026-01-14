@@ -1,79 +1,27 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Agenda</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-</head>
-
-<body class="pagina-agenda">
-
-<header>
-    <nav class="menu">
-        <a href="agenda.html" class="ativo">Agenda</a>
-        <a href="clientes.html">Clientes</a>
-        <a href="servicos.html">Serviços</a>
-        <a href="funcionarios.html">Funcionários</a>
-        <a href="financeiro.html">Financeiro</a>
-        <a href="comissoes.html">Comissões</a>
-    </nav>
-</header>
-
 <main class="agenda-container">
+    <h2 id="titulo-data"></h2>
 
-    <!-- TÍTULO DATA -->
-    <h2 id="data-selecionada"></h2>
+    <div class="dias-semana" id="dias-semana"></div>
 
-    <!-- CALENDÁRIO -->
-    <div id="calendario-diario" class="grade-agenda"></div>
-
+    <div class="lista-horarios" id="lista-horarios"></div>
 </main>
 
 <!-- MODAL NOVO AGENDAMENTO -->
-<div id="modal-agendamento" class="modal">
-    <div class="modal-conteudo">
-        <button id="fechar-modal" class="fechar">&times;</button>
+<div class="modal" id="modal-agendamento">
+    <div class="form-container">
+        <button class="fechar-modal-btn" id="fechar-modal">×</button>
         <h3>Novo Agendamento</h3>
 
-        <form id="form-novo-agendamento">
-            <input type="date" id="dataAgendamento" required>
-            <input type="time" id="horaAgendamento" required>
+        <form id="form-agendamento">
+            <input type="hidden" id="data-agendamento">
+            <input type="hidden" id="hora-agendamento">
 
             <select id="cliente-agendamento" required></select>
             <select id="servico-agendamento" required></select>
 
-            <select id="funcionario-agendamento" multiple></select>
+            <select id="funcionario-agendamento" multiple required></select>
 
             <button type="submit">Salvar Agendamento</button>
         </form>
     </div>
 </div>
-
-<!-- MODAL EDIÇÃO -->
-<div id="modal-editar-agendamento" class="modal">
-    <div class="modal-conteudo">
-        <button id="fechar-modal-edicao" class="fechar">&times;</button>
-
-        <h3>Detalhes do Agendamento</h3>
-
-        <p><strong>Cliente:</strong> <span id="detalhesCliente"></span></p>
-        <p><strong>Serviço:</strong> <span id="detalhesServico"></span></p>
-        <p><strong>Funcionários:</strong> <span id="detalhesFuncionarios"></span></p>
-        <p><strong>Status:</strong> <span id="detalhesStatus"></span></p>
-
-        <input type="hidden" id="agendamentoId">
-
-        <button id="botaoIniciar">Iniciar Serviço</button>
-
-        <div id="bloco-finalizar" style="display:none;">
-            <button id="botaoFinalizar">Finalizar Serviço</button>
-        </div>
-
-        <button id="botaoCancelar" class="btn-cancelar">Cancelar</button>
-    </div>
-</div>
-
-<script src="script.js"></script>
-</body>
-</html>
