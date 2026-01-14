@@ -1,27 +1,41 @@
-<main class="agenda-container">
-    <h2 id="titulo-data"></h2>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Agenda</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-    <div class="dias-semana" id="dias-semana"></div>
+<header>
+<nav>
+<a href="agenda.html" class="ativo">Agenda</a>
+<a href="clientes.html">Clientes</a>
+<a href="servicos.html">Serviços</a>
+<a href="funcionarios.html">Funcionários</a>
+<a href="financeiro.html">Financeiro</a>
+<a href="despesas.html">Despesas</a>
+</nav>
+</header>
 
-    <div class="lista-horarios" id="lista-horarios"></div>
-</main>
-
-<!-- MODAL NOVO AGENDAMENTO -->
-<div class="modal" id="modal-agendamento">
-    <div class="form-container">
-        <button class="fechar-modal-btn" id="fechar-modal">×</button>
-        <h3>Novo Agendamento</h3>
-
-        <form id="form-agendamento">
-            <input type="hidden" id="data-agendamento">
-            <input type="hidden" id="hora-agendamento">
-
-            <select id="cliente-agendamento" required></select>
-            <select id="servico-agendamento" required></select>
-
-            <select id="funcionario-agendamento" multiple required></select>
-
-            <button type="submit">Salvar Agendamento</button>
-        </form>
-    </div>
+<div class="container">
+<h1>Agendamentos do Dia</h1>
+<div id="agenda-dia" class="agenda-dia"></div>
 </div>
+
+<div class="modal" id="modal">
+<div class="modal-box">
+<span class="fechar" onclick="fecharModal()">×</span>
+<h2>Novo Agendamento</h2>
+
+<input id="horaAgendamento" readonly>
+<select id="clienteAg"></select>
+<select id="servicoAg"></select>
+
+<button onclick="salvarAgendamento()">Salvar</button>
+</div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
