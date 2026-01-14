@@ -165,3 +165,33 @@ button {
   gap: 8px;
   margin-top: 10px;
 }
+/* ================= AGENDA ================= */
+
+.agenda-lista {
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.horario {
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.horario:hover {
+  opacity: 0.9;
+}
+
+.horario.livre {
+  background: #d1f1dc;
+  color: #0f5132;
+}
+
+.horario.ocupado {
+  background: #ffc107;
+  color: #664d03;
+}
