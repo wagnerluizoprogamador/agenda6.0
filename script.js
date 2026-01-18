@@ -113,7 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const funcionarios = [...document.getElementById('funcionario-agendamento').selectedOptions]
       .map(o => o.value);
 
-    if (!hora || !cliente || !servico || funcionarios.length === 0) return;
+    if (!hora || !cliente || !servico || funcionarios.length === 0) {
+      alert('Preencha todos os campos');
+      return;
+    }
 
     const ags = lerLocal('agendamentos');
     ags.push({
@@ -191,4 +194,4 @@ function atualizarStatus(status) {
   salvarLocal('agendamentos', ags);
   fecharModalDetalhes();
   carregarAgenda();
-    }
+            }
