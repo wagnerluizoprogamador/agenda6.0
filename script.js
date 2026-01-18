@@ -194,4 +194,4 @@ function atualizarStatus(status) {
   salvarLocal('agendamentos', ags);
   fecharModalDetalhes();
   carregarAgenda();
-            }
+}
