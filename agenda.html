@@ -22,18 +22,23 @@
 
 <main class="container">
   <h2 id="titulo-dia">Agendamentos do Dia</h2>
+
+  <!-- AGENDA -->
   <div id="agenda-lista" class="agenda-lista"></div>
 </main>
 
 <!-- ================= MODAL NOVO AGENDAMENTO ================= -->
 <div id="modal-novo" class="modal">
   <div class="modal-conteudo">
-    <button class="fechar" onclick="fecharModalNovo()">×</button>
+
+    <button type="button" class="fechar" onclick="fecharModalNovo()">×</button>
+
     <h3>Novo Agendamento</h3>
 
     <form id="form-agendamento">
+
       <label>Hora</label>
-      <input type="time" id="hora-agendamento" required>
+      <input type="time" id="hora-agendamento" required readonly>
 
       <label>Cliente</label>
       <select id="cliente-agendamento" required></select>
@@ -47,6 +52,7 @@
       <button type="submit" class="btn-primary">
         Salvar Agendamento
       </button>
+
     </form>
   </div>
 </div>
@@ -54,7 +60,8 @@
 <!-- ================= MODAL DETALHES ================= -->
 <div id="modal-detalhes" class="modal">
   <div class="modal-conteudo">
-    <button class="fechar" onclick="fecharModalDetalhes()">×</button>
+
+    <button type="button" class="fechar" onclick="fecharModalDetalhes()">×</button>
 
     <h3>Detalhes do Agendamento</h3>
 
@@ -69,10 +76,11 @@
     </div>
 
     <div class="acoes">
-      <button class="btn-success" onclick="iniciarServico()">Iniciar</button>
-      <button class="btn-primary" onclick="finalizarServico()">Finalizar</button>
-      <button class="btn-danger" onclick="cancelarAgendamento()">Cancelar</button>
+      <button type="button" class="btn-success" onclick="iniciarServico()">Iniciar</button>
+      <button type="button" class="btn-primary" onclick="finalizarServico()">Finalizar</button>
+      <button type="button" class="btn-danger" onclick="cancelarAgendamento()">Cancelar</button>
     </div>
+
   </div>
 </div>
 
