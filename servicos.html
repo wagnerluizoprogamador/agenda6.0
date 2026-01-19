@@ -2,53 +2,29 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Serviços</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Serviços</title>
     <link rel="stylesheet" href="style.css">
 </head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html">Cadastro</a>
+            <a href="clientes.html">Clientes</a>
+            <a href="servicos.html">Serviços</a>
+            <a href="financeiro.html"class="ativo">Financeiro</a>
+             <a href="comissoes.html"class="ativo">Comissões</a>
+        </nav>
+    </header>
 
-<body class="pagina-servicos">
+    <main>
+        <section class="list-container">
+            <h2>Lista de Serviços</h2>
+            <div id="lista-de-servicos"></div>
+        </section>
+    </main>
 
-<header>
-    <nav>
-        <a href="agenda.html">Agenda</a>
-        <a href="index.html">Cadastros</a>
-        <a href="clientes.html">Clientes</a>
-        <a href="servicos.html" class="ativo">Serviços</a>
-        <a href="funcionarios.html">Funcionários</a>
-        <a href="financeiro.html">Financeiro</a>
-    </nav>
-</header>
-
-<main>
-    <section class="form-container">
-        <h2>Cadastrar Serviço</h2>
-
-        <form id="form-cadastro-servico">
-            <div class="form-group">
-                <label>Nome</label>
-                <input id="nome-servico" required>
-            </div>
-
-            <div class="form-group">
-                <label>Duração (min)</label>
-                <input type="number" id="duracao-servico" required>
-            </div>
-
-            <div class="form-group">
-                <label>Valor (R$)</label>
-                <input type="number" id="valor-servico" required>
-            </div>
-
-            <button type="submit">Salvar Serviço</button>
-        </form>
-    </section>
-
-    <section class="list-container">
-        <h2>Serviços Cadastrados</h2>
-        <div id="lista-servicos" class="lista"></div>
-    </section>
-</main>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
+<body class="pagina-cadastro"></body>
 </html>
