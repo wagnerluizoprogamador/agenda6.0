@@ -1,54 +1,31 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Clientes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Clientes</title>
     <link rel="stylesheet" href="style.css">
 </head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html">Cadastro</a>
+            <a href="clientes.html">Clientes</a>
+            <a href="servicos.html">Serviços</a>
+            <a href="financeiro.html"class="ativo">Financeiro</a>
+             <a href="comissoes.html"class="ativo">Comissões</a>
+        </nav>
+    </header>
 
-<body class="pagina-clientes">
+    <main>
+        <section class="list-container">
+            <h2>Lista de Clientes</h2>
+            <div id="lista-de-clientes"></div>
+        </section>
+    </main>
 
-<header>
-    <nav>
-        <a href="agenda.html">Agenda</a>
-        <a href="index.html">Cadastros</a>
-        <a href="clientes.html" class="ativo">Clientes</a>
-        <a href="servicos.html">Serviços</a>
-        <a href="funcionarios.html">Funcionários</a>
-        <a href="financeiro.html">Financeiro</a>
-    </nav>
-</header>
-
-<main>
-    <section class="form-container">
-        <h2>Cadastrar Cliente</h2>
-
-        <form id="form-cadastro-cliente">
-            <div class="form-group">
-                <label>Nome</label>
-                <input id="nome-cliente" required>
-            </div>
-
-            <div class="form-group">
-                <label>Telefone</label>
-                <input id="telefone-cliente" required>
-            </div>
-
-            <div class="form-group">
-                <label>Endereço</label>
-                <input id="endereco-cliente">
-            </div>
-
-            <button type="submit">Salvar Cliente</button>
-        </form>
-    </section>
-
-    <section class="list-container">
-        <h2>Clientes Cadastrados</h2>
-        <div id="lista-clientes" class="lista"></div>
-    </section>
-</main>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
+<body class="pagina-cadastro"></body>
 </html>
