@@ -1,89 +1,168 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Agenda</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de Serviços</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="pagina-agenda">
 
 <header>
-  <nav>
-    <a class="ativo" href="agenda.html">Agenda</a>
-    <a href="clientes.html">Clientes</a>
-    <a href="servicos.html">Serviços</a>
-    <a href="funcionarios.html">Funcionários</a>
-    <a href="financeiro.html">Financeiro</a>
-    <a href="comissoes.html">Comissões</a>
-  </nav>
+    <nav>
+        <a href="agenda.html" class="ativo">Agenda</a>
+        <a href="index.html">Cadastros</a>
+        <a href="clientes.html">Clientes</a>
+        <a href="servicos.html">Serviços</a>
+        <a href="funcionarios.html">Funcionários</a>
+        <a href="financeiro.html">Financeiro</a>
+        <a href="comissoes.html">Comissões</a>
+    </nav>
 </header>
 
-<main class="container">
-  <h2 id="titulo-dia">Agendamentos do Dia</h2>
+<main>
+    <section class="agenda-container">
+        <div class="navegacao-semanal">
+            <h2 id="data-selecionada"></h2>
+            <div id="dias-da-semana"></div>
+        </div>
 
-  <!-- AGENDA -->
-  <div id="agenda-lista" class="agenda-lista"></div>
+        <div id="calendario-diario"></div>
+    </section>
+
+    <!-- MODAL NOVO AGENDAMENTO -->
+    <div id="modal-agendamento" class="modal">
+        <section class="form-container">
+            <button id="fechar-modal" class="fechar-modal-btn">&times;</button>
+            <h2>Novo Agendamento</h2>
+
+            <form id="form-novo-agendamento">
+                <div class="form-group">
+                    <label>Data:</label>
+                    <input type="date" id="data-agendamento" required readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Hora:</label>
+                    <input type="time" id="hora-agendamento" required readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Cliente:</label>
+                    <select id="cliente-agendamento" required>
+                        <option value="">Selecione um cliente</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Serviço:</label>
+                    <select id="servico-agendamento" required>
+                        <option value="">Selecione um serviço</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Funcionário(s):</label>
+                    <select id="funcionario-agendamento" multiple>
+                    </select>
+                    <small>Use Ctrl (Windows) ou Cmd (Mac) para selecionar mais de um.</small>
+                </div>
+
+                <button type="submit">Agendar Serviço</button>
+            </form>
+        </section>
+    </div>
+
+    <!-- MODAL DETALHES / EDIÇÃO -->
+    <div id="modal-editar-agendamento" class="modal">
+        <section class="form-container">
+            <button id="fechar-modal-edicao" class="fechar-modal-btn">&times;</button>
+
+            <h2 id="titulo-modal-edicao">Detalhes do Agendamento</h2>
+
+            <div id="detalhes-agendamento">
+                <p><strong>Cliente:</strong> <span id="detalhes-cliente"></span></p>
+                <p><strong>Telefone:</strong> <span id="detalhes-telefone"></span></p>
+                <p><strong>Endereço:</strong> <span id="detalhes-endereco"></span></p>
+                <p><strong>Serviço:</strong> <span id="detalhes-servico"></span></p>
+                <p><strong>Funcionário(s):</strong> <span id="detalhes-funcionarios"></span></p>
+                <p><strong>Status:</strong> <span id="detalhes-status"></span></p>
+
+                <p id="detalhes-duracao" style="display:none;">
+                    <strong>Duração:</strong> <span id="valor-duracao"></span>
+                </p>
+
+                <p id="timer-servico" style="display:none;">
+                    <strong>Tempo Decorrido:</strong>
+                    <span id="valor-timer">00:00:00</span>
+                </p>
+
+                <div class="botoes-acao-rapida">
+                    <a id="botao-whatsapp" target="_blank" class="btn-acao-rapida">WhatsApp</a>
+                    <a id="botao-maps" target="_blank" class="btn-acao-rapida">Google Maps</a>
+                </div>
+            </div>
+
+            <!-- FLUXO DE SERVIÇO -->
+            <div id="form-fluxo">
+                <button type="button" id="botao-iniciar" class="btn-fluxo">
+                    Iniciar Serviço
+                </button>
+
+                <div id="bloco-finalizar" style="display:none;">
+                    <button type="button" id="botao-finalizar" class="btn-fluxo">
+                        Finalizar Serviço
+                    </button>
+
+                    <div class="form-group">
+                        <label>Foto do Serviço (opcional):</label>
+                        <input type="file" id="foto-servico" accept="image/*">
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÕES DE EDIÇÃO -->
+            <div class="botoes-edicao" id="botoes-edicao">
+                <button type="button" id="botao-alterar-dados">Alterar Dados</button>
+                <button type="button" id="botao-cancelar">Cancelar Agendamento</button>
+            </div>
+
+            <!-- FORM EDIÇÃO -->
+            <form id="form-alterar-dados" style="display:none;">
+                <input type="hidden" id="agendamento-id">
+
+                <div class="form-group">
+                    <label>Data e Hora:</label>
+                    <input type="datetime-local" id="data-hora-edicao" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Cliente:</label>
+                    <select id="cliente-edicao" required></select>
+                </div>
+
+                <div class="form-group">
+                    <label>Serviço:</label>
+                    <select id="servico-edicao" required></select>
+                </div>
+
+                <div class="form-group">
+                    <label>Funcionário(s):</label>
+                    <select id="funcionario-edicao" multiple></select>
+                </div>
+
+                <div class="botoes-edicao">
+                    <button type="submit">Salvar Alterações</button>
+                    <button type="button" id="botao-voltar">Voltar</button>
+                </div>
+            </form>
+
+        </section>
+    </div>
 </main>
 
-<!-- ================= MODAL NOVO AGENDAMENTO ================= -->
-<div id="modal-novo" class="modal">
-  <div class="modal-conteudo">
-
-    <button type="button" class="fechar" onclick="fecharModalNovo()">×</button>
-
-    <h3>Novo Agendamento</h3>
-
-    <form id="form-agendamento">
-
-      <label>Hora</label>
-      <input type="time" id="hora-agendamento" required readonly>
-
-      <label>Cliente</label>
-      <select id="cliente-agendamento" required></select>
-
-      <label>Serviço</label>
-      <select id="servico-agendamento" required></select>
-
-      <label>Funcionário(s)</label>
-      <select id="funcionario-agendamento" multiple required></select>
-
-      <button type="submit" class="btn-primary">
-        Salvar Agendamento
-      </button>
-
-    </form>
-  </div>
-</div>
-
-<!-- ================= MODAL DETALHES ================= -->
-<div id="modal-detalhes" class="modal">
-  <div class="modal-conteudo">
-
-    <button type="button" class="fechar" onclick="fecharModalDetalhes()">×</button>
-
-    <h3>Detalhes do Agendamento</h3>
-
-    <p><strong>Cliente:</strong> <span id="det-cliente"></span></p>
-    <p><strong>Serviço:</strong> <span id="det-servico"></span></p>
-    <p><strong>Funcionário(s):</strong> <span id="det-func"></span></p>
-    <p><strong>Status:</strong> <span id="det-status"></span></p>
-
-    <div class="acoes-rapidas">
-      <a id="btn-whatsapp" class="btn-wpp" target="_blank">WhatsApp</a>
-      <a id="btn-maps" class="btn-maps" target="_blank">Mapa</a>
-    </div>
-
-    <div class="acoes">
-      <button type="button" class="btn-success" onclick="iniciarServico()">Iniciar</button>
-      <button type="button" class="btn-primary" onclick="finalizarServico()">Finalizar</button>
-      <button type="button" class="btn-danger" onclick="cancelarAgendamento()">Cancelar</button>
-    </div>
-
-  </div>
-</div>
-
 <script src="script.js"></script>
+
 </body>
 </html>
